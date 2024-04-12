@@ -1,18 +1,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import AutenticationPage from './autentication';
-import HomePage from './homePage';
 import MenuOptions from '../components/menu/menu';
 import '../css/App.css';
-import SchedulePage from './schedulePage';
-import TeamPage from './teamPage';
 import Profile from './profilePage';
-import ChatPage from './chatPage';
 import FogotPassword from './fogotPassword';
-import MissionsPage from './missionsPage';
-import MissionsListPage from './missionsListPage';
-import MissionPage from './missionPage';
-import MissionCreationPage from './missionCreationPage';
+import AutenticationPage from './autentication';
+import HomePage from './homePage';
+import PortfolioPage from './PortfolioPage';
+import Slideshow from './slideshow';
 
 function App() {
   return (
@@ -29,18 +24,13 @@ function AppContent() {
     <React.Fragment>
       <Routes>
         <Route path="/home" element={<HomePage />} />
-        <Route path="/schedule" element={<SchedulePage />} />
-        <Route path="/team" element={<TeamPage />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/chat" element={<ChatPage />} />
-        <Route path="/missions" element={<MissionsPage />} />
         <Route path="/fogotPassword" element={<FogotPassword />} />
-        <Route path="/missionslist" element={<MissionsListPage />} />
-        <Route path="/mission" element={<MissionPage />} />
-        <Route path="/missioncreation" element={<MissionCreationPage />} />
-        <Route path="/" element={<AutenticationPage />} />
+        <Route path="/auth" element={<AutenticationPage />} />
+        <Route path="/" element={<PortfolioPage />} />
+        <Route path="/slides" element={<Slideshow />} />
       </Routes>
-      {(location.pathname !== "/" && location.pathname !== "/fogotPassword") && <MenuOptions />}
+      {(location.pathname !== "/auth" && location.pathname !== "/fogotPassword" && location.pathname !== "/slides" && location.pathname !== "/") && <MenuOptions />}
     </React.Fragment>
   );
 }

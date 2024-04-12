@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../components/firebase/firebase';
-import Narrator from '../components/narrador/narrador';
 import '../css/homePage.css';
 import LogoJA from '../img/userUnknow.png';
 
@@ -17,7 +16,7 @@ function HomePage() {
     async function userValidation() {
         const authTime = localStorage.getItem('authTime');
         if (!authTime) {
-            navigate('/');
+            navigate('/auth');
             return;
         }
 
@@ -26,7 +25,7 @@ function HomePage() {
 
         const threeHoursInMs = 3 * 60 * 60 * 1000;
         if (timeElapsed > threeHoursInMs) {
-            navigate('/');
+            navigate('/auth');
             return;
         }
     }

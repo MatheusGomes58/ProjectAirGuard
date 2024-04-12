@@ -18,7 +18,7 @@ function Auth() {
     async function userValidation() {
         const authTime = localStorage.getItem('authTime');
         if (!authTime) {
-            navigate('/');
+            navigate('/auth');
             return;
         }
 
@@ -27,7 +27,7 @@ function Auth() {
 
         const threeHoursInMs = 3 * 60 * 60 * 1000;
         if (timeElapsed > threeHoursInMs) {
-            navigate('/');
+            navigate('/auth');
             return;
         }
     }
