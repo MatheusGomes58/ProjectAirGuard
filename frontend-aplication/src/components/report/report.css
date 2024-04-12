@@ -1,0 +1,79 @@
+/* report.css */
+
+.report-form {
+    background-color: #0314af;
+    color: white;
+    padding: 20px;
+    border-radius: 30px;
+    margin-right: 10%;
+    margin-left: 10%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 30px;
+    color: #ddd;
+    margin-top: 3%;
+}
+
+.report-form textarea {
+    border: none;
+    border-bottom: 2px solid white;
+    outline: none;
+    min-width: 100%;
+    background: none;
+    color: white;
+    margin-bottom: 3%;
+}
+
+.inputText {
+    border: none;
+    border-bottom: 2px solid white;
+    outline: none;
+    min-width: 300px;
+    background: none;
+    color: white;
+}
+
+
+.report-form button {
+    width: 100%;
+    background-color: #fecc0d;
+    font-size: 16px;
+    color: #0314af;
+    height: auto;
+    border-radius: 30px;
+    font-weight: bold;
+    margin-top: 1%;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.report-form button:disabled {
+    background-color: #444;
+    cursor: default;
+}
+
+/* Adicionando um toque de cor */
+
+.report-form button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #4caf50;
+}
+
+.report-form::before {
+    content: "";
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #4caf50;
+    opacity: 0.2;
+    z-index: -1;
+}

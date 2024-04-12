@@ -1,0 +1,62 @@
+.Auth {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #005028;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  flex-direction: column;
+  background: #E6E6FB;
+  color: black;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  max-width: auto;
+  max-height: auto;
+  padding: 3%;
+  border-radius: 34px;
+  text-align: center;
+}
+
+.sliderLogin {
+  display: flex;
+  flex-direction: row;
+  width: 200px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 100px;
+  border: 1px solid #005028;
+  color: white;
+  background: #82a738;
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50%;
+  color: #005028;
+}
+
+.active {
+  background-color: #005028;
+  color: white;
+  border-radius: 30px;
+}
+
+.LogoJA {
+  width: 270px;
+  height: 270px;
+}
+
+.containerAuth {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+}

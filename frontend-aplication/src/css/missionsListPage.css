@@ -1,0 +1,220 @@
+.missionsListPage {
+  width: 100vw;
+  height: 100vh;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 5%;
+  margin-bottom: 15%;
+}
+
+.containerListMissions {
+  margin-right: 10%;
+  margin-left: 10%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.profileImg {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.functionLabel {
+  width: 100%;
+  color: #fecc0d;
+  font-weight: bold;
+}
+
+.missionCards {
+  width: 80%;
+  background-color: #f0f0f0;
+  color: black;
+  border-radius: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-height: 400px;
+  min-height: 400px;
+  padding: 1%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.missionCardHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #575757;
+}
+
+.missionCardFooter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 10px;
+  border-top: 1px solid #575757;
+}
+
+.missionCardList {
+  height: 80%;
+  overflow-y: auto;
+}
+
+.missionCardList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.missionCardList::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.missionCardList::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.missionCardBody {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 1%;
+}
+
+
+.missionCardContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 80%;
+
+}
+
+.missionCardStatus {
+  display: flex;
+  align-items: start;
+  justify-content: center;
+  flex-direction: column;
+  width: 20%;
+  font-size: 30px;
+  color: white;
+}
+
+.missionCardBody:hover {
+  background-color: #e0e0e0;
+}
+
+.missionCardBody h3 {
+  font-size: 20px;
+  margin-bottom: 5px;
+}
+
+.missionCardBody p {
+  margin-bottom: 10px;
+}
+
+.missionCardStatus .fas.fa-check-circle {
+  border-radius: 100%;
+  padding: 3%;
+  background-color: green;
+  animation: stamp 2s infinite;
+}
+
+@keyframes stamp {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+.missionCardStatus .fas.fa-times-circle {
+  border-radius: 100%;
+  padding: 3%;
+  background-color: red;
+  animation: jump 1s infinite;
+}
+
+@keyframes jump {
+  0% {
+    transform: translateZ(0);
+  }
+
+  50% {
+    font-size: 36px;
+    box-shadow: 3px 5px 3px rgba(0, 0, 0, 0.555);
+  }
+
+  100% {
+    transform: translateZ(0);
+  }
+}
+
+
+.fa-circle-notch {
+  border-radius: 100%;
+  padding: 3%;
+  background-color: darkorange;
+  animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+.missionCardStatus .fas.fa-bullseye {
+  border-radius: 100%;
+  padding: 3%;
+  background-color: gray;
+  animation: jitter 1s infinite;
+}
+
+@keyframes jitter {
+  0% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-2px);
+  }
+
+  50% {
+    transform: translateX(2px);
+  }
+
+  75% {
+    transform: translateX(-2px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
