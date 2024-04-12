@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { storage, realTimeDB } from '../components/firebase/firebase';
+import '../css/slideshow.css'
 
 const Slideshow = () => {
   const [images, setImages] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  const handlePreviousSlide = () => {
+    setCurrentSlide((prevSlide) => (prevSlide === 0 ? 0 : prevSlide - 1));
+  };
+
+  const handleNextSlide = () => {
+    setCurrentSlide((prevSlide) => (prevSlide === images.length - 1 ? images.length - 1 : prevSlide + 1));
+  };
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -41,6 +50,22 @@ const Slideshow = () => {
     };
   }, [currentSlide]);
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.keyCode === 37) { // seta para esquerda
+        handlePreviousSlide();
+      } else if (event.keyCode === 39) { // seta para direita
+        handleNextSlide();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handlePreviousSlide, handleNextSlide]);
+
   const findIndex = (array, condition) => {
     if (!array) {
       return -1; // Retorna -1 se o array for null ou undefined
@@ -52,17 +77,6 @@ const Slideshow = () => {
       }
     }
     return -1;
-  };
-  
-  
-  
-
-  const handlePreviousSlide = () => {
-    setCurrentSlide((prevSlide) => (prevSlide === 0 ? 0 : prevSlide - 1));
-  };
-
-  const handleNextSlide = () => {
-    setCurrentSlide((prevSlide) => (prevSlide === images.length - 1 ? images.length - 1 : prevSlide + 1));
   };
 
   const toggleFullScreen = () => {
@@ -77,10 +91,10 @@ const Slideshow = () => {
 
   return (
     <div className="slideshow">
-      <button className="floating-button" onClick={handlePreviousSlide}><i className="fas fa-arrow-left"></i></button>
+      <button className="floating-button left" onClick={handlePreviousSlide}><i className="fas fa-arrow-left"></i></button>
       <img src={images[currentSlide]} alt={`Slide ${currentSlide + 1}`} />
-      <button className="floating-button" onClick={handleNextSlide}><i className="fas fa-arrow-right"></i></button>
-      <button className="floating-button" onClick={toggleFullScreen}><i className="fas fa-expand"></i></button>
+      <button className="floating-button right" onClick={handleNextSlide}><i className="fas fa-arrow-right"></i></button>
+      <button className="floating-button expand" onClick={toggleFullScreen}><i className="fas fa-expand"></i></button>
     </div>
   );
 };
