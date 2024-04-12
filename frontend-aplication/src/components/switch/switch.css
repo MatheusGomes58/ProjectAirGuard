@@ -1,0 +1,50 @@
+.switch-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin: 5px;
+}
+
+.switch-label {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.switch-input {
+    display: none;
+}
+
+.switch-slider {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    background-color: #ccc;
+    border-radius: 17px;
+    transition: background-color 0.3s;
+}
+
+.switch-input:checked+.switch-slider {
+    background-color: #4caf50;
+    /* Cor quando o switch está ligado (true) */
+}
+
+.switch-slider:before {
+    position: absolute;
+    content: '';
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+.switch-input:checked+.switch-slider:before {
+    transform: translateX(26px);
+}

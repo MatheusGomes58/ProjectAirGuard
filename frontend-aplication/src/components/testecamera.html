@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camera App</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+    video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+    }
+    .scan-line {
+      position: absolute;
+      width: 100%;
+      height: 5px;
+      background-color: red;
+      top: 0;
+      animation: scanAnimation 2s linear infinite;
+    }
+    @keyframes scanAnimation {
+      0% {
+        top: -2px;
+      }
+      100% {
+        top: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scan-line"></div>
+  <video id="video" autoplay></video>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const video = document.getElementById('video');
+      const scanLine = document.querySelector('.scan-line');
+      const maxAttempts = Math.floor(Math.random() * 4); // Número aleatório de tentativas entre 0 e 10
+      let attempts = 0;
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        document.body.requestFullscreen().catch((err) => console.error('Error trying to go fullscreen:', err));
+        video.play();
+        simulateScanning();
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+      }
+
+      function simulateScanning() {
+        const scanningInterval = setInterval(() => {
+          if (attempts < maxAttempts) {
+            // Simulate scanning process
+            attempts++;
+            alert('Tentativa de escaneamento falhou.');
+          } else {
+            // Close camera after reaching max attempts
+            clearInterval(scanningInterval);
+            document.exitFullscreen();
+            video.srcObject.getTracks().forEach(track => track.stop());
+            scanLine.style.display = 'none';
+            alert('Escaneamento concluído com sucesso. Camera fechada.');
+          }
+        }, 3000); // Adjust the interval as needed
+      }
+    });
+  </script>
+</body>
+</html>

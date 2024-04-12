@@ -1,0 +1,65 @@
+.btnAuth {
+    background-color: #005028;
+    border-radius: 100px;
+    color: white;
+    font-size: 15px;
+    border: none;
+    width: 163px;
+    height: 42px;
+}
+
+.btnAuth:hover {
+    background-color: #003d1f;
+}
+
+.inputLogin {
+    border: none;
+    border-bottom: 2px solid #005028;
+    outline: none;
+    min-width: 300px;
+    margin-top: 10%;
+    background: none;
+}
+
+.resetPass{
+    display: flex;
+    width: 100%;
+    align-items: end;
+    justify-content: end;
+    margin-top: 5%;
+}
+
+.password-container {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.boxButton{
+    margin-top: 30px;
+    min-height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: end;
+}
+
+#loginForm{
+    margin-top: 40px;
+}
+
+#RegisterForm{
+    display: flex;
+    flex-direction: column;
+}
+
+#ForgotPasswordForm{
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+}

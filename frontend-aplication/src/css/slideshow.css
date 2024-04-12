@@ -1,0 +1,52 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.slideshow {
+    position: relative;
+    width: 100vw;
+    /* Largura total da viewport */
+    height: 100vh;
+    /* Altura total da viewport */
+    overflow: hidden;
+    /* Para garantir que a imagem não estenda além dos limites da tela */
+}
+
+.slideshow img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Para cobrir toda a área do contêiner */
+}
+
+.floating-button {
+    background-color: #005028;
+    border-radius: 50%;
+    color: white;
+    font-size: 15px;
+    border: none;
+    width: 42px;
+    height: 42px;
+    position: fixed;
+}
+
+
+.left {
+    top: 50%;
+    left: 3%;
+    z-index: 999;
+}
+
+.right {
+    top: 50%;
+    right: 3%;
+    z-index: 999;
+}
+
+.expand {
+    top: 3%;
+    right: 50%;
+    z-index: 999;
+}

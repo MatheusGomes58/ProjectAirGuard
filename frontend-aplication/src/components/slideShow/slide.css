@@ -1,0 +1,78 @@
+/* slide.css */
+
+.slideshow-container {
+    max-width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+}
+
+.slideshow {
+    display: flex;
+    animation: fade 2s ease-in-out infinite;
+}
+
+.img {
+    max-height: 200px;
+    min-height: 200px;
+}
+
+.slide-container {
+    width: 100%;
+    position: relative;
+}
+
+.slide {
+    display: none;
+    animation: slide 1s ease-in-out;
+}
+
+@keyframes slide {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.slide.active {
+    display: block;
+}
+
+.img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+.prev,
+.next {
+    cursor: pointer;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2em;
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: none;
+    outline: none;
+    padding: 10px;
+    z-index: 1;
+}
+
+.prev:hover,
+.next:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.prev {
+    left: 10px;
+}
+
+.next {
+    right: 10px;
+}
