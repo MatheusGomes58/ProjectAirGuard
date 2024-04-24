@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { db, auth, storage } from '../components/firebase/firebase';
+import { useNavigate } from 'react-router-dom';
+import { db, storage } from '../components/firebase/firebase';
 import UserUnknow from '../img/userUnknow.png';
 import Switch from '../components/switch/switch';
 import '../css/profilePage.css';

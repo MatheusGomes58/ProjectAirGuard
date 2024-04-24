@@ -11,7 +11,9 @@ function PortfolioPage() {
         <nav>
           <ul>
             <li><a href="#home">Início</a></li>
-            <li><a href="auth">Aplicação</a></li>
+            <Link to="/auth">
+              <li><a>Aplicação</a></li>
+            </Link>
             <li><a href="#about">Sobre</a></li>
             <li><a href="#skills">Habilidades</a></li>
             <li><a href="#education">Educação</a></li>
@@ -27,9 +29,6 @@ function PortfolioPage() {
         <div className="container">
           <h2>Bem-vindo ao Gerenciamento de Qualidade do Ar</h2>
           <p>O nosso dispositivo de gerenciamento de qualidade do ar é compatível com sistemas de automação residencial e tem como objetivo principal proteger as pessoas garantindo a qualidade do ar em ambientes internos.</p>
-          <Link to="/slides">
-            <button className='button'>Saiba Mais</button>
-          </Link>
         </div>
       </section>
 
@@ -99,7 +98,10 @@ function PortfolioPage() {
 
       {/* Rodapé */}
       <footer className="footer">
-        <p>&copy; 2024 Gerenciamento de Qualidade do Ar</p>
+
+        <Link to="/slides">
+          <p>&copy; 2024 Gerenciamento de Qualidade do Ar</p>
+        </Link>
       </footer>
     </>
   );
