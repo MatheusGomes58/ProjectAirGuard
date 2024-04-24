@@ -27,8 +27,8 @@ function AppContent() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/fogotPassword" element={<FogotPassword />} />
         <Route path="/auth" element={<AutenticationPage />} />
-        <Route path="/" element={<PortfolioPage />} />
         <Route path="/slides" element={<Slideshow />} />
+        <Route path="/" element={<PortfolioPage />} />
       </Routes>
       {(location.pathname !== "/auth" && location.pathname !== "/fogotPassword" && location.pathname !== "/slides" && location.pathname !== "/") && <MenuOptions />}
     </React.Fragment>

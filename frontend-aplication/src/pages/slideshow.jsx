@@ -1,10 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { storage, realTimeDB } from '../components/firebase/firebase';
-import '../css/slideshow.css'
+import { realTimeDB } from '../components/firebase/firebase'; // Mantenha o import do Realtime Database se necessário
+import '../css/slideshow.css';
 
 const Slideshow = () => {
   const [images, setImages] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Definir os slides automaticamente
+  useEffect(() => {
+    const importAll = (r) => r.keys().map(r);
+    const slideImages = importAll(require.context('../img/slides', false, /\.(png|jpe?g|svg)$/));
+    setImages(slideImages);
+
+    // Adicionando listener ao Realtime Database para atualizações de slide
+    const slideRef = realTimeDB.ref('slide');
+    slideRef.on('value', (snapshot) => {
+      const slideIndex = snapshot.val();
+      if (slideIndex !== null) {
+        setCurrentSlide(slideIndex);
+      }
+    });
+
+    return () => {
+      slideRef.off('value');
+    };
+  }, []);
+
+  // Atualizar o slide no Realtime Database quando houver mudança
+  useEffect(() => {
+    realTimeDB.ref('slide').set(currentSlide);
+  }, [currentSlide]);
 
   const handlePreviousSlide = () => {
     setCurrentSlide((prevSlide) => (prevSlide === 0 ? 0 : prevSlide - 1));
@@ -15,47 +40,16 @@ const Slideshow = () => {
   };
 
   useEffect(() => {
-    const fetchImages = async () => {
-      try {
-        const imagesRef = storage.ref('slides');
-        const imagesList = await imagesRef.listAll();
-        const urls = await Promise.all(
-          imagesList.items.map(async (item) => {
-            return await item.getDownloadURL();
-          })
-        );
-        setImages(urls);
-      } catch (error) {
-        console.error('Error fetching images:', error);
-      }
-    };
-
-    fetchImages();
-  }, []);
-
-  useEffect(() => {
-    const slidesRef = realTimeDB.ref('slides');
-    const handleSlideChange = (snapshot) => {
-      const slides = snapshot.val();
-      const currentIndex = findIndex(slides, slide => slide.order === currentSlide);
-      if (currentIndex !== -1) {
-        setCurrentSlide(currentIndex);
-      }
-    };
-  
-    slidesRef.on('value', handleSlideChange);
-  
-    return () => {
-      slidesRef.off('value', handleSlideChange);
-    };
-  }, [currentSlide]);
-
-  useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.keyCode === 37) { // seta para esquerda
-        handlePreviousSlide();
-      } else if (event.keyCode === 39) { // seta para direita
-        handleNextSlide();
+      switch (event.key) {
+        case 'ArrowLeft':
+          handlePreviousSlide();
+          break;
+        case 'ArrowRight':
+          handleNextSlide();
+          break;
+        default:
+          break;
       }
     };
 
@@ -65,19 +59,6 @@ const Slideshow = () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [handlePreviousSlide, handleNextSlide]);
-
-  const findIndex = (array, condition) => {
-    if (!array) {
-      return -1; // Retorna -1 se o array for null ou undefined
-    }
-    
-    for (let i = 0; i < array.length; i++) {
-      if (condition(array[i])) {
-        return i;
-      }
-    }
-    return -1;
-  };
 
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
