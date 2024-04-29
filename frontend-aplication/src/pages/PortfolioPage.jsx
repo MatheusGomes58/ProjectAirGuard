@@ -12,7 +12,7 @@ function PortfolioPage() {
           <ul>
             <li><a href="#home">Início</a></li>
             <Link to="/auth">
-              <li><a>Aplicação</a></li>
+              <li><a href='/auth'>Aplicação</a></li>
             </Link>
             <li><a href="#about">Sobre</a></li>
             <li><a href="#skills">Habilidades</a></li>

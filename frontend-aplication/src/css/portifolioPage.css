@@ -68,3 +68,11 @@ section p {
 .buttom:hover {
     background-color: #003d1f;
 }
+
+a {
+    text-decoration: none;
+}
+
+footer a {
+    color: white;
+}
