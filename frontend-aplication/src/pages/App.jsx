@@ -3,10 +3,11 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-route
 import MenuOptions from '../components/menu/menu';
 import '../css/App.css';
 import Profile from './profilePage';
+import Scene from './scenePage';
+import ProfileEdit from './profilePageEdit';
 import FogotPassword from './fogotPassword';
 import AutenticationPage from './autentication';
 import HomePage from './homePage';
-import PortfolioPage from './PortfolioPage';
 import Slideshow from './slideshow';
 
 function App() {
@@ -25,10 +26,11 @@ function AppContent() {
       <Routes>
         <Route path="/home" element={<HomePage />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/scene" element={<Scene />} />
+        <Route path="/profileEdit" element={<ProfileEdit />} />
         <Route path="/fogotPassword" element={<FogotPassword />} />
-        <Route path="/auth" element={<AutenticationPage />} />
         <Route path="/slides" element={<Slideshow />} />
-        <Route path="/" element={<PortfolioPage />} />
+        <Route path="/" element={<AutenticationPage />} />
       </Routes>
       {(location.pathname !== "/auth" && location.pathname !== "/fogotPassword" && location.pathname !== "/slides" && location.pathname !== "/") && <MenuOptions />}
     </React.Fragment>

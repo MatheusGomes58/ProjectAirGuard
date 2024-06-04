@@ -1,22 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../components/firebase/firebase';
+import Switch from '../components/switch/switch';
 import '../css/homePage.css';
-import LogoJA from '../img/userUnknow.png';
+import DeviceIcon from '@mui/icons-material/Devices';
+import DeviceModal from '../components/addDeviceModal/addDeviceModal';
 
 function HomePage() {
     const [user, setUser] = useState({});
+    const [devices, setDevices] = useState([]);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [modalDevice, setModalDevice] = useState(null);
+    const currentUserUid = localStorage.getItem('uid');
     const navigate = useNavigate();
 
     useEffect(() => {
         userValidation();
     }, []);
 
-
     async function userValidation() {
         const authTime = localStorage.getItem('authTime');
         if (!authTime) {
-            navigate('/auth');
+            navigate('/');
             return;
         }
 
@@ -25,12 +30,10 @@ function HomePage() {
 
         const threeHoursInMs = 3 * 60 * 60 * 1000;
         if (timeElapsed > threeHoursInMs) {
-            navigate('/auth');
+            navigate('/');
             return;
         }
     }
-
-
 
     useEffect(() => {
         const getUserFromFirestore = () => {
@@ -41,7 +44,7 @@ function HomePage() {
                     if (!snapshot.empty) {
                         const userData = snapshot.docs[0].data();
                         const userId = snapshot.docs[0].id;
-                        setUser({ id: userId, ...userData }); // Adicionando o ID do documento aos dados do usuário
+                        setUser({ id: userId, ...userData });
                     }
                 });
         };
@@ -53,8 +56,37 @@ function HomePage() {
         };
     }, []);
 
+    useEffect(() => {
+        const getDevicesFromFirestore = () => {
+            const currentUserUid = localStorage.getItem('uid');
+
+            return db.collection('devices')
+                .where('uids', 'array-contains', currentUserUid)
+                .onSnapshot(snapshot => {
+                    const devicesData = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        const userData = data.usersData.find(user => user.uid === currentUserUid);
+                        return {
+                            id: doc.id,
+                            ...data,
+                            name: userData ? userData.name : null // Adiciona o nome apenas se o userData for encontrado
+                        };
+                    }).filter(device => device.name !== null); // Filtra dispositivos onde o nome não é nulo
+
+                    setDevices(devicesData);
+                });
+        };
+
+
+        const unsubscribe = getDevicesFromFirestore();
+
+        return () => {
+            unsubscribe();
+        };
+    }, []);
+
     if (user.admin) {
-        localStorage.setItem('admin', user.admin)
+        localStorage.setItem('admin', user.admin);
     }
 
     function editUserAcess() {
@@ -66,29 +98,47 @@ function HomePage() {
         navigate('/missions');
     }
 
+    const handleToggle = (deviceId, newState) => {
+        db.collection('devices').doc(deviceId).update({ state: newState });
+    };
+
+    const openModal = (device) => {
+        setModalDevice(device || { name: '', state: false, id: null });
+        setModalIsOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalIsOpen(false);
+    };
+
     return (
         <div className="homePage">
             <div className='containerHome'>
-                <div className="profileImage" style={{ position: 'relative', display: 'inline-block' }}>
-                    <img src={user.img ? user.img : LogoJA} alt="Profile" className="profileImg" />
-                    <button className='configButton' onClick={editUserAcess}>
-                        <i className="fas fa-cog"></i>
-                    </button>
+                <div className='deviceGrid'>
+                    {devices.map(device => (
+                        <div>
+                            <div className="deviceCard">
+                                <DeviceIcon className="deviceIcon" key={device.id} onClick={() => openModal(device)} />
+                                <div className='boxSwitch'>
+                                    <Switch
+                                        id={device.id}
+                                        status={device.state}
+                                        label=""
+                                        onToggle={handleToggle}
+                                    />
+                                </div>
+                                <div className="deviceName" key={device.id} onClick={() => openModal(device)}>{device.name}</div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-
-                <h2 className='functionLabel'>{user.function ? user.function : 'Cargo Indefinido'}</h2>
             </div>
-            <div className='containerHome'>
-                <div className="missionsCard">
-                    <input className='inputText' type="text" placeholder="Email:" value={user.email ? user.email : 'Email Indefinido'} readOnly />
-                    <input className='inputText' type="text" placeholder="Nome:" value={user.name ? user.name : 'Nome Indefinido'} readOnly />
-                    <input className='inputText' type="text" placeholder="Idade:" value={user.age ? user.age : 'Idade Indefinida'} readOnly />
-                    <input className='inputText' type="text" placeholder="Equipe:" value={user.team ? user.team : 'Time Indefinido'} readOnly />
-                    <button className='buttonMissions' onClick={acessMissionsPage}>
-                        MINHAS MISSÕES
-                    </button>
-                </div>
-            </div>
+            <DeviceModal
+                open={modalIsOpen}
+                handleClose={closeModal}
+                deviceData={modalDevice}
+                currentUser={user}
+            />
         </div>
     );
 }

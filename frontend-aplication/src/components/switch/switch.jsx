@@ -2,7 +2,7 @@
 import React from 'react';
 import './switch.css';
 
-const Switch = ({ status, label, id, onToggle }) => {
+const Switch = ({ status, label, readOnly, id, onToggle }) => {
   return (
     <div className="switch-container">
       <label className='switch-label'>
@@ -12,6 +12,7 @@ const Switch = ({ status, label, id, onToggle }) => {
           checked={status}
           onChange={() => onToggle(id, !status)}
           className="switch-input"
+          disabled={readOnly}
         />
         <span className="switch-slider"></span>
       </label>

@@ -12,7 +12,7 @@ function Auth() {
 
 
     const handleTabSwitch = (tab) => {
-        navigate('/auth');
+        navigate('/');
     };
 
     return (

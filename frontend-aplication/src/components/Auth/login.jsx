@@ -8,33 +8,32 @@ function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const history = useNavigate();
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
 
   const handleLogin = async () => {
-    // Autenticação com e-mail e senha
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        localStorage.setItem('authTime', new Date().getTime().toString());
-        localStorage.setItem('email',email);
-        console.log('Usuário logado:', user);
-        history('/home');
-      })
-      .catch((error) => {
-        // Tratar erros de login
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error('Erro no login:', errorCode, errorMessage);
-        // Adicione aqui a manipulação de erros
-      });
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      localStorage.setItem('authTime', new Date().getTime().toString());
+      localStorage.setItem('email', email);
+      localStorage.setItem('uid', user.uid); 
+      console.log('Usuário logado:', user);
+      navigate('/home');
+    } catch (error) {
+      // Tratar erros de login
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.error('Erro no login:', errorCode, errorMessage);
+      // Adicione aqui a manipulação de erros
+    }
   };
 
   const handleForgotPassword = () => {
-    history('/fogotPassword');
+    navigate('/forgotPassword');
   };
 
   return (

@@ -1,16 +1,13 @@
-.ProfilePage {
+.profilePage {
   width: 100vw;
   height: 100vh;
-  background-color: black;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  margin-top: 5%;
-  margin-bottom: 15%;
 }
 
-.containerProfile {
+.containerHome {
   margin-right: 10%;
   margin-left: 10%;
   display: flex;
@@ -27,76 +24,10 @@
   object-fit: cover;
 }
 
-.profileCard {
-  background-color: #0314af;
-  color: white;
-  padding: 20px;
-  border-radius: 30px;
-  margin-right: 10%;
-  margin-left: 10%;
-}
-
-.inputText {
-  margin-top: 1%;
-  margin-bottom: 1%;
-  border: none;
-  border-bottom: 2px solid white;
-  outline: none;
-  width: 100%;
-  background: none;
-  color: white;
-}
-
-.selectContainer {
-  position: relative;
-  width: 100%;
-}
-
-.selectContainer select {
-  border: none;
-  border-bottom: 2px solid white;
-  outline: none;
-  background: none;
-  color: white;
-  width: 100%;
-  padding: 8px 0;
-  font-size: 16px;
-  appearance: none;
-  background-color: #0314af;
-}
-
-.selectContainer::after {
-  content: '\25BC';
-  /* Ícone de seta para baixo */
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-
-.buttonMissions {
-  width: 100%;
-  min-height: 40px;
-  border: none;
-  background-color: #fecc0d;
-  font-size: 16px;
-  color: #0314af;
-  height: auto;
-  border-radius: 30px;
-  font-weight: bold;
-  margin-top: 1%;
-}
-
-.inputFunction {
+.functionLabel {
   width: 100%;
   color: #fecc0d;
   font-weight: bold;
-  background: none;
-  border: none;
-  margin-top: 1%;
-  margin-bottom: 2%;
 }
 
 .configButton {
@@ -110,3 +41,22 @@
   border: none;
 }
 
+.Card {
+  background: #E6E6FB;
+  padding: 20px;
+  border-radius: 30px;
+  margin-right: 10%;
+  margin-left: 10%;
+  width: 300px;
+  height: auto;
+}
+
+.Card input {
+  width: 100%;
+  margin-bottom: 10px;
+  border: none;
+  border-bottom: 2px solid #005028;
+  outline: none;
+  background: none;
+  color: black;
+}
