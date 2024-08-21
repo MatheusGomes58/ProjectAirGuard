@@ -12,10 +12,9 @@ import Slideshow from './slideshow';
 import data from '../data/config.json';
 
 function App() {
-  //const [apiUrl, setApiUrl] = useState('');
   
   useEffect(() => {
-    console.log("API URL:", data.API_URL);
+    console.log("API URL:", data.propsValis);
   }, []);
   
   return (

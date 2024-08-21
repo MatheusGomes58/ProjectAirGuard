@@ -1,5 +1,5 @@
 # Exemplo básico de Dockerfile
-FROM node:14
+FROM node:18.20.4
 WORKDIR /app
 COPY package*.json ./
 RUN npm install

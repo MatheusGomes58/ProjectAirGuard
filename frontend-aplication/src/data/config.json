@@ -1,1 +1,12 @@
-{}
+{
+    "propsValis": "false",
+    "firebaseConfig": {
+        "apiKey": "AIzaSyBFZvQeulc-HcJ0mg4pkJ3PaYT6fjkau6U",
+        "authDomain": "projectairguard.firebaseapp.com",
+        "projectId": "projectairguard",
+        "storageBucket": "projectairguard.appspot.com",
+        "messagingSenderId": "676272574243",
+        "appId": "1:676272574243:web:14e7455fcda2cdabba4696",
+        "measurementId": "G-EC2QV72RV4"
+    }
+} 

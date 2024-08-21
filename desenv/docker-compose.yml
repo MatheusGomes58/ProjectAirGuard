@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: Generator
     volumes:
-      - .Docker/database:/var/lib/postgresql/data
+      - ../localdatabase-aplication/Database:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 

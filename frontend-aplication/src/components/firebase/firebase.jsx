@@ -3,24 +3,20 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import 'firebase/compat/storage';
 import 'firebase/compat/database';
+import data from '../../data/config.json';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBFZvQeulc-HcJ0mg4pkJ3PaYT6fjkau6U",
-  authDomain: "projectairguard.firebaseapp.com",
-  projectId: "projectairguard",
-  storageBucket: "projectairguard.appspot.com",
-  messagingSenderId: "676272574243",
-  appId: "1:676272574243:web:14e7455fcda2cdabba4696",
-  measurementId: "G-EC2QV72RV4"
-};
+const firebaseConfig = data.firebaseConfig;
 
-const app = firebase.initializeApp(firebaseConfig, 'app');
-const auth = firebase.initializeApp(firebaseConfig).auth();
-const db = app.firestore();
-const realTimeDB = app.database();
-const storage = app.storage();
+// Inicialize o Firebase apenas se ele ainda não foi inicializado
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 
+// Exporte os serviços necessários
+const app = firebase.app();
+const auth = firebase.auth();
+const db = firebase.firestore();
+const realTimeDB = firebase.database();
+const storage = firebase.storage();
 
-
-export { db, storage, app, auth, realTimeDB };
-
+export { app, auth, db, realTimeDB, storage };
