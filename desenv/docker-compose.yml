@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 services:
   db:
     image: postgres:15
@@ -12,9 +12,25 @@ services:
       - .Docker/database:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+
   front:
     image: geradorfront
+    container_name: Frontend
     restart: always
     ports:
       - "3000:3000"
-    
+
+  restapi:
+    image: restapi
+    container_name: RestApi
+    restart: always
+    depends_on:
+      - db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: Generator
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+    ports:
+      - "4000:8000"

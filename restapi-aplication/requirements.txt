@@ -1,0 +1,9 @@
+Flask==2.0.3
+gunicorn==20.1.0
+
+fastapi
+sqlalchemy
+datetime
+pydantic
+
+uvicorn[standard]
