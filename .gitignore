@@ -1,4 +1,4 @@
 frontend-aplication/node_modules/
 frontend-aplication/build/
 node_modules/
-.pyc
+*.pyc
