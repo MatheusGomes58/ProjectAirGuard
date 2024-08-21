@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import MenuOptions from '../components/menu/menu';
 import '../css/App.css';
@@ -9,8 +9,15 @@ import FogotPassword from './fogotPassword';
 import AutenticationPage from './autentication';
 import HomePage from './homePage';
 import Slideshow from './slideshow';
+import data from '../data/config.json';
 
 function App() {
+  //const [apiUrl, setApiUrl] = useState('');
+  
+  useEffect(() => {
+    console.log("API URL:", data.API_URL);
+  }, []);
+  
   return (
     <Router>
       <AppContent />

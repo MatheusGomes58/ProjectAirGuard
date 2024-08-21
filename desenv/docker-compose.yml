@@ -17,6 +17,8 @@ services:
     image: geradorfront
     container_name: Frontend
     restart: always
+    volumes:
+      - ./config.json:/app/src/data/config.json
     ports:
       - "3000:3000"
 
