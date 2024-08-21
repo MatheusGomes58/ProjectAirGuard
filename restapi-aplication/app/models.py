@@ -12,9 +12,17 @@ class Item(Base):
 # Modelo para Log
 class Log(Base):
     __tablename__ = "logs"
-
     id = Column(Integer, primary_key=True, index=True)
     action = Column(String, index=True)
     details = Column(String)
     timestamp = Column(DateTime, default=datetime.utcnow)
+
+#modelo para o User
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    email = Column(String, index=True)
+    password = Column(String, index=True)
+
 

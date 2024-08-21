@@ -23,3 +23,8 @@ class Log(BaseModel):
 class ItemCreate(BaseModel):
     name: str
     description: str
+
+class User(BaseModel):
+    name: str
+    email: str
+    password: str
