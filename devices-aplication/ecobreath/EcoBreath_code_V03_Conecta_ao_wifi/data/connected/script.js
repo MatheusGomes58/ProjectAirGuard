@@ -14,17 +14,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function fetchNetworks() {
     try {
-        //const response = await fetch('/networks');
-        const response = [
+        const response = await fetch('/networks');
+        /*const response = [
             { "ssid": "Rede Wi-Fi 1" },
             { "SSID": "Rede Wi-Fi 2" },
             { "ssid": "Rede Wi-Fi 3", "connected": true },
             { "SSID": "Rede Wi-Fi 4" }
-        ]
+        ]*/
 
-        /*if (!response.ok) {
+        if (!response.ok) {
             throw new Error('Erro ao buscar redes Wi-Fi');
-        }*/
+        }
         return response;
     } catch (error) {
         console.error('Erro:', error);
