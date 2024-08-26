@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import MenuOptions from '../components/menu/menu';
+import ApiRest from '../components/apirest/apirest';
 import '../css/App.css';
 import Profile from './profilePage';
 import Scene from './scenePage';
@@ -12,7 +13,7 @@ import Slideshow from './slideshow';
 import data from '../data/config.json';
 
 function App() {
-  
+
   useEffect(() => {
     console.log("API URL:", data.propsValis);
   }, []);
@@ -37,8 +38,11 @@ function AppContent() {
         <Route path="/fogotPassword" element={<FogotPassword />} />
         <Route path="/slides" element={<Slideshow />} />
         <Route path="/" element={<AutenticationPage />} />
+        <Route path="/apirest" element={<ApiRest />} />
+        {/* Redireciona para / se a rota não existir */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      {(location.pathname !== "/auth" && location.pathname !== "/fogotPassword" && location.pathname !== "/slides" && location.pathname !== "/") && <MenuOptions />}
+      {(location.pathname !== "/auth" && location.pathname !== "/fogotPassword" && location.pathname !== "/slides" && location.pathname !== "/" && location.pathname !== "/apirest") && <MenuOptions />}
     </React.Fragment>
   );
 }

@@ -1,4 +1,5 @@
 var oldPage;
+showPage("wifi")
 
 document.addEventListener("DOMContentLoaded", async () => {
     await populateWifiList();

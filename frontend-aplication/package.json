@@ -18,6 +18,8 @@
     "react-firebase-hooks": "^5.1.1",
     "react-router-dom": "^6.21.3",
     "react-scripts": "5.0.1",
+    "swagger-ui-dist": "^5.17.14",
+    "swagger-ui-react": "^5.17.14",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
