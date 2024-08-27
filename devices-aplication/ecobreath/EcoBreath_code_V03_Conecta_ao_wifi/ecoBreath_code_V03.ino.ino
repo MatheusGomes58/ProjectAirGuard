@@ -33,7 +33,7 @@ String scanNetworks() {
 }
 
 // Função para servir arquivos
-void handleFileRequest(String pathFormat) {
+void handleFileRequest(String pathFormat = "/connection") {
   String path = server.uri();
   
   if (path == "/") {
@@ -59,16 +59,17 @@ void handleFileRequest(String pathFormat) {
     contentType = "text/plain";
   }
 
-  File file = SPIFFS.open(path, "r");
-  if (!file) {
+  if (!SPIFFS.exists(path)) {
     server.send(404, "text/plain", "Arquivo não encontrado.");
     return;
   }
 
+  File file = SPIFFS.open(path, "r");
   server.streamFile(file, contentType);
   file.close();
 }
 
+// Função para salvar as credenciais de Wi-Fi e tentar se conectar
 void handleSave() {
   String ssid = server.arg("ssid");
   String password = server.arg("password");
@@ -114,6 +115,7 @@ void handleSave() {
   }
 }
 
+// Função para listar as redes Wi-Fi disponíveis
 void handleNetworks() {
   String networks = scanNetworks();
   server.send(200, "application/json", networks);
@@ -135,7 +137,7 @@ void setup() {
   dnsServer.start(53, "*", WiFi.softAPIP());
 
   // Configurar o servidor web
-  server.onNotFound(handleFileRequest("/connection"));
+  server.onNotFound([]() { handleFileRequest(); });
   server.on("/save", HTTP_POST, handleSave);
   server.on("/networks", HTTP_GET, handleNetworks);
   server.begin();
