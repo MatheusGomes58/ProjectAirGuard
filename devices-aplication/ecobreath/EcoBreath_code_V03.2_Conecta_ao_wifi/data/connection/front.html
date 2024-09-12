@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurar Wi-Fi</title>
+
+    <!-- Ícone da página -->
+    <link rel="icon" href="./logo.png">
+
+    <!-- CSS Customizado -->
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <img src="./logo.png" class="LogoJA">
+    <div class="Card">
+        <h2>Configurar Wi-Fi</h2>
+
+        <label for="wifiList">Selecione a Rede Wi-Fi:</label>
+        <ul id="wifiList" class="wifi-list"></ul>
+    </div>
+
+    <!-- Modal -->
+    <div id="wifiModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>Conectar à rede</h2>
+            <form id="loginForm" onsubmit="return submitForm()">
+                <label for="ssid">SSID:</label>
+                <input type="text" id="ssid" name="ssid" required readonly>
+
+                <label for="password">Senha:</label>
+                <div class="input-container">
+                    <input type="password" id="password" name="password" required>
+                    <span id="togglePassword" class="show-password">Exibir</span>
+                </div>
+
+                <button type="submit">Conectar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="./script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,2 @@
+somente aplicação do Display e DHT11
+11;09;2024
