@@ -131,6 +131,64 @@ void handleSave()
     }
 }
 
+void handleFileRequest(String pathFormat)
+{
+    String path = server.uri();
+
+    if (path == "/")
+    {
+        path = pathFormat + "/front.html"; // Se o caminho for a raiz, servir front.html
+    }
+    else
+    {
+        path = pathFormat + path;
+    }
+
+    String contentType;
+    if (path.endsWith(".htm") || path.endsWith(".html"))
+    {
+        contentType = "text/html";
+    }
+    else if (path.endsWith(".css"))
+    {
+        contentType = "text/css";
+    }
+    else if (path.endsWith(".js"))
+    {
+        contentType = "application/javascript";
+    }
+    else if (path.endsWith(".png"))
+    {
+        contentType = "image/png";
+    }
+    else if (path.endsWith(".jpg"))
+    {
+        contentType = "image/jpeg";
+    }
+    else if (path.endsWith(".gif"))
+    {
+        contentType = "image/gif";
+    }
+    else if (path.endsWith(".ico"))
+    {
+        contentType = "image/x-icon";
+    }
+    else
+    {
+        contentType = "text/plain";
+    }
+
+    if (!SPIFFS.exists(path))
+    {
+        server.send(404, "text/plain", "Arquivo não encontrado.");
+        return;
+    }
+
+    File file = SPIFFS.open(path, "r");
+    server.streamFile(file, contentType);
+    file.close();
+}
+
 // Função para retornar as redes Wi-Fi disponíveis
 void handleNetworks()
 {
