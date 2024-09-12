@@ -1,93 +1,154 @@
-import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { db } from '../firebase/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { FaCogs, FaPlay } from 'react-icons/fa';
 import './apirest.css';
 
 function ApiRest() {
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const endpoint = searchParams.get("endpoint");
-    const param = window.location.search.substring(1); // Captura a query string completa
+    const location = useLocation();
+    const [method, setMethod] = useState('POST');
+    const [endpoint, setEndpoint] = useState('');
+    const [requestBody, setRequestBody] = useState('{}');
+    const [response, setResponse] = useState('');
 
-    const [inputEndpoint, setInputEndpoint] = useState('');
-    const [inputParam, setInputParam] = useState('');
-
-    React.useEffect(() => {
-        if (endpoint && param) {
-            console.log("Calling API with params:", param);
-            handleApiCall(endpoint, param);
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const jsonStr = searchParams.get('data');
+        if (jsonStr) {
+            try {
+                const decodedJsonStr = decodeURIComponent(jsonStr);
+                const jsonObject = JSON.parse(decodedJsonStr);
+                if (jsonObject.method && ['POST', 'PUT', 'DELETE'].includes(jsonObject.method)) {
+                    setMethod(jsonObject.method);
+                    setEndpoint(jsonObject.endpoint || '');
+                    setRequestBody(JSON.stringify(jsonObject.data || {}));
+                    handleApiRequest();
+                } else {
+                    setResponse('Invalid method in JSON data.');
+                }
+            } catch (error) {
+                setResponse(`Error parsing JSON data: ${error.message}`);
+            }
         }
-    }, [endpoint, param]);
+    }, [location.search]);
 
-    const handleApiCall = (endpoint, param) => {
-        if (!param) {
-            console.error("Param is null or undefined");
+    // Função para validar JSON
+    const isValidJson = (jsonString) => {
+        try {
+            JSON.parse(jsonString);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    };
+
+    // Função para limpar a URL
+    const clearUrl = () => {
+        debugger
+        navigate('/apirest');
+    };
+
+    // Função para captura da requisição
+    const handleApiRequest = async () => {
+        if (!isValidJson(requestBody)) {
+            setResponse('Invalid JSON format. Please check your input.');
             return;
         }
 
-        // Converte o param em um objeto JSON
-        const paramObj = param.split('&').reduce((acc, pair) => {
-            const [key, value] = pair.split('=');
-            acc[key] = decodeURIComponent(value); // Decodifica valores de URL
-            return acc;
-        }, {});
+        const body = JSON.parse(requestBody);
 
-        console.log("Parsed Parameters:", paramObj);
-
-        switch (endpoint) {
-            case "datasensors":
-                setdatasensors(paramObj);
-                break;
-            default:
-                console.log("Unknown endpoint");
-        }
-    };
-
-    const setdatasensors = async (paramObj) => {
         try {
-            // Adiciona o documento à coleção 'data'
-            await addDoc(collection(db, 'data'), paramObj);
-            console.log("Data added successfully:", paramObj);
+            switch (method) {
+                case 'POST':
+                    await addDoc(collection(db, endpoint), body);
+                    setResponse(`Data successfully added to collection: ${endpoint}`);
+                    break;
+                case 'PUT':
+                    if (!body.id) {
+                        setResponse('PUT requires an "id" field in the JSON body to identify the document.');
+                        return;
+                    }
+                    await setDoc(doc(db, endpoint, body.id), body.data, { merge: true });
+                    setResponse(`Document with id: ${body.id} successfully updated in collection: ${endpoint}`);
+                    break;
+                case 'DELETE':
+                    if (!body.id) {
+                        setResponse('DELETE requires an "id" field in the JSON body to identify the document.');
+                        return;
+                    }
+                    await deleteDoc(doc(db, endpoint, body.id));
+                    setResponse(`Document with id: ${body.id} successfully deleted from collection: ${endpoint}`);
+                    break;
+                default:
+                    setResponse('Unsupported method');
+                    break;
+            }
+            clearUrl(); // Limpa a URL após captura dos dados
         } catch (error) {
-            console.error("Error adding document: ", error);
+            setResponse(`Error: ${error.message}`);
         }
     };
 
-    const handleSubmit = () => {
-        if (inputEndpoint && inputParam) {
-            const formattedParam = inputParam.replace(/\n/g, '&');
-            navigate(`/apirest?endpoint=${inputEndpoint}&${formattedParam}`);
+    // Submissão manual do formulário
+    const handleSubmit = (event) => {
+        event.preventDefault();
+
+        if (isValidJson(requestBody)) {
+            // Codifica o JSON para a URL
+            const encodedData = encodeURIComponent(JSON.stringify({ method, endpoint, data: JSON.parse(requestBody) }));
+            navigate(`/apirest?data=${encodedData}`);
+        } else {
+            setResponse('Invalid JSON format. Please check your input.');
         }
     };
 
     return (
         <div className="api-rest-container">
-            <h1>API Rest Interface</h1>
-            <div className="api-form">
-                <div className="form-group">
-                    <label htmlFor="endpoint">Endpoint:</label>
-                    <input
-                        type="text"
-                        id="endpoint"
-                        value={inputEndpoint}
-                        onChange={(e) => setInputEndpoint(e.target.value)}
-                        placeholder="/endpoint"
-                    />
+            <h1><FaCogs /> API Rest Interface</h1>
+            <form onSubmit={handleSubmit}>
+                <div className="api-form">
+                    <div className="form-group">
+                        <label htmlFor="method">Method:</label>
+                        <select id="method" value={method} onChange={(e) => setMethod(e.target.value)}>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="endpoint">Endpoint (Collection Name):</label>
+                        <input
+                            type="text"
+                            id="endpoint"
+                            value={endpoint}
+                            onChange={(e) => setEndpoint(e.target.value)}
+                            placeholder="Collection Name"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="requestBody">Request Body (JSON):</label>
+                        <textarea
+                            id="requestBody"
+                            value={requestBody}
+                            onChange={(e) => setRequestBody(e.target.value)}
+                            rows="5"
+                            style={{ width: '100%' }}
+                            placeholder='{"data": { "key": "value" }, "id": "documentId"}'
+                        />
+                    </div>
+                    <button className="submit-button" type="submit">
+                        <FaPlay /> Execute
+                    </button>
                 </div>
-                <div className="form-group">
-                    <label htmlFor="param">Parameters:</label>
-                    <textarea
-                        id="param"
-                        value={inputParam}
-                        onChange={(e) => setInputParam(e.target.value)}
-                        placeholder="param1=value1&#10;param2=value2"
-                        rows="5"
-                        style={{ width: '100%' }}
-                    />
+            </form>
+            {response && (
+                <div className="api-response">
+                    <h3>Response:</h3>
+                    <pre>{response}</pre>
                 </div>
-                <button className="submit-button" onClick={handleSubmit}>Execute</button>
-            </div>
+            )}
         </div>
     );
 }

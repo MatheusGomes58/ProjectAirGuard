@@ -75,31 +75,60 @@ void scanAndStoreNetworks()
 void handleSave()
 {
     String ssid = server.arg("ssid");
+    Serial.println("SSID: ");
+    Serial.println(ssid);
     String password = server.arg("password");
+    Serial.println("Senha: ");
+    Serial.println(password);
+
+    Serial.print("Tentando conectar à rede Wi-Fi: ");
+    Serial.println(ssid);
 
     WiFi.begin(ssid.c_str(), password.c_str());
 
+    // Tentativa de conexão
     int attempts = 0;
     const int maxAttempts = 20;
 
     while (WiFi.status() != WL_CONNECTED && attempts < maxAttempts)
     {
         delay(500);
+        Serial.print(".");
+
+        // Exibe o status da conexão a cada tentativa
+        wl_status_t wifi_status = WiFi.status();
+        Serial.print(" Status: ");
+        Serial.println(wifi_status);
+
         attempts++;
     }
 
+    // Verifica se a conexão foi bem-sucedida
     if (WiFi.status() == WL_CONNECTED)
     {
+        Serial.println("\nConectado com sucesso!");
+        Serial.print("Endereço IP obtido: ");
+        Serial.println(WiFi.localIP());
+
+        // Exibe mensagem de conexão bem-sucedida
+        Serial.println("Conexão à internet estabelecida com sucesso!");
+
+        // Redirecionar para a página de conexão bem-sucedida
         server.onNotFound([]()
                           { handleFileRequest("/connected"); });
     }
-    else
+    else if (WiFi.status() != WL_CONNECTED && attempts == maxAttempts)
     {
+        Serial.println("\nFalha ao conectar.");
+
+        // Recriar a rede local e reiniciar o servidor web
         scanAndStoreNetworks();
         WiFi.softAP(ssid_ap, password_ap);
         dnsServer.start(53, "*", WiFi.softAPIP());
+
+        // Exibir página de falha de conexão
         server.onNotFound([]()
-                          { handleFileRequest("/connection"); });
+                          { handleFileRequest("/connection"); }); // Página de erro de conexão
     }
 }
 

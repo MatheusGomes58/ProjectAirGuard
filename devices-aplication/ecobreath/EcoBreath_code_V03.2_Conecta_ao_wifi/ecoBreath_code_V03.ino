@@ -164,7 +164,7 @@ void handleSave()
     server.onNotFound([]()
                       { handleFileRequest("/connected"); });
   }
-  else if(WiFi.status() != WL_CONNECTED && attempts == maxAttempts)
+  else if (WiFi.status() != WL_CONNECTED && attempts == maxAttempts)
   {
     Serial.println("\nFalha ao conectar.");
 
