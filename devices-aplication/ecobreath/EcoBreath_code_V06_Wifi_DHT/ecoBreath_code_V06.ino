@@ -122,7 +122,6 @@ void handleSave()
         Serial.println("\nFalha ao conectar.");
 
         // Recriar a rede local e reiniciar o servidor web
-        scanAndStoreNetworks();
         WiFi.softAP(ssid_ap, password_ap);
         dnsServer.start(53, "*", WiFi.softAPIP());
 
@@ -212,7 +211,7 @@ void setup()
     // Configurar o servidor web
     server.on("/save", HTTP_POST, handleSave);
     server.on("/networks", HTTP_GET, handleNetworks);
-    server.on("/sensor", HTTP_GET, handleSensorData); // Endpoint para dados do sensor
+    server.on("/sensors", HTTP_GET, handleSensorData); // Endpoint para dados do sensor
     server.begin();
 
     Serial.println("Servidor iniciado");
@@ -225,5 +224,6 @@ void loop()
     dnsServer.processNextRequest();
     server.handleClient();
     readSensorData(); // Atualiza os dados do sensor no loop
-    delay(5000);      // Atualização a cada 5 segundos
+    scanAndStoreNetworks();
+    delay(5000); // Atualização a cada 5 segundos
 }

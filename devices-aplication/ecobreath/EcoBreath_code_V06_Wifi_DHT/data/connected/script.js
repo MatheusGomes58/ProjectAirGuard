@@ -1,9 +1,10 @@
 var oldPage;
-showPage("wifi")
+showPage("sensors");
 
 document.addEventListener("DOMContentLoaded", async () => {
     await populateWifiList();
-
+    await populateDataSensors();
+    
     // Adiciona eventos de clique para as opções do menu
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function () {
@@ -11,6 +12,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             showPage(page);
         });
     });
+
+    // Atualiza a lista de redes cada 5 segundos
+    setInterval(async () => {
+        await populateWifiList();
+        await populateDataSensors();
+    }, 5000);
 });
 
 async function fetchNetworks() {
@@ -29,10 +36,36 @@ async function fetchNetworks() {
         return response;
     } catch (error) {
         console.error('Erro:', error);
-        alert('Ocorreu um erro ao buscar redes Wi-Fi.');
         return [];
     }
 }
+
+async function fetchSensors() {
+    try {
+        const response = await fetch('/sensors');
+
+        if (!response.ok) {
+            throw new Error('Erro ao buscar dados dos sensores');
+        }
+        return response;
+    } catch (error) {
+        console.error('Erro:', error);
+        return [];
+    }
+}
+
+async function populateDataSensors() {
+    const sensors = await fetchSensors();
+    const humidityValue = document.getElementById("humidityValue");
+    const temperatureValue = document.getElementById("temperatureValue");
+
+    humidityValue.innerHTML = ''; 
+    temperatureValue.innerHTML = '';
+
+    humidityValue.innerHTML = (sensors.humidity? sensors.humidity : '0')  + '%';
+    temperatureValue.innerHTML = (sensors.temperature? sensors.temperature : '0') + '°C';
+}
+
 
 async function populateWifiList() {
     const networks = await fetchNetworks(); // Agora é um array
@@ -126,7 +159,7 @@ function showPage(page) {
         newMenuElement.classList.add('menuActive'); // Adiciona classe 'active' para o menu selecionado
     }
 
-    if (oldPage) {
+    if (oldPage != page) {
         const oldMenuElement = document.getElementById(`${oldPage}Menu`);
         if (oldMenuElement) {
             oldMenuElement.classList.remove('menuActive'); // Remove a classe 'active' do menu anterior
