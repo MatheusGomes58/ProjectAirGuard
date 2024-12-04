@@ -1,0 +1,73 @@
+.modalBox {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #E6E6FB;
+    padding: 20px;
+    border-radius: 30px;
+    width: 300px;
+    height: auto;
+    box-shadow: 24px;
+    padding: 16px;
+    border-radius: 8px;
+    color: black;
+}
+
+.modalHeader {
+    margin-bottom: 16px;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.modalActions button {
+    margin-left: 8px;
+    min-height: 40px;
+    border: none;
+    background-color: #005028;
+    font-size: 16px;
+    color: white;
+    height: auto;
+    border-radius: 30px;
+    font-weight: bold;
+    margin-top: 1%;
+}
+
+.modalActions button:hover {
+    margin-left: 8px;
+    min-height: 40px;
+    border: none;
+    background-color: #005028;
+    font-size: 16px;
+    color: white;
+    height: auto;
+    border-radius: 30px;
+    font-weight: bold;
+    margin-top: 1%;
+}
+
+.sensor {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    background-color: white;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.sensor-icon {
+    margin-right: 12px;
+}
+
+.sensor-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.sensor-info label {
+    font-weight: bold;
+}

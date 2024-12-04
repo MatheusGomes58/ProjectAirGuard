@@ -4,15 +4,19 @@ import { db } from '../components/firebase/firebase';
 import Switch from '../components/switch/switch';
 import '../css/homePage.css';
 import DeviceIcon from '@mui/icons-material/Devices';
-import DeviceModal from '../components/addDeviceModal/addDeviceModal';
+import DeviceModalEdit from '../components/addDeviceModal/addDeviceModal';
+import DeviceModal from '../components/deviceModal/deviceModal';
 
 function HomePage() {
     const [user, setUser] = useState({});
     const [devices, setDevices] = useState([]);
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [modalEditIsOpen, setEditModalIsOpen] = useState(false);
     const [modalDevice, setModalDevice] = useState(null);
     const currentUserUid = localStorage.getItem('uid');
     const navigate = useNavigate();
+    const openEditModal = () => setEditModalIsOpen(true);
+    const closeEditModal = () => setEditModalIsOpen(false);
 
     useEffect(() => {
         userValidation();
@@ -136,6 +140,13 @@ function HomePage() {
             <DeviceModal
                 open={modalIsOpen}
                 handleClose={closeModal}
+                deviceData={modalDevice}
+                currentUser={user}
+                editDevice={openEditModal} // Passando a função que abre o modal de edição
+            />
+            <DeviceModalEdit
+                open={modalEditIsOpen}
+                handleClose={closeEditModal}
                 deviceData={modalDevice}
                 currentUser={user}
             />
