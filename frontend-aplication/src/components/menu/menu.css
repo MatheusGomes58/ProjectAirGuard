@@ -1,35 +1,101 @@
+/* =============================================
+   BOTTOM NAVIGATION MENU
+   ============================================= */
 .addEvent {
     position: fixed;
     bottom: 0;
-    left: 0;
-    width: 100vw;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
     display: flex;
     justify-content: center;
-    align-items: center;  
+    align-items: center;
+    padding: 8px 16px;
+    padding-bottom: calc(8px + var(--safe-bottom));
+    z-index: 1000;
+    pointer-events: none;
+    /* allow click-through on backdrop area */
 }
 
+.navBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+    background: var(--color-glass);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--color-glass-border);
+    border-radius: var(--radius-full);
+    padding: 8px 8px;
+    box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 200, 83, 0.06);
+    pointer-events: all;
+}
 
 .btnCircle {
-    border-radius: 100%;
-    width: 60px;
-    height: 60px;
-    background-color: #000f07c4;
-    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-text-muted);
     border: none;
     cursor: pointer;
-    box-shadow: 10px 20px 26px rgba(0, 0, 0, 0.6);
-    margin-top: 1%;
-    margin-bottom: 40px;
-    margin-right: 1%;
-    margin-left: 1%;
-    z-index: 999;
+    font-size: 18px;
+    transition: color var(--transition), background var(--transition), transform var(--transition);
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
 }
 
-.btnCircle:hover{
-    margin-bottom: 10px}
+.btnCircle:active {
+    transform: scale(0.92);
+}
 
-.hideMenu
+.btnCircle:hover {
+    color: var(--color-text);
+    background: var(--color-surface-2);
+}
 
-.btnAdd:hover {
-    box-shadow: 0 0px 0px rgba(0, 0, 0, 0.6);
+/* Active page indicator */
+.btnCircle.navActive {
+    color: var(--color-primary);
+    background: var(--color-primary-dim);
+}
+
+.btnCircle.navActive::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--color-primary);
+}
+
+/* Plus button — center CTA */
+.btnCircle.Plus {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, #00C853, #00A846);
+    color: #000;
+    font-size: 20px;
+    box-shadow: 0 4px 16px rgba(0, 200, 83, 0.4);
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.btnCircle.Plus:hover {
+    color: #000;
+    background: linear-gradient(135deg, #00C853, #00A846);
+    transform: rotate(45deg) scale(1.05);
+    box-shadow: 0 8px 24px rgba(0, 200, 83, 0.5);
+}
+
+.btnCircle.Plus:active {
+    transform: rotate(45deg) scale(0.95);
 }

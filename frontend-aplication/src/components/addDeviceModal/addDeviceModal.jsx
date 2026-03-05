@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase/firebase';
+import { db } from '../firebase/firebase.jsx';
 import { Modal, Box, Button, TextField, FormControl, Switch, FormControlLabel } from '@mui/material';
 import './addDeviceModal.css'; // Crie um arquivo CSS para estilização personalizada
 
@@ -36,7 +36,6 @@ const DeviceModal = ({ open, handleClose, deviceData }) => {
         };
 
         try {
-            debugger
             if (deviceData?.id) {
                 let usersDataArray = deviceData.usersData || [];
                 let uidsArray = deviceData.uids || [];

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase/firebase';
+import { db } from '../firebase/firebase.jsx';
 import { Modal, Box, Button, TextField, MenuItem, Select, FormControl, InputLabel, Switch, FormControlLabel } from '@mui/material';
 import './addFunctionModal.css';
 

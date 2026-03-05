@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { auth, db } from '../firebase/firebase'; // Importe o firestore também
+import { auth, db } from '../firebase/firebase.jsx'; // Importe o firestore também
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { collection, addDoc } from 'firebase/firestore'; // Importe as funções necessárias para o Firestore
 import './login.css';

@@ -1,73 +1,91 @@
+/* =============================================
+   MODAL BOXES — addDevice, addFunction, deviceModal
+   ============================================= */
 .modalBox {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: #E6E6FB;
-    padding: 20px;
-    border-radius: 30px;
-    width: 300px;
-    height: auto;
-    box-shadow: 24px;
-    padding: 16px;
-    border-radius: 8px;
-    color: black;
+    width: calc(100% - 32px);
+    max-width: 380px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-glass-border);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    box-shadow: var(--shadow-modal);
+    outline: none;
+    color: var(--color-text);
 }
 
 .modalHeader {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-text);
     margin-bottom: 16px;
 }
 
+/* MUI overrides inside modals */
+.modalBox .MuiInputLabel-root,
+.modalBox .MuiOutlinedInput-root,
+.modalBox .MuiSelect-select {
+    color: var(--color-text) !important;
+}
+
+.modalBox .MuiOutlinedInput-notchedOutline {
+    border-color: var(--color-border) !important;
+}
+
+.modalBox .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: var(--color-primary) !important;
+}
+
+.modalBox .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: var(--color-primary) !important;
+}
+
+.modalBox .MuiInputLabel-root.Mui-focused {
+    color: var(--color-primary) !important;
+}
+
+.modalBox .MuiInputBase-input {
+    color: var(--color-text) !important;
+}
+
+.modalBox .MuiFormControlLabel-label {
+    color: var(--color-text-muted) !important;
+    font-size: 0.875rem;
+}
+
+/* Modal Actions */
 .modalActions {
     display: flex;
-    justify-content: center;
-    margin-top: 16px;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+    flex-wrap: wrap;
 }
 
-.modalActions button {
-    margin-left: 8px;
-    min-height: 40px;
-    border: none;
-    background-color: #005028;
-    font-size: 16px;
-    color: white;
-    height: auto;
-    border-radius: 30px;
-    font-weight: bold;
-    margin-top: 1%;
+.modalActions .MuiButton-root {
+    border-radius: var(--radius-full) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    text-transform: none !important;
+    padding: 8px 20px !important;
 }
 
-.modalActions button:hover {
-    margin-left: 8px;
-    min-height: 40px;
-    border: none;
-    background-color: #005028;
-    font-size: 16px;
-    color: white;
-    height: auto;
-    border-radius: 30px;
-    font-weight: bold;
-    margin-top: 1%;
+.modalActions .MuiButton-contained.MuiButton-containedPrimary {
+    background: var(--color-primary) !important;
+    color: #000 !important;
+    box-shadow: 0 4px 12px rgba(0, 200, 83, 0.3) !important;
 }
 
-.sensor {
-    display: flex;
-    align-items: center;
-    margin-bottom: 16px;
-    background-color: white;
-    border-radius: 10px;
-    padding: 10px;
+.modalActions .MuiButton-contained.MuiButton-containedSecondary {
+    background: rgba(255, 82, 82, 0.15) !important;
+    color: var(--color-danger) !important;
+    border: 1px solid rgba(255, 82, 82, 0.3) !important;
 }
 
-.sensor-icon {
-    margin-right: 12px;
-}
-
-.sensor-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.sensor-info label {
-    font-weight: bold;
+.modalActions .MuiButton-text {
+    color: var(--color-text-muted) !important;
 }

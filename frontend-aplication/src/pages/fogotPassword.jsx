@@ -1,39 +1,26 @@
 import '../css/autenticationPage.css';
-import { db, auth } from '../components/firebase/firebase';
 import { useNavigate } from 'react-router-dom';
 import LogoJA from '../img/logo.png';
 import React, { useState } from 'react';
 import ForgotPasswordForm from '../components/Auth/fogotPassword';
 
-function Auth() {
-    const [activeTab, setActiveTab] = useState('login');
+function ForgotPassword() {
     const navigate = useNavigate();
-
-
-
-    const handleTabSwitch = (tab) => {
-        navigate('/');
-    };
 
     return (
         <div className="Auth">
-            <div className='containerAuth'>
-                <img src={LogoJA} className='LogoJA' />
+            <div className='containerAuth logoArea'>
+                <img src={LogoJA} className='LogoJA' alt="AirGuard Logo" />
+                <h1 className="brandName">AirGuard</h1>
             </div>
             <div className='containerAuth'>
                 <div className="container">
                     <div className="sliderLogin">
                         <div
-                            className={`switch ${activeTab === 'login' ? 'active' : ''}`}
-                            onClick={() => handleTabSwitch('login')}
+                            className="switch active"
+                            onClick={() => navigate('/')}
                         >
-                            Logar
-                        </div>
-                        <div
-                            className={`switch ${activeTab === 'register' ? 'active' : ''}`}
-                            onClick={() => handleTabSwitch('register')}
-                        >
-                            Registrar
+                            Voltar ao Login
                         </div>
                     </div>
                     <ForgotPasswordForm />
@@ -43,5 +30,4 @@ function Auth() {
     );
 }
 
-export default Auth;
-
+export default ForgotPassword;

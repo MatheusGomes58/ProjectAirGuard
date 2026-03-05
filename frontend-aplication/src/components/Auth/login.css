@@ -1,65 +1,114 @@
-.btnAuth {
-    background-color: #005028;
-    border-radius: 100px;
-    color: white;
-    font-size: 15px;
-    border: none;
-    width: 163px;
-    height: 42px;
-}
+/* =============================================
+   AUTH FORMS — Login / Register / Forgot
+   ============================================= */
 
-.btnAuth:hover {
-    background-color: #003d1f;
-}
-
-.inputLogin {
-    border: none;
-    border-bottom: 2px solid #005028;
-    outline: none;
-    min-width: 300px;
-    margin-top: 10%;
-    background: none;
-}
-
-.resetPass{
+/* Form wrappers */
+#loginForm,
+#RegisterForm,
+#ForgotPasswordForm {
     display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
     width: 100%;
-    align-items: end;
-    justify-content: end;
-    margin-top: 5%;
 }
 
+/* Input fields */
+.inputLogin {
+    background: var(--color-surface-2);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    padding: 14px 16px;
+    width: 100%;
+    min-width: unset;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    text-align: left;
+}
+
+.inputLogin:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-dim);
+}
+
+.inputLogin::placeholder {
+    color: var(--color-text-muted);
+}
+
+/* Password field wrapper */
 .password-container {
     position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-container .inputLogin {
+    padding-right: 44px;
 }
 
 .toggle-password {
     position: absolute;
+    right: 14px;
     top: 50%;
-    right: 10px;
     transform: translateY(-50%);
     cursor: pointer;
+    color: var(--color-text-muted);
+    font-size: 15px;
+    transition: color var(--transition);
+    z-index: 1;
 }
 
-.boxButton{
-    margin-top: 30px;
-    min-height: 50px;
+.toggle-password:hover {
+    color: var(--color-text);
+}
+
+/* Forgot password link */
+.resetPass {
     display: flex;
-    justify-content: center;
-    align-items: end;
+    width: 100%;
+    justify-content: flex-end;
+    font-size: 0.8125rem;
+    color: var(--color-primary);
+    cursor: pointer;
+    font-weight: 500;
+    margin-top: -4px;
+    text-decoration: none;
 }
 
-#loginForm{
-    margin-top: 40px;
+.resetPass:hover {
+    text-decoration: underline;
 }
 
-#RegisterForm{
-    display: flex;
-    flex-direction: column;
+/* Button container */
+.boxButton {
+    margin-top: 8px;
 }
 
-#ForgotPasswordForm{
-    margin-top: 40px;
-    display: flex;
-    flex-direction: column;
+/* Auth button */
+.btnAuth {
+    width: 100%;
+    background: linear-gradient(135deg, #00C853, #00A846);
+    color: #000;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius-full);
+    padding: 14px;
+    cursor: pointer;
+    transition: opacity var(--transition), box-shadow var(--transition), transform var(--transition);
+    box-shadow: 0 4px 16px rgba(0, 200, 83, 0.3);
+}
+
+.btnAuth:hover {
+    opacity: 0.92;
+    box-shadow: 0 6px 24px rgba(0, 200, 83, 0.45);
+}
+
+.btnAuth:active {
+    transform: scale(0.98);
 }

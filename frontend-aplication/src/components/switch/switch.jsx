@@ -1,16 +1,22 @@
-// Switch.js
+// Switch.jsx
 import React from 'react';
 import './switch.css';
 
 const Switch = ({ status, label, readOnly, id, onToggle }) => {
+  const handleChange = () => {
+    if (!readOnly && onToggle) {
+      onToggle(id, !status);
+    }
+  };
+
   return (
     <div className="switch-container">
       <label className='switch-label'>
-        <label className='switch-label'>{label}</label>
+        {label && <span className='switch-label-text'>{label}</span>}
         <input
           type="checkbox"
           checked={status}
-          onChange={() => onToggle(id, !status)}
+          onChange={handleChange}
           className="switch-input"
           disabled={readOnly}
         />

@@ -1,32 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import AddFunctionModal from '../addFunctionModal/addFunctionModal';
-import DeviceModal from '../addDeviceModal/addDeviceModal'; // Importe o DeviceModal
-import './menu.css'
+import DeviceModal from '../addDeviceModal/addDeviceModal';
+import './menu.css';
 
 function MenuOptions() {
     const navigate = useNavigate();
     const location = useLocation();
     const [isFunctionModalOpen, setIsFunctionModalOpen] = useState(false);
     const [isDeviceModalOpen, setIsDeviceModalOpen] = useState(false);
-    const [modalDevice, setModalDevice] = useState(null); // Estado para o dispositivo no modal
+    const [modalDevice] = useState(null);
 
-    function acessHome() {
-        navigate('/home');
-    }
-
-    function acessScene() {
-        navigate('/scene');
-    }
-
-    function acessProfile() {
-        navigate('/profile');
-    }
-
-    function logout() {
-        localStorage.clear();
-        navigate('/');
-    }
+    const isActive = (path) => location.pathname === path;
 
     const handleOpenModal = () => {
         if (location.pathname === '/scene') {
@@ -36,35 +21,55 @@ function MenuOptions() {
         }
     };
 
-    const handleCloseDeviceModal = () => {
-        setIsDeviceModalOpen(false);
-    };
-
-    const handleCloseFunctionModal = () => {
-        setIsFunctionModalOpen(false);
-    };
+    function logout() {
+        localStorage.clear();
+        navigate('/');
+    }
 
     return (
         <div className='addEvent'>
-            <button className='btnCircle Dow' onClick={acessHome}>
-                <i className="fas fa-home"></i>
-            </button>
-            <button className='btnCircle' onClick={acessScene}>
-                <i className="fas fa-cube"></i>
-            </button>
-            <button className='btnCircle Plus' onClick={handleOpenModal}>
-                <i className="fas fa-plus"></i>
-            </button>
-            <button className='btnCircle' onClick={acessProfile}>
-                <i className="fas fa-user"></i>
-            </button>
-            <button className='btnCircle Dow' onClick={logout}>
-                <i className="fas fa-sign-out-alt"></i>
-            </button>
-            <AddFunctionModal open={isFunctionModalOpen} handleClose={handleCloseFunctionModal} />
+            <nav className="navBar">
+                <button
+                    className={`btnCircle ${isActive('/home') ? 'navActive' : ''}`}
+                    onClick={() => navigate('/home')}
+                    title="Início"
+                >
+                    <i className="fas fa-home"></i>
+                </button>
+                <button
+                    className={`btnCircle ${isActive('/scene') ? 'navActive' : ''}`}
+                    onClick={() => navigate('/scene')}
+                    title="Cenas"
+                >
+                    <i className="fas fa-bolt"></i>
+                </button>
+                <button
+                    className="btnCircle Plus"
+                    onClick={handleOpenModal}
+                    title="Adicionar"
+                >
+                    <i className="fas fa-plus"></i>
+                </button>
+                <button
+                    className={`btnCircle ${isActive('/profile') ? 'navActive' : ''}`}
+                    onClick={() => navigate('/profile')}
+                    title="Perfil"
+                >
+                    <i className="fas fa-user"></i>
+                </button>
+                <button
+                    className="btnCircle"
+                    onClick={logout}
+                    title="Sair"
+                >
+                    <i className="fas fa-sign-out-alt"></i>
+                </button>
+            </nav>
+
+            <AddFunctionModal open={isFunctionModalOpen} handleClose={() => setIsFunctionModalOpen(false)} />
             <DeviceModal
                 open={isDeviceModalOpen}
-                handleClose={handleCloseDeviceModal}
+                handleClose={() => setIsDeviceModalOpen(false)}
                 deviceData={modalDevice}
             />
         </div>

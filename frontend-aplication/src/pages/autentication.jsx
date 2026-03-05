@@ -1,7 +1,6 @@
 import '../css/autenticationPage.css';
 import LoginForm from '../components/Auth/login'
 import RegisterForm from '../components/Auth/register'
-import { db, auth } from '../components/firebase/firebase';
 import { useNavigate } from 'react-router-dom';
 import LogoJA from '../img/logo.png';
 import React, { useState, useEffect } from 'react';
@@ -14,26 +13,20 @@ function Auth() {
         userValidation();
     }, []);
 
-
     async function userValidation() {
         const authTime = localStorage.getItem('authTime');
-        if (!authTime) {
-            navigate('/');
-            return;
-        }
+        if (!authTime) return; // Nenhum token — permanece na tela de auth
 
         const currentTime = new Date().getTime();
         const timeElapsed = currentTime - parseInt(authTime, 10);
-
         const threeHoursInMs = 3 * 60 * 60 * 1000;
-        if (timeElapsed > threeHoursInMs) {
-            navigate('/');
-            return;
+
+        if (timeElapsed <= threeHoursInMs) {
+            // Sessão ainda válida — redirecionar para home
+            navigate('/home');
         }
+        // Se expirado, permanece na tela de login para reautenticar
     }
-
-
-
 
     const handleTabSwitch = (tab) => {
         setActiveTab(tab);
@@ -41,8 +34,10 @@ function Auth() {
 
     return (
         <div className="Auth">
-            <div className='containerAuth'>
-                <img src={LogoJA} className='LogoJA' />
+            <div className='containerAuth logoArea'>
+                <img src={LogoJA} className='LogoJA' alt="AirGuard Logo" />
+                <h1 className="brandName">AirGuard</h1>
+                <p className="brandTagline">Monitoramento inteligente</p>
             </div>
             <div className='containerAuth'>
                 <div className="container">
@@ -68,4 +63,3 @@ function Auth() {
 }
 
 export default Auth;
-

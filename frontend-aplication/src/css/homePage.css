@@ -1,75 +1,173 @@
+/* =============================================
+   HOME PAGE
+   ============================================= */
 .homePage {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  min-height: 100dvh;
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
-  background-color: #005028;
+  background-color: var(--color-bg);
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
 }
 
+/* Header */
+.homeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 8px;
+  padding-top: calc(20px + var(--safe-top));
+}
+
+.homeHeaderText {
+  flex: 1;
+}
+
+.homeGreeting {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin-bottom: 2px;
+}
+
+.homeTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.homeStats {
+  display: flex;
+  gap: 8px;
+}
+
+.statBadge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--color-primary-dim);
+  color: var(--color-primary);
+  border: 1px solid rgba(0, 200, 83, 0.2);
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Container */
+.containerHome {
+  flex: 1;
+  padding: 8px 16px;
+  width: 100%;
+}
+
+/* Device Grid */
 .deviceGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-  padding: 20px;
-  width: 100%;
-  box-sizing: border-box;
-  justify-content: center; /* Alinha o conteúdo ao centro horizontalmente */
-  align-items: center; /* Alinha o conteúdo ao centro verticalmente */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
 
-.deviceGrid > div {
-  display: flex;
-  height: 100%;
-  width: 100%;
-  justify-content: center; /* Alinha o conteúdo ao centro horizontalmente */
-  align-items: center; /* Alinha o conteúdo ao centro verticalmente */
-}
-
-
-
-.containerHome {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-}
-
-.deviceCard {
-  color: black;
-  background: #E6E6FB;
-  padding: 20px;
-  border-radius: 30px;
-  margin: 10px 0;
+/* Empty State */
+.emptyState {
+  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.emptyState svg {
+  opacity: 0.35;
+}
+
+.emptyState p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Device Card */
+.deviceCard {
   position: relative;
-  height: 100px;
-  width: 150px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  overflow: hidden;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.deviceIcon {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  font-size: 24px;
+.deviceCard:active {
+  transform: scale(0.97);
 }
 
-.boxSwitch{
+.deviceCard:has(.switch-input:checked) {
+  border-color: rgba(0, 200, 83, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 200, 83, 0.15);
+}
+
+/* Status dot */
+.deviceStatus {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 12px;
+  left: 12px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.deviceStatus.on {
+  background: var(--color-primary);
+  box-shadow: 0 0 8px var(--color-primary);
+}
+
+.deviceStatus.off {
+  background: var(--color-text-muted);
+}
+
+.deviceCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 4px;
+}
+
+.deviceIconWrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  font-size: 18px;
+}
+
+.boxSwitch {
+  flex-shrink: 0;
 }
 
 .deviceName {
-  margin-top: auto;
-  height: 70px;
-  display: flex;
-  justify-content: center;
-  align-items: end;
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.deviceStateLabel {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
 }

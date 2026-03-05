@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase/firebase';
+import { db } from '../firebase/firebase.jsx';
 import { Modal, Box, Button } from '@mui/material';
 import { WiHumidity, WiThermometer } from 'react-icons/wi';
 import { AiOutlineRobot } from 'react-icons/ai'; // Ícone de IA

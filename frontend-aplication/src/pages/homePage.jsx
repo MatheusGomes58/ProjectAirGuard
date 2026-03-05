@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../components/firebase/firebase';
+import { db } from '../components/firebase/firebase.jsx';
 import Switch from '../components/switch/switch';
 import '../css/homePage.css';
-import DeviceIcon from '@mui/icons-material/Devices';
 import DeviceModalEdit from '../components/addDeviceModal/addDeviceModal';
 import DeviceModal from '../components/deviceModal/deviceModal';
+import { FiWifi, FiHome } from 'react-icons/fi';
 
 function HomePage() {
     const [user, setUser] = useState({});
@@ -13,8 +13,8 @@ function HomePage() {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalEditIsOpen, setEditModalIsOpen] = useState(false);
     const [modalDevice, setModalDevice] = useState(null);
-    const currentUserUid = localStorage.getItem('uid');
     const navigate = useNavigate();
+
     const openEditModal = () => setEditModalIsOpen(true);
     const closeEditModal = () => setEditModalIsOpen(false);
 
@@ -24,83 +24,40 @@ function HomePage() {
 
     async function userValidation() {
         const authTime = localStorage.getItem('authTime');
-        if (!authTime) {
-            navigate('/');
-            return;
-        }
-
-        const currentTime = new Date().getTime();
-        const timeElapsed = currentTime - parseInt(authTime, 10);
-
-        const threeHoursInMs = 3 * 60 * 60 * 1000;
-        if (timeElapsed > threeHoursInMs) {
-            navigate('/');
-            return;
-        }
+        if (!authTime) { navigate('/'); return; }
+        const timeElapsed = new Date().getTime() - parseInt(authTime, 10);
+        if (timeElapsed > 3 * 60 * 60 * 1000) { navigate('/'); return; }
     }
 
     useEffect(() => {
-        const getUserFromFirestore = () => {
-            const userEmail = localStorage.getItem('email');
-            return db.collection('users')
-                .where('email', '==', userEmail)
-                .onSnapshot(snapshot => {
-                    if (!snapshot.empty) {
-                        const userData = snapshot.docs[0].data();
-                        const userId = snapshot.docs[0].id;
-                        setUser({ id: userId, ...userData });
-                    }
-                });
-        };
-
-        const unsubscribe = getUserFromFirestore();
-
-        return () => {
-            unsubscribe();
-        };
+        const userEmail = localStorage.getItem('email');
+        const unsubscribe = db.collection('users')
+            .where('email', '==', userEmail)
+            .onSnapshot(snapshot => {
+                if (!snapshot.empty) {
+                    const userData = snapshot.docs[0].data();
+                    setUser({ id: snapshot.docs[0].id, ...userData });
+                }
+            });
+        return () => unsubscribe();
     }, []);
 
     useEffect(() => {
-        const getDevicesFromFirestore = () => {
-            const currentUserUid = localStorage.getItem('uid');
-
-            return db.collection('devices')
-                .where('uids', 'array-contains', currentUserUid)
-                .onSnapshot(snapshot => {
-                    const devicesData = snapshot.docs.map(doc => {
-                        const data = doc.data();
-                        const userData = data.usersData.find(user => user.uid === currentUserUid);
-                        return {
-                            id: doc.id,
-                            ...data,
-                            name: userData ? userData.name : null // Adiciona o nome apenas se o userData for encontrado
-                        };
-                    }).filter(device => device.name !== null); // Filtra dispositivos onde o nome não é nulo
-
-                    setDevices(devicesData);
-                });
-        };
-
-
-        const unsubscribe = getDevicesFromFirestore();
-
-        return () => {
-            unsubscribe();
-        };
+        const currentUserUid = localStorage.getItem('uid');
+        const unsubscribe = db.collection('devices')
+            .where('uids', 'array-contains', currentUserUid)
+            .onSnapshot(snapshot => {
+                const devicesData = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    const userData = data.usersData.find(u => u.uid === currentUserUid);
+                    return { id: doc.id, ...data, name: userData ? userData.name : null };
+                }).filter(device => device.name !== null);
+                setDevices(devicesData);
+            });
+        return () => unsubscribe();
     }, []);
 
-    if (user.admin) {
-        localStorage.setItem('admin', user.admin);
-    }
-
-    function editUserAcess() {
-        localStorage.removeItem('editUser');
-        navigate('/profile');
-    }
-
-    function acessMissionsPage() {
-        navigate('/missions');
-    }
+    if (user.admin) localStorage.setItem('admin', user.admin);
 
     const handleToggle = (deviceId, newState) => {
         db.collection('devices').doc(deviceId).update({ state: newState });
@@ -111,19 +68,36 @@ function HomePage() {
         setModalIsOpen(true);
     };
 
-    const closeModal = () => {
-        setModalIsOpen(false);
-    };
+    const activeCount = devices.filter(d => d.state).length;
 
     return (
         <div className="homePage">
+            <div className="homeHeader">
+                <div className="homeHeaderText">
+                    <p className="homeGreeting">Olá, {user.name?.split(' ')[0] || 'Usuário'} 👋</p>
+                    <h2 className="homeTitle">Seus dispositivos</h2>
+                </div>
+                <div className="homeStats">
+                    <span className="statBadge"><FiWifi /> {activeCount} ativos</span>
+                </div>
+            </div>
+
             <div className='containerHome'>
                 <div className='deviceGrid'>
+                    {devices.length === 0 && (
+                        <div className="emptyState">
+                            <FiHome size={48} />
+                            <p>Nenhum dispositivo ainda.<br />Adicione um pelo botão +</p>
+                        </div>
+                    )}
                     {devices.map(device => (
-                        <div>
-                            <div className="deviceCard">
-                                <DeviceIcon className="deviceIcon" key={device.id} onClick={() => openModal(device)} />
-                                <div className='boxSwitch'>
+                        <div key={device.id} className="deviceCard" onClick={() => openModal(device)}>
+                            <div className={`deviceStatus ${device.state ? 'on' : 'off'}`}></div>
+                            <div className="deviceCardTop">
+                                <div className="deviceIconWrapper">
+                                    <i className="fas fa-microchip"></i>
+                                </div>
+                                <div className='boxSwitch' onClick={e => e.stopPropagation()}>
                                     <Switch
                                         id={device.id}
                                         status={device.state}
@@ -131,18 +105,20 @@ function HomePage() {
                                         onToggle={handleToggle}
                                     />
                                 </div>
-                                <div className="deviceName" key={device.id} onClick={() => openModal(device)}>{device.name}</div>
                             </div>
+                            <div className="deviceName">{device.name}</div>
+                            <div className="deviceStateLabel">{device.state ? 'Ligado' : 'Desligado'}</div>
                         </div>
                     ))}
                 </div>
             </div>
+
             <DeviceModal
                 open={modalIsOpen}
-                handleClose={closeModal}
+                handleClose={() => setModalIsOpen(false)}
                 deviceData={modalDevice}
                 currentUser={user}
-                editDevice={openEditModal} // Passando a função que abre o modal de edição
+                editDevice={openEditModal}
             />
             <DeviceModalEdit
                 open={modalEditIsOpen}

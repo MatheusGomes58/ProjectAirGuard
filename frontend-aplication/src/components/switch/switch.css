@@ -1,17 +1,23 @@
+/* =============================================
+   SWITCH COMPONENT — Custom Toggle
+   ============================================= */
 .switch-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
+    display: inline-flex;
     align-items: center;
-    flex-direction: column;
-    margin: 5px;
+    gap: 8px;
+    user-select: none;
 }
 
 .switch-label {
     display: flex;
     align-items: center;
-    font-size: 16px;
-    margin-right: 10px;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.switch-label-text {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
 }
 
 .switch-input {
@@ -21,30 +27,40 @@
 .switch-slider {
     position: relative;
     display: inline-block;
-    width: 60px;
-    height: 34px;
-    background-color: #ccc;
-    border-radius: 17px;
-    transition: background-color 0.3s;
+    width: 44px;
+    height: 26px;
+    background: var(--color-surface-2);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-full);
+    transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+    flex-shrink: 0;
+}
+
+.switch-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--color-text-muted);
+    border-radius: 50%;
+    transition: transform var(--transition), background var(--transition);
 }
 
 .switch-input:checked+.switch-slider {
-    background-color: #4caf50;
-    /* Cor quando o switch está ligado (true) */
+    background: var(--color-primary-dim);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 10px rgba(0, 200, 83, 0.3);
 }
 
-.switch-slider:before {
-    position: absolute;
-    content: '';
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    border-radius: 50%;
-    transition: transform 0.3s;
+.switch-input:checked+.switch-slider::before {
+    transform: translateX(18px) translateY(-50%);
+    background: var(--color-primary);
 }
 
-.switch-input:checked+.switch-slider:before {
-    transform: translateX(26px);
+.switch-input:disabled+.switch-slider {
+    opacity: 0.5;
+    cursor: not-allowed;
 }

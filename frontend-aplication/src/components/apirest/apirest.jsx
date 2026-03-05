@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { db } from '../firebase/firebase';
+import { db } from '../firebase/firebase.jsx';
 import { collection, addDoc, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { FaCogs, FaPlay } from 'react-icons/fa';
 import './apirest.css';

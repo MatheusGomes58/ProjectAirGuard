@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { auth } from '../firebase/firebase'; // Importe o auth do Firebase
+import { auth } from '../firebase/firebase.jsx'; // Importe o auth do Firebase
 import { sendPasswordResetEmail } from 'firebase/auth';
 import './login.css';
 

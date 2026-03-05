@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../components/firebase/firebase';
+import { db } from '../components/firebase/firebase.jsx';
 import Switch from '../components/switch/switch';
 import '../css/scenePage.css';
-import FunctionIcon from '@mui/icons-material/Functions';
-import { Button } from '@mui/material';
-import AddFunctionModal from '../components/addFunctionModal/addFunctionModal'; // Verifique se o caminho de importação está correto
+import AddFunctionModal from '../components/addFunctionModal/addFunctionModal';
+import { FiZap } from 'react-icons/fi';
 
 function ScenePage() {
     const [user, setUser] = useState({});
@@ -21,155 +20,103 @@ function ScenePage() {
 
     async function userValidation() {
         const authTime = localStorage.getItem('authTime');
-        if (!authTime) {
-            navigate('/');
-            return;
-        }
-
-        const currentTime = new Date().getTime();
-        const timeElapsed = currentTime - parseInt(authTime, 10);
-
-        const threeHoursInMs = 3 * 60 * 60 * 1000;
-        if (timeElapsed > threeHoursInMs) {
-            navigate('/');
-            return;
-        }
+        if (!authTime) { navigate('/'); return; }
+        const timeElapsed = new Date().getTime() - parseInt(authTime, 10);
+        if (timeElapsed > 3 * 60 * 60 * 1000) { navigate('/'); return; }
     }
 
     useEffect(() => {
-        const getUserFromFirestore = () => {
-            const userEmail = localStorage.getItem('email');
-            return db.collection('users')
-                .where('email', '==', userEmail)
-                .onSnapshot(snapshot => {
-                    if (!snapshot.empty) {
-                        const userData = snapshot.docs[0].data();
-                        const userId = snapshot.docs[0].id;
-                        setUser({ id: userId, ...userData });
-                    }
-                });
-        };
-
-        const unsubscribe = getUserFromFirestore();
-
-        return () => {
-            unsubscribe();
-        };
+        const userEmail = localStorage.getItem('email');
+        const unsubscribe = db.collection('users')
+            .where('email', '==', userEmail)
+            .onSnapshot(snapshot => {
+                if (!snapshot.empty) {
+                    setUser({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() });
+                }
+            });
+        return () => unsubscribe();
     }, []);
 
     useEffect(() => {
-        const getDevicesFromFirestore = () => {
-            const currentUserUid = localStorage.getItem('uid');
-
-            return db.collection('devices')
-                .where('uids', 'array-contains', currentUserUid)
-                .onSnapshot(snapshot => {
-                    const devicesData = snapshot.docs.map(doc => {
-                        const data = doc.data();
-                        const userData = data.usersData.find(user => user.uid === currentUserUid);
-                        return {
-                            id: doc.id,
-                            ...data,
-                            name: userData ? userData.name : null // Adiciona o nome apenas se o userData for encontrado
-                        };
-                    }).filter(device => device.name !== null); // Filtra dispositivos onde o nome não é nulo
-
-                    setDevices(devicesData);
-                });
-        };
-
-        const unsubscribe = getDevicesFromFirestore();
-
-        return () => {
-            unsubscribe();
-        };
+        const currentUserUid = localStorage.getItem('uid');
+        const unsubscribe = db.collection('devices')
+            .where('uids', 'array-contains', currentUserUid)
+            .onSnapshot(snapshot => {
+                const devicesData = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    const userData = data.usersData.find(u => u.uid === currentUserUid);
+                    return { id: doc.id, ...data, name: userData ? userData.name : null };
+                }).filter(d => d.name !== null);
+                setDevices(devicesData);
+            });
+        return () => unsubscribe();
     }, []);
 
     useEffect(() => {
         if (devices.length > 0) {
-            const deviceMap = devices.reduce((acc, device) => {
-                acc[device.id] = device.name;
-                return acc;
-            }, {});
-
-            const getFunctionsFromFirestore = () => {
-                return db.collection('functions')
-                    .where('device', 'in', Object.keys(deviceMap))
-                    .onSnapshot(snapshot => {
-                        const functionsData = snapshot.docs.map(doc => {
-                            const functionData = doc.data();
-                            return {
-                                id: doc.id,
-                                ...functionData,
-                                device: deviceMap[functionData.device],
-                                deviceId: functionData.device
-                            };
-                        });
-                        setFunctions(functionsData);
+            const deviceMap = devices.reduce((acc, d) => { acc[d.id] = d.name; return acc; }, {});
+            const unsubscribe = db.collection('functions')
+                .where('device', 'in', Object.keys(deviceMap))
+                .onSnapshot(snapshot => {
+                    const functionsData = snapshot.docs.map(doc => {
+                        const fd = doc.data();
+                        return { id: doc.id, ...fd, device: deviceMap[fd.device], deviceId: fd.device };
                     });
-            };
-
-            const unsubscribe = getFunctionsFromFirestore();
-
-            return () => {
-                unsubscribe();
-            };
+                    setFunctions(functionsData);
+                });
+            return () => unsubscribe();
         }
     }, [devices]);
 
-    if (user.admin) {
-        localStorage.setItem('admin', user.admin);
-    }
+    if (user.admin) localStorage.setItem('admin', user.admin);
 
-    function editUserAccess() {
-        localStorage.removeItem('editUser');
-        navigate('/profile');
-    }
+    const handleEdit = (func) => { setSelectedFunction(func); setIsModalOpen(true); };
+    const handleCloseModal = () => { setIsModalOpen(false); setSelectedFunction(null); };
 
-    function accessMissionsPage() {
-        navigate('/missions');
-    }
-
-    const handleEdit = (func) => {
-        setSelectedFunction(func);
-        setIsModalOpen(true);
-    };
-
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setSelectedFunction(null);
+    const actionIcon = (action) => {
+        if (action === 'Webhook') return '🔗';
+        if (action === 'Notificação') return '🔔';
+        if (action === 'Alerta') return '🚨';
+        return '⚡';
     };
 
     return (
         <div className="scenePage">
+            <div className="homeHeader">
+                <div className="homeHeaderText">
+                    <p className="homeGreeting">Automações</p>
+                    <h2 className="homeTitle">Suas cenas</h2>
+                </div>
+            </div>
             <div className='containerscene'>
                 <div className='functionGrid'>
+                    {functions.length === 0 && (
+                        <div className="emptyState">
+                            <FiZap size={48} />
+                            <p>Nenhuma cena ainda.<br />Adicione uma pelo botão +</p>
+                        </div>
+                    )}
                     {functions.map(func => (
                         <div className="functionCard" key={func.id} onClick={() => handleEdit(func)}>
-                            <FunctionIcon className="functionIcon" />
-                            <div className='boxSwitch'>
-                                <Switch
-                                    id={func.id}
-                                    status={func.state}
-                                    label=""
-                                    readOnly
-                                />
+                            <div className="functionCardTop">
+                                <div className="functionIconWrapper">
+                                    <span className="functionActionIcon">{actionIcon(func.action)}</span>
+                                </div>
+                                <div className='boxSwitch' onClick={e => e.stopPropagation()}>
+                                    <Switch id={func.id} status={func.state} label="" readOnly />
+                                </div>
                             </div>
-                            <div className="functionName">
-                                <p>{func.name}</p>
+                            <div className="functionName">{func.name}</div>
+                            <div className='functionMeta'>
+                                <span className="functionMetaTag">⚙️ {func.device}</span>
+                                <span className="functionMetaTag">{actionIcon(func.action)} {func.action}</span>
                             </div>
-                            <div className='textFunction'>⚙️ : {func.device}</div>
-                            <div className='textFunction'>⚡️ : {func.action}</div>
                         </div>
                     ))}
                 </div>
             </div>
             {isModalOpen && (
-                <AddFunctionModal
-                    open={isModalOpen}
-                    handleClose={handleCloseModal}
-                    functionData={selectedFunction}
-                />
+                <AddFunctionModal open={isModalOpen} handleClose={handleCloseModal} functionData={selectedFunction} />
             )}
         </div>
     );

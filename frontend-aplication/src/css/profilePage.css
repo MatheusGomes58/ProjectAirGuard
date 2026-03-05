@@ -1,63 +1,137 @@
+/* =============================================
+   PROFILE PAGE
+   ============================================= */
 .profilePage {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  min-height: 100dvh;
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
-  background-color: #005028;
+  background-color: var(--color-bg);
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
 }
 
-.containerHome {
-  margin-right: 10%;
-  margin-left: 10%;
+.profileHeader {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  width: 100%;
+  padding: 32px 20px 24px;
+  padding-top: calc(32px + var(--safe-top));
+  position: relative;
 }
 
 .profileImg {
-  width: 150px;
-  height: 150px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   object-fit: cover;
+  border: 3px solid var(--color-primary);
+  box-shadow: 0 0 24px rgba(0, 200, 83, 0.35);
 }
 
-.functionLabel {
-  width: 100%;
-  color: #fecc0d;
-  font-weight: bold;
+.profileImageWrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 16px;
 }
 
 .configButton {
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 50px;
-  height: 50px;
-  background-color: white;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  border: none;
+  background: var(--color-primary);
+  border: 2px solid var(--color-bg);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+  transition: transform var(--transition);
+}
+
+.configButton:hover {
+  transform: scale(1.1);
+}
+
+.functionLabel {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.profileSubtitle {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* Info Card */
+.containerHome {
+  padding: 0 16px;
+  width: 100%;
 }
 
 .Card {
-  background: #E6E6FB;
-  padding: 20px;
-  border-radius: 30px;
-  margin-right: 10%;
-  margin-left: 10%;
-  width: 300px;
-  height: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 8px 0;
+  width: 100%;
 }
 
-.Card input {
-  width: 100%;
-  margin-bottom: 10px;
-  border: none;
-  border-bottom: 2px solid #005028;
-  outline: none;
-  background: none;
-  color: black;
+.profileInfoRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.profileInfoRow:last-child {
+  border-bottom: none;
+}
+
+.profileInfoIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-dim);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.profileInfoContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.profileInfoLabel {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profileInfoValue {
+  font-size: 0.9rem;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+/* Legacy inputs inside profile card (used on profilePage) */
+.Card input[type="text"] {
+  display: none;
+  /* replaced by profileInfoRow divs */
 }

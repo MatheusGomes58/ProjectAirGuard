@@ -1,82 +1,119 @@
+/* =============================================
+   PROFILE EDIT PAGE
+   ============================================= */
 .ProfilePageEdit {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  min-height: 100dvh;
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
-  background-color: #005028;
+  background-color: var(--color-bg);
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
 }
 
 .containerProfile {
-  margin-right: 10%;
-  margin-left: 10%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  padding: 0 16px;
   width: 100%;
 }
 
-.profileImg {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  object-fit: cover;
+.containerProfile:first-child {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: calc(32px + var(--safe-top));
+  padding-bottom: 24px;
 }
 
 .profileCard {
-  background: #E6E6FB;
-  color: white;
-  padding: 20px;
-  border-radius: 30px;
-  margin-right: 10%;
-  margin-left: 10%;
-  width: 300px;
-  height: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 8px 16px 24px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.profileCard input {
+.inputFunction,
+.inputText {
+  background: var(--color-surface-2);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 14px 16px;
   width: 100%;
-  margin-bottom: 10px;
-  border: none;
-  border-bottom: 2px solid #005028;
   outline: none;
-  background: none;
-  color: black;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  text-align: left;
 }
 
-.buttonMissions {
-  width: 100%;
-  min-height: 40px;
-  border: none;
-  background-color: #005028;
-  font-size: 16px;
-  color: white;
-  height: auto;
-  border-radius: 30px;
-  font-weight: bold;
-  margin-top: 1%;
+.inputFunction:focus,
+.inputText:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-dim);
+}
+
+.inputFunction::placeholder,
+.inputText::placeholder {
+  color: var(--color-text-muted);
 }
 
 .inputFunction {
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  max-width: 220px;
+}
+
+.buttonMissions {
+  background: linear-gradient(135deg, #00C853, #00A846);
+  color: #000;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 14px;
   width: 100%;
-  color: #fecc0d;
-  font-weight: bold;
-  background: none;
-  border: none;
-  margin-top: 1%;
-  margin-bottom: 2%;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
+  box-shadow: 0 4px 16px rgba(0, 200, 83, 0.3);
 }
 
-.configButton {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 50px;
-  height: 50px;
-  background-color: white;
-  border-radius: 50%;
-  border: none;
+.buttonMissions:hover {
+  opacity: 0.9;
+  box-shadow: 0 6px 24px rgba(0, 200, 83, 0.4);
 }
 
+.buttonMissions:active {
+  transform: scale(0.98);
+}
+
+.buttonMissions:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.buttonMissions h2 {
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
+}
+
+.loadingOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  z-index: 9999;
+}

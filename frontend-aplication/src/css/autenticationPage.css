@@ -1,62 +1,100 @@
+/* =============================================
+   AUTH PAGE — Glassmorphism + Gradient BG
+   ============================================= */
 .Auth {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  margin: 0;
-  background-color: #005028;
+  min-height: 100dvh;
+  width: 100%;
+  background: radial-gradient(ellipse at 20% 10%, rgba(0, 200, 83, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(0, 180, 75, 0.12) 0%, transparent 50%),
+    var(--color-bg);
+  padding: 24px 20px;
+  padding-top: calc(24px + var(--safe-top));
 }
 
+/* Logo Area */
+.logoArea {
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.LogoJA {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  box-shadow: 0 0 32px rgba(0, 200, 83, 0.35);
+}
+
+.brandName {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #00C853, #69F0AE);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+
+.brandTagline {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+/* Card */
 .container {
   display: flex;
-  align-items: center;
-  justify-content: start;
   flex-direction: column;
-  background: #E6E6FB;
-  color: black;
-  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-  max-width: auto;
-  max-height: auto;
-  padding: 3%;
-  border-radius: 34px;
-  text-align: center;
+  align-items: stretch;
+  width: 100%;
+  max-width: 360px;
+  background: var(--color-glass);
+  border: 1px solid var(--color-glass-border);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: var(--radius-xl);
+  padding: 28px 24px 32px;
+  box-shadow: var(--shadow-modal);
 }
 
+/* Tab Switcher */
 .sliderLogin {
   display: flex;
-  flex-direction: row;
-  width: 200px;
-  height: 32px;
-  flex-shrink: 0;
-  border-radius: 100px;
-  border: 1px solid #005028;
-  color: white;
-  background: #82a738;
+  width: 100%;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  padding: 3px;
+  margin-bottom: 4px;
 }
 
 .switch {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 50%;
-  color: #005028;
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-full);
+  transition: var(--transition);
+  user-select: none;
 }
 
-.active {
-  background-color: #005028;
-  color: white;
-  border-radius: 30px;
-}
-
-.LogoJA {
-  width: 270px;
-  height: 270px;
+.switch.active {
+  background: var(--color-primary);
+  color: #000;
+  box-shadow: 0 2px 12px rgba(0, 200, 83, 0.4);
 }
 
 .containerAuth {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100vw;
+  width: 100%;
 }
