@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db, storage } from '../components/firebase/firebase.jsx';
+import { auth } from '../components/firebase/firebase.jsx';
 import UserUnknow from '../img/userUnknow.png';
 import '../css/profilePageEdit.css';
+import { useLocale } from '../context/LocaleContext';
 
 function ProfilePageEdit() {
+    const { t } = useLocale();
     const [user, setUser] = useState({});
     const [editableFields, setEditableFields] = useState({
         name: '',
@@ -15,6 +18,7 @@ function ProfilePageEdit() {
         country: ''
     });
     const [isLoading, setIsLoading] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -23,30 +27,17 @@ function ProfilePageEdit() {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setEditableFields({
-            ...editableFields,
-            [name]: value
-        });
+        setEditableFields({ ...editableFields, [name]: value });
     };
 
     async function userValidation() {
         const authTime = localStorage.getItem('authTime');
-        if (!authTime) {
-            navigate('/');
-            return;
-        }
-
+        if (!authTime) { navigate('/'); return; }
         const currentTime = new Date().getTime();
         const timeElapsed = currentTime - parseInt(authTime, 10);
-
-        const threeHoursInMs = 3 * 60 * 60 * 1000;
-        if (timeElapsed > threeHoursInMs) {
-            navigate('/');
-            return;
-        }
+        if (timeElapsed > 3 * 60 * 60 * 1000) { navigate('/'); return; }
 
         const userEmail = localStorage.getItem('email');
-
         try {
             const userEdit = localStorage.getItem('editUser');
             let userQuerySnapshot;
@@ -55,7 +46,6 @@ function ProfilePageEdit() {
             } else {
                 userQuerySnapshot = await db.collection('users').where('email', '==', userEmail).get();
             }
-
             if (!userQuerySnapshot.empty) {
                 userQuerySnapshot.forEach(doc => {
                     const userData = doc.data();
@@ -76,10 +66,8 @@ function ProfilePageEdit() {
     }
 
     const handleImageClick = () => {
-        const confirmChange = window.confirm("Deseja trocar a foto de perfil?");
-        if (confirmChange) {
-            document.getElementById('fileInput').click();
-        }
+        const confirmChange = window.confirm(t('confirmChangePhoto'));
+        if (confirmChange) document.getElementById('fileInput').click();
     };
 
     const handleFileChange = async (event) => {
@@ -90,18 +78,14 @@ function ProfilePageEdit() {
             const fileRef = storageRef.child(`users/${file.name}`);
             await fileRef.put(file);
             const fileUrl = await fileRef.getDownloadURL();
-            await db.collection('users').doc(user.id).update({
-                img: fileUrl
-            });
+            await db.collection('users').doc(user.id).update({ img: fileUrl });
             setIsLoading(false);
-            setUser(prevUser => ({
-                ...prevUser,
-                img: fileUrl
-            }));
+            setUser(prev => ({ ...prev, img: fileUrl }));
         }
     };
 
     const handleEditButtonClick = async () => {
+        if (!isEditing) { setIsEditing(true); return; }
         try {
             await db.collection('users').doc(user.id).update({
                 address: editableFields.address,
@@ -111,14 +95,18 @@ function ProfilePageEdit() {
                 name: editableFields.name,
                 email: editableFields.email,
             });
-            console.log('Informações do usuário atualizadas com sucesso.');
-
+            setIsEditing(false);
             localStorage.removeItem('editUser');
             navigate(-1);
         } catch (error) {
-            console.error('Erro ao atualizar informações do usuário ou mensagem do administrador:', error);
+            console.error('Erro ao atualizar informações do usuário:', error);
         }
     };
+
+    function logout() {
+        localStorage.clear();
+        navigate('/');
+    }
 
     return (
         <div className="ProfilePageEdit">
@@ -134,56 +122,37 @@ function ProfilePageEdit() {
                     className='inputFunction'
                     type="text"
                     name="name"
-                    placeholder="Nome:"
+                    placeholder={t('namePlaceholder')}
                     value={editableFields.name}
                     onChange={handleChange}
                 />
                 <input id="fileInput" type="file" onChange={handleFileChange} style={{ display: 'none' }} />
             </div>
+
             <div className='containerProfile'>
                 <div className="profileCard">
-                    <input
-                        className='inputText'
-                        type="text"
-                        name="email"
-                        placeholder="Email:"
-                        value={editableFields.email}
-                        onChange={handleChange}
-                    />
-                    <input
-                        className='inputText'
-                        type="text"
-                        name="address"
-                        placeholder="Endereço:"
-                        value={editableFields.address}
-                        onChange={handleChange}
-                    />
-                    <input
-                        className='inputText'
-                        type="text"
-                        name="city"
-                        placeholder="Cidade:"
-                        value={editableFields.city}
-                        onChange={handleChange}
-                    />
-                    <input
-                        className='inputText'
-                        type="text"
-                        name="state"
-                        placeholder="Estado:"
-                        value={editableFields.state}
-                        onChange={handleChange}
-                    />
-                    <input
-                        className='inputText'
-                        type="text"
-                        name="country"
-                        placeholder="Pais:"
-                        value={editableFields.country}
-                        onChange={handleChange}
-                    />
+                    <input className='inputText' type="text" name="email"
+                        placeholder={t('emailPlaceholder')} value={editableFields.email}
+                        onChange={handleChange} disabled={!isEditing} />
+                    <input className='inputText' type="text" name="address"
+                        placeholder={t('addressPlaceholder')} value={editableFields.address}
+                        onChange={handleChange} disabled={!isEditing} />
+                    <input className='inputText' type="text" name="city"
+                        placeholder={t('cityPlaceholder')} value={editableFields.city}
+                        onChange={handleChange} disabled={!isEditing} />
+                    <input className='inputText' type="text" name="state"
+                        placeholder={t('statePlaceholder')} value={editableFields.state}
+                        onChange={handleChange} disabled={!isEditing} />
+                    <input className='inputText' type="text" name="country"
+                        placeholder={t('countryPlaceholder')} value={editableFields.country}
+                        onChange={handleChange} disabled={!isEditing} />
+
                     <button className='buttonMissions' onClick={handleEditButtonClick} disabled={isLoading}>
-                        <h2>Editar</h2>
+                        <h2>{isEditing ? t('save') : t('enableEdit')}</h2>
+                    </button>
+                    <button className='buttonLogout' onClick={logout}>
+                        <i className="fas fa-sign-out-alt"></i>
+                        <h2>{t('logout')}</h2>
                     </button>
                 </div>
             </div>

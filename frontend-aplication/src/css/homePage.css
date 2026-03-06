@@ -67,6 +67,24 @@
   gap: 12px;
 }
 
+@media (min-width: 600px) {
+  .deviceGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .deviceGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .deviceGrid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
 /* Empty State */
 .emptyState {
   grid-column: 1 / -1;

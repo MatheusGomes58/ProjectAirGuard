@@ -117,3 +117,105 @@
   color: var(--color-primary);
   z-index: 9999;
 }
+
+/* Logout button — danger style */
+.buttonLogout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--color-danger);
+  border: 1.5px solid var(--color-danger);
+  border-radius: var(--radius-full);
+  padding: 14px;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background var(--transition), opacity var(--transition), transform var(--transition);
+}
+
+.buttonLogout:hover {
+  background: rgba(255, 82, 82, 0.1);
+}
+
+.buttonLogout:active {
+  transform: scale(0.98);
+}
+
+.buttonLogout h2 {
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
+}
+
+/* Language selector */
+.langSelectorWrapper {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  background: var(--color-surface-2);
+}
+
+.langSelectorLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+.langOptions {
+  display: flex;
+  gap: 8px;
+}
+
+.langBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 8px 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.langBtn:hover {
+  color: var(--color-text);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.langBtn:active {
+  transform: scale(0.95);
+}
+
+.langBtnActive {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--color-primary-dim);
+}
+
+.langFlag {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.langName {
+  white-space: nowrap;
+}

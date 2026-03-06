@@ -7,7 +7,7 @@
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
-    max-width: 480px;
+    max-width: 680px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -15,7 +15,6 @@
     padding-bottom: calc(8px + var(--safe-bottom));
     z-index: 1000;
     pointer-events: none;
-    /* allow click-through on backdrop area */
 }
 
 .navBar {

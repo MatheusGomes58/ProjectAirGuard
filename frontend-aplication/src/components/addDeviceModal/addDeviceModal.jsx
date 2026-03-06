@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase/firebase.jsx';
 import { Modal, Box, Button, TextField, FormControl, Switch, FormControlLabel } from '@mui/material';
-import './addDeviceModal.css'; // Crie um arquivo CSS para estilização personalizada
+import './addDeviceModal.css';
+import { t } from '../../utils/i18n';
 
 const DeviceModal = ({ open, handleClose, deviceData }) => {
     const [name, setName] = useState(deviceData?.name || '');
@@ -18,15 +19,8 @@ const DeviceModal = ({ open, handleClose, deviceData }) => {
     }, [deviceData]);
 
     const handleSave = async () => {
-        if (!name) {
-            alert("O campo Nome é obrigatório.");
-            return;
-        }
-
-        if (!code && !deviceData) {
-            alert("O campo Código é obrigatório.");
-            return;
-        }
+        if (!name) { alert(t('fieldNameRequired')); return; }
+        if (!code && !deviceData) { alert(t('fieldCodeRequired')); return; }
 
         const newDevice = {
             state,
@@ -90,12 +84,12 @@ const DeviceModal = ({ open, handleClose, deviceData }) => {
                         uids: uidsArray
                     });
                 } else {
-                    alert("O código inserido é inexistente.");
+                    alert(t('codeNotFound'));
                 }
             }
             handleClose();
         } catch (error) {
-            alert("Ocorreu um erro ao salvar o dispositivo: " + error.message);
+            alert(t('saveError') + ' ' + error.message);
         }
     };
 
@@ -115,7 +109,7 @@ const DeviceModal = ({ open, handleClose, deviceData }) => {
                 handleClose();
             }
         } catch (error) {
-            alert("Ocorreu um erro ao remover o usuário do dispositivo: " + error.message);
+            alert(t('deleteError') + ' ' + error.message);
         }
     };
 
@@ -125,9 +119,9 @@ const DeviceModal = ({ open, handleClose, deviceData }) => {
             onClose={handleClose}
         >
             <Box className="modalBox">
-                <h2 className="modalHeader">{deviceData ? 'Editar Dispositivo' : 'Adicionar Novo Dispositivo'}</h2>
+                <h2 className="modalHeader">{deviceData ? t('editDevice') : t('addNewDevice')}</h2>
                 <TextField
-                    label="Nome"
+                    label={t('labelName')}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     fullWidth
@@ -136,7 +130,7 @@ const DeviceModal = ({ open, handleClose, deviceData }) => {
                 />
                 {!deviceData && (
                     <TextField
-                        label="Código"
+                        label={t('labelCode')}
                         value={code}
                         onChange={(e) => setCode(e.target.value)}
                         fullWidth
@@ -153,15 +147,15 @@ const DeviceModal = ({ open, handleClose, deviceData }) => {
                                 color="primary"
                             />
                         }
-                        label={state ? "Ligado" : "Desligado"}
+                        label={state ? t('deviceOn') : t('deviceOff')}
                     />
                 </FormControl>
                 <Box className="modalActions">
-                    <Button onClick={handleClose}>Cancelar</Button>
+                    <Button onClick={handleClose}>{t('cancel')}</Button>
                     {deviceData?.id && (
-                        <Button variant="contained" color="secondary" onClick={handleDelete}>Excluir</Button>
+                        <Button variant="contained" color="secondary" onClick={handleDelete}>{t('delete')}</Button>
                     )}
-                    <Button variant="contained" color="primary" onClick={handleSave}>Salvar</Button>
+                    <Button variant="contained" color="primary" onClick={handleSave}>{t('save')}</Button>
                 </Box>
             </Box>
         </Modal>

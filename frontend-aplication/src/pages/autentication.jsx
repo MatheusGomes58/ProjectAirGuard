@@ -1,6 +1,7 @@
 import '../css/autenticationPage.css';
 import LoginForm from '../components/Auth/login'
 import RegisterForm from '../components/Auth/register'
+import { t } from '../utils/i18n';
 import { useNavigate } from 'react-router-dom';
 import LogoJA from '../img/logo.png';
 import React, { useState, useEffect } from 'react';
@@ -35,9 +36,9 @@ function Auth() {
     return (
         <div className="Auth">
             <div className='containerAuth logoArea'>
-                <img src={LogoJA} className='LogoJA' alt="AirGuard Logo" />
-                <h1 className="brandName">AirGuard</h1>
-                <p className="brandTagline">Monitoramento inteligente</p>
+                <img src={LogoJA} className='LogoJA' alt={t('brandName') + ' Logo'} />
+                <h1 className="brandName">{t('brandName')}</h1>
+                <p className="brandTagline">{t('brandTagline')}</p>
             </div>
             <div className='containerAuth'>
                 <div className="container">
@@ -46,13 +47,13 @@ function Auth() {
                             className={`switch ${activeTab === 'login' ? 'active' : ''}`}
                             onClick={() => handleTabSwitch('login')}
                         >
-                            Logar
+                            {t('logIn')}
                         </div>
                         <div
                             className={`switch ${activeTab === 'register' ? 'active' : ''}`}
                             onClick={() => handleTabSwitch('register')}
                         >
-                            Registrar
+                            {t('register')}
                         </div>
                     </div>
                     {activeTab === 'login' ? <LoginForm /> : <RegisterForm />}

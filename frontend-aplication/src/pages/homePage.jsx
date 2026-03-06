@@ -6,6 +6,7 @@ import '../css/homePage.css';
 import DeviceModalEdit from '../components/addDeviceModal/addDeviceModal';
 import DeviceModal from '../components/deviceModal/deviceModal';
 import { FiWifi, FiHome } from 'react-icons/fi';
+import { t } from '../utils/i18n';
 
 function HomePage() {
     const [user, setUser] = useState({});
@@ -74,11 +75,11 @@ function HomePage() {
         <div className="homePage">
             <div className="homeHeader">
                 <div className="homeHeaderText">
-                    <p className="homeGreeting">Olá, {user.name?.split(' ')[0] || 'Usuário'} 👋</p>
-                    <h2 className="homeTitle">Seus dispositivos</h2>
+                    <p className="homeGreeting">{t('homeGreeting')}, {user.name?.split(' ')[0] || 'Usuário'} 👋</p>
+                    <h2 className="homeTitle">{t('homeTitle')}</h2>
                 </div>
                 <div className="homeStats">
-                    <span className="statBadge"><FiWifi /> {activeCount} ativos</span>
+                    <span className="statBadge"><FiWifi /> {activeCount} {t('activeCount')}</span>
                 </div>
             </div>
 
@@ -87,7 +88,7 @@ function HomePage() {
                     {devices.length === 0 && (
                         <div className="emptyState">
                             <FiHome size={48} />
-                            <p>Nenhum dispositivo ainda.<br />Adicione um pelo botão +</p>
+                            <p>{t('noDevicesHome')}<br />{t('noDevicesHomeHint')}</p>
                         </div>
                     )}
                     {devices.map(device => (
@@ -107,7 +108,7 @@ function HomePage() {
                                 </div>
                             </div>
                             <div className="deviceName">{device.name}</div>
-                            <div className="deviceStateLabel">{device.state ? 'Ligado' : 'Desligado'}</div>
+                            <div className="deviceStateLabel">{device.state ? t('deviceOn') : t('deviceOff')}</div>
                         </div>
                     ))}
                 </div>

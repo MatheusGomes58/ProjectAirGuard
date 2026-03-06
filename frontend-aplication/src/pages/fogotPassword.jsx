@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import LogoJA from '../img/logo.png';
 import React, { useState } from 'react';
 import ForgotPasswordForm from '../components/Auth/fogotPassword';
+import { t } from '../utils/i18n';
 
 function ForgotPassword() {
     const navigate = useNavigate();
@@ -11,7 +12,7 @@ function ForgotPassword() {
         <div className="Auth">
             <div className='containerAuth logoArea'>
                 <img src={LogoJA} className='LogoJA' alt="AirGuard Logo" />
-                <h1 className="brandName">AirGuard</h1>
+                <h1 className="brandName">{t('brandName')}</h1>
             </div>
             <div className='containerAuth'>
                 <div className="container">
@@ -20,7 +21,7 @@ function ForgotPassword() {
                             className="switch active"
                             onClick={() => navigate('/')}
                         >
-                            Voltar ao Login
+                            {t('backToLogin')}
                         </div>
                     </div>
                     <ForgotPasswordForm />

@@ -3,10 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import AddFunctionModal from '../addFunctionModal/addFunctionModal';
 import DeviceModal from '../addDeviceModal/addDeviceModal';
 import './menu.css';
+import { useLocale } from '../../context/LocaleContext';
 
 function MenuOptions() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { t } = useLocale();
     const [isFunctionModalOpen, setIsFunctionModalOpen] = useState(false);
     const [isDeviceModalOpen, setIsDeviceModalOpen] = useState(false);
     const [modalDevice] = useState(null);
@@ -32,37 +34,37 @@ function MenuOptions() {
                 <button
                     className={`btnCircle ${isActive('/home') ? 'navActive' : ''}`}
                     onClick={() => navigate('/home')}
-                    title="Início"
+                    title={t('home')}
                 >
                     <i className="fas fa-home"></i>
                 </button>
                 <button
                     className={`btnCircle ${isActive('/scene') ? 'navActive' : ''}`}
                     onClick={() => navigate('/scene')}
-                    title="Cenas"
+                    title={t('scene')}
                 >
                     <i className="fas fa-bolt"></i>
                 </button>
                 <button
                     className="btnCircle Plus"
                     onClick={handleOpenModal}
-                    title="Adicionar"
+                    title={t('add')}
                 >
                     <i className="fas fa-plus"></i>
                 </button>
                 <button
                     className={`btnCircle ${isActive('/profile') ? 'navActive' : ''}`}
                     onClick={() => navigate('/profile')}
-                    title="Perfil"
+                    title={t('profile')}
                 >
                     <i className="fas fa-user"></i>
                 </button>
                 <button
-                    className="btnCircle"
-                    onClick={logout}
-                    title="Sair"
+                    className={`btnCircle ${isActive('/map') ? 'navActive' : ''}`}
+                    onClick={() => navigate('/map')}
+                    title={t('mapTitle')}
                 >
-                    <i className="fas fa-sign-out-alt"></i>
+                    <i className="fas fa-map-marker-alt"></i>
                 </button>
             </nav>
 

@@ -2,42 +2,199 @@
    DESIGN TOKENS — AirGuard Dark Theme
    ============================================ */
 :root {
-  --color-bg:            #0a0f0d;
-  --color-surface:       #141a17;
-  --color-surface-2:     #1e2823;
-  --color-border:        rgba(255,255,255,0.08);
-  --color-primary:       #00C853;
-  --color-primary-dim:   rgba(0, 200, 83, 0.15);
-  --color-primary-glow:  rgba(0, 200, 83, 0.4);
-  --color-accent:        #69F0AE;
-  --color-danger:        #FF5252;
-  --color-warning:       #FFD740;
-  --color-text:          #F0F4F2;
-  --color-text-muted:    #8A9A92;
-  --color-glass:         rgba(20, 28, 22, 0.75);
-  --color-glass-border:  rgba(0, 200, 83, 0.12);
+  --color-bg: #0a0f0d;
+  --color-surface: #141a17;
+  --color-surface-2: #1e2823;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-primary: #00C853;
+  --color-primary-dim: rgba(0, 200, 83, 0.15);
+  --color-primary-glow: rgba(0, 200, 83, 0.4);
+  --color-accent: #69F0AE;
+  --color-danger: #FF5252;
+  --color-warning: #FFD740;
+  --color-text: #F0F4F2;
+  --color-text-muted: #8A9A92;
+  --color-glass: rgba(20, 28, 22, 0.75);
+  --color-glass-border: rgba(0, 200, 83, 0.12);
 
-  --radius-sm:   8px;
-  --radius-md:   16px;
-  --radius-lg:   24px;
-  --radius-xl:   32px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
   --radius-full: 9999px;
 
   --shadow-glow: 0 0 20px rgba(0, 200, 83, 0.25);
-  --shadow-card: 0 4px 24px rgba(0,0,0,0.5);
-  --shadow-modal:0 8px 48px rgba(0,0,0,0.7);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.5);
+  --shadow-modal: 0 8px 48px rgba(0, 0, 0, 0.7);
 
   --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   --nav-height: 72px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+/* ============================================
+   LIGHT THEME OVERRIDES
+   Applied when html[data-theme="light"] is present.
+   When `data-theme` is not present we fall back to system preference.
+   ============================================ */
+html[data-theme="light"] {
+  --color-bg: #f7fbf7;
+  --color-surface: #ffffff;
+  --color-surface-2: #f1f5f1;
+  --color-border: rgba(0, 0, 0, 0.06);
+  --color-primary: #00C853;
+  --color-primary-dim: rgba(0, 200, 83, 0.08);
+  --color-primary-glow: rgba(0, 200, 83, 0.16);
+  --color-accent: #056839;
+  --color-danger: #d32f2f;
+  --color-warning: #b28704;
+  --color-text: #0b2a17;
+  --color-text-muted: #6b7a72;
+  --color-glass: rgba(255, 255, 255, 0.6);
+  --color-glass-border: rgba(0, 0, 0, 0.04);
+}
+
+/* Floating Theme Selector (global) */
+.themeFab {
+  position: fixed;
+  right: 18px;
+  bottom: calc(var(--nav-height) + 24px);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.themeFab .fabMain {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.themeFab .fabMain:hover {
+  background: var(--color-surface-2);
+  transform: scale(1.07);
+}
+
+.themeFab .fabOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 8px 14px 8px 12px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.themeFab .fabOption:hover {
+  color: var(--color-text);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.themeFab .fabOption.active {
+  color: var(--color-primary);
+  background: var(--color-primary-dim);
+  border-color: rgba(0, 200, 83, 0.3);
+}
+
+.themeFab .label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: inherit;
+}
+
+/* Floating Language Selector (global) — mirrors themeFab but left side */
+.langFab {
+  position: fixed;
+  left: 18px;
+  bottom: calc(var(--nav-height) + 24px);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.langFab .fabMain {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  font-size: 1.35rem;
+  line-height: 1;
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.langFab .fabMain:hover {
+  background: var(--color-surface-2);
+  transform: scale(1.07);
+}
+
+.langFab .fabOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 8px 14px 8px 12px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.langFab .fabOption:hover {
+  color: var(--color-text);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.langFab .fabOption.active {
+  color: var(--color-primary);
+  background: var(--color-primary-dim);
+  border-color: rgba(0, 200, 83, 0.3);
+}
+
+.langFab .label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: inherit;
 }
 
 /* ============================================
    RESET & BASE
    ============================================ */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -71,18 +228,46 @@ body {
 /* ============================================
    TYPOGRAPHY SCALE
    ============================================ */
-h1, h2, h3, h4 { font-weight: 700; line-height: 1.2; color: var(--color-text); }
-h1 { font-size: 1.75rem; }
-h2 { font-size: 1.375rem; }
-h3 { font-size: 1.125rem; }
-p  { color: var(--color-text-muted); }
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+h1 {
+  font-size: 1.75rem;
+}
+
+h2 {
+  font-size: 1.375rem;
+}
+
+h3 {
+  font-size: 1.125rem;
+}
+
+p {
+  color: var(--color-text-muted);
+}
 
 /* ============================================
    SCROLLBAR (webkit)
    ============================================ */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-surface-2); border-radius: 2px; }
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-2);
+  border-radius: 2px;
+}
 
 /* ============================================
    UTILITY: GLASS CARD

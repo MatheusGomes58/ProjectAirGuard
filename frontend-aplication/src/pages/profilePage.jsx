@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { db } from '../components/firebase/firebase.jsx';
 import '../css/profilePage.css';
 import LogoUnknow from '../img/userUnknow.png';
+import { useLocale } from '../context/LocaleContext';
 
 function ProfilePage() {
+    const { t } = useLocale();
     const [user, setUser] = useState({});
     const navigate = useNavigate();
 
@@ -17,6 +19,11 @@ function ProfilePage() {
         if (!authTime) { navigate('/'); return; }
         const timeElapsed = new Date().getTime() - parseInt(authTime, 10);
         if (timeElapsed > 3 * 60 * 60 * 1000) { navigate('/'); return; }
+    }
+
+    function logout() {
+        localStorage.clear();
+        navigate('/');
     }
 
     useEffect(() => {
@@ -85,6 +92,13 @@ function ProfilePage() {
                         </div>
                     </div>
                 </div>
+            </div>
+            {/* Logout */}
+            <div className="profileLogoutArea">
+                <button className="buttonLogout profileLogoutBtn" onClick={logout}>
+                    <i className="fas fa-sign-out-alt"></i>
+                    <span>{t('logout')}</span>
+                </button>
             </div>
         </div>
     );

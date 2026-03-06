@@ -3,6 +3,7 @@ import { auth } from '../firebase/firebase.jsx';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import './login.css';
+import { t } from '../../utils/i18n';
 
 function LoginForm() {
   const [email, setEmail] = useState('');
@@ -42,28 +43,28 @@ function LoginForm() {
         className="inputLogin"
         type="email"
         id="email"
-        placeholder="Entrar com email"
+        placeholder={t('emailLoginPlaceholder')}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
       />
       <div className="password-container">
-        <input
-          className="inputLogin"
-          type={passwordVisible ? 'text' : 'password'}
-          id="password"
-          placeholder="Senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+          <input
+            className="inputLogin"
+            type={passwordVisible ? 'text' : 'password'}
+            id="password"
+            placeholder={t('passwordPlaceholder')}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
         <span className="toggle-password" onClick={togglePasswordVisibility}>
           {passwordVisible ? <i className="fas fa-eye-slash"></i> : <i className="fas fa-eye"></i>}
         </span>
       </div>
-      <a className="resetPass" onClick={handleForgotPassword}>Esqueceu sua senha?</a>
+  <a className="resetPass" onClick={handleForgotPassword}>{t('forgotPassword')}</a>
       <div className="boxButton">
-        <button className="btnAuth" onClick={handleLogin}>Log In</button>
+  <button className="btnAuth" onClick={handleLogin}>{t('loginButton')}</button>
       </div>
     </div>
   );

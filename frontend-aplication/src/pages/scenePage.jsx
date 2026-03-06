@@ -5,6 +5,7 @@ import Switch from '../components/switch/switch';
 import '../css/scenePage.css';
 import AddFunctionModal from '../components/addFunctionModal/addFunctionModal';
 import { FiZap } from 'react-icons/fi';
+import { t } from '../utils/i18n';
 
 function ScenePage() {
     const [user, setUser] = useState({});
@@ -84,8 +85,8 @@ function ScenePage() {
         <div className="scenePage">
             <div className="homeHeader">
                 <div className="homeHeaderText">
-                    <p className="homeGreeting">Automações</p>
-                    <h2 className="homeTitle">Suas cenas</h2>
+                    <p className="homeGreeting">{t('sceneGreeting')}</p>
+                    <h2 className="homeTitle">{t('sceneTitle')}</h2>
                 </div>
             </div>
             <div className='containerscene'>
@@ -93,7 +94,7 @@ function ScenePage() {
                     {functions.length === 0 && (
                         <div className="emptyState">
                             <FiZap size={48} />
-                            <p>Nenhuma cena ainda.<br />Adicione uma pelo botão +</p>
+                            <p>{t('noScenesHome')}<br />{t('noScenesHomeHint')}</p>
                         </div>
                     )}
                     {functions.map(func => (

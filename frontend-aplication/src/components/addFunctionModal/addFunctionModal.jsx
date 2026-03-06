@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase/firebase.jsx';
 import { Modal, Box, Button, TextField, MenuItem, Select, FormControl, InputLabel, Switch, FormControlLabel } from '@mui/material';
 import './addFunctionModal.css';
+import { t } from '../../utils/i18n';
 
 const AddFunctionModal = ({ open, handleClose, functionData }) => {
     const [devices, setDevices] = useState([]);
@@ -75,16 +76,16 @@ const AddFunctionModal = ({ open, handleClose, functionData }) => {
             onClose={handleClose}
         >
             <Box className="modalBox">
-                <h2 className="modalHeader">{functionData ? 'Editar Função' : 'Adicionar Nova Função'}</h2>
+                <h2 className="modalHeader">{functionData ? t('editFunction') : t('addNewFunction')}</h2>
                 <TextField
-                    label="Nome"
+                    label={t('labelName')}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     fullWidth
                     margin="normal"
                 />
                 <FormControl fullWidth margin="normal">
-                    <InputLabel>Dispositivo</InputLabel>
+                    <InputLabel>{t('labelDevice')}</InputLabel>
                     <Select
                         value={device}
                         onChange={(e) => setDevice(e.target.value)}
@@ -96,19 +97,19 @@ const AddFunctionModal = ({ open, handleClose, functionData }) => {
                 </FormControl>
 
                 <FormControl fullWidth margin="normal">
-                    <InputLabel>Ação</InputLabel>
+                    <InputLabel>{t('labelAction')}</InputLabel>
                     <Select
                         value={action}
                         onChange={(e) => setAction(e.target.value)}
                     >
-                        <MenuItem value="Webhook">Webhook</MenuItem>
-                        <MenuItem value="Notificação">Notificação</MenuItem>
-                        <MenuItem value="Alerta">Alerta de Emergência</MenuItem>
+                        <MenuItem value="Webhook">{t('actionWebhook')}</MenuItem>
+                        <MenuItem value="Notificação">{t('actionNotification')}</MenuItem>
+                        <MenuItem value="Alerta">{t('actionAlert')}</MenuItem>
                     </Select>
                 </FormControl>
                 {action === 'Webhook' && (
                     <TextField
-                        label="Webhook URL"
+                        label={t('labelWebhookUrl')}
                         value={webhookUrl}
                         onChange={(e) => setWebhookUrl(e.target.value)}
                         fullWidth
@@ -117,7 +118,7 @@ const AddFunctionModal = ({ open, handleClose, functionData }) => {
                 )}
                 {action === 'Notificação' && (
                     <TextField
-                        label="Email para Notificação"
+                        label={t('labelNotificationEmail')}
                         value={notificationEmail}
                         onChange={(e) => setNotificationEmail(e.target.value)}
                         fullWidth
@@ -133,13 +134,13 @@ const AddFunctionModal = ({ open, handleClose, functionData }) => {
                                 color="primary"
                             />
                         }
-                        label={isEnabled ? "Ligado" : "Desligado"}
+                        label={isEnabled ? t('deviceOn') : t('deviceOff')}
                     />
                 </FormControl>
                 <Box className="modalActions">
-                    <Button onClick={handleClose}>Cancelar</Button>
-                    {functionData && <Button variant="contained" color="secondary" onClick={handleDelete}>Excluir</Button>}
-                    <Button variant="contained" color="primary" onClick={handleSave}>Salvar</Button>
+                    <Button onClick={handleClose}>{t('cancel')}</Button>
+                    {functionData && <Button variant="contained" color="secondary" onClick={handleDelete}>{t('delete')}</Button>}
+                    <Button variant="contained" color="primary" onClick={handleSave}>{t('save')}</Button>
                 </Box>
             </Box>
         </Modal>

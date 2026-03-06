@@ -135,3 +135,34 @@
   display: none;
   /* replaced by profileInfoRow divs */
 }
+
+/* Logout area */
+.profileLogoutArea {
+  padding: 16px 16px 8px;
+}
+
+.profileLogoutBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--color-danger);
+  border: 1.5px solid var(--color-danger);
+  border-radius: var(--radius-full);
+  padding: 14px;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.profileLogoutBtn:hover {
+  background: rgba(255, 82, 82, 0.1);
+}
+
+.profileLogoutBtn:active {
+  transform: scale(0.98);
+}

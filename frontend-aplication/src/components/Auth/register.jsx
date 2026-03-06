@@ -3,6 +3,7 @@ import { auth, db } from '../firebase/firebase.jsx'; // Importe o firestore tamb
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { collection, addDoc } from 'firebase/firestore'; // Importe as funções necessárias para o Firestore
 import './login.css';
+import { t } from '../../utils/i18n';
 
 function RegisterForm() {
     const [passwordVisible, setPasswordVisible] = useState(false);
@@ -25,10 +26,10 @@ function RegisterForm() {
                 status: false
             });
 
-            alert('Usuário cadastrado com sucesso!');
+            alert(t('registerSuccess'));
             window.location.reload();
         } catch (error) {
-            alert(`Erro no cadastro: ${error.message}`);
+            alert(t('registerError') + ' ' + error.message);
         }
     };
 
@@ -38,7 +39,7 @@ function RegisterForm() {
                 className="inputLogin"
                 type="text"
                 id="NameUser"
-                placeholder="Nome do Usuário"
+                placeholder={t('registerNamePlaceholder')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -47,7 +48,7 @@ function RegisterForm() {
                 className="inputLogin"
                 type="email"
                 id="EmailUser"
-                placeholder="E-mail"
+                placeholder={t('registerEmailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -57,7 +58,7 @@ function RegisterForm() {
                     className="inputLogin"
                     type={passwordVisible ? 'text' : 'password'}
                     id="password"
-                    placeholder="Crie uma Senha"
+                    placeholder={t('registerPasswordPlaceholder')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -71,7 +72,7 @@ function RegisterForm() {
                     className="inputLogin"
                     type={passwordVisible ? 'text' : 'password'}
                     id="confirmPassword"
-                    placeholder="Confirme a sua Senha"
+                    placeholder={t('registerConfirmPasswordPlaceholder')}
                     required
                 />
                 <span className="toggle-password" onClick={togglePasswordVisibility}>
@@ -79,7 +80,7 @@ function RegisterForm() {
                 </span>
             </div>
             <div className="boxButton">
-                <button className="btnAuth" onClick={handleRegister}>Cadastrar</button>
+                <button className="btnAuth" onClick={handleRegister}>{t('registerButton')}</button>
             </div>
         </div>
     );
