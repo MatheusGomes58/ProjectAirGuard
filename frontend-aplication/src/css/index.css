@@ -134,6 +134,12 @@ html[data-theme="light"] {
   align-items: flex-start;
 }
 
+/* Hide FABs in fullscreen */
+html[data-fullscreen="true"] .themeFab,
+html[data-fullscreen="true"] .langFab {
+  display: none !important;
+}
+
 .langFab .fabMain {
   width: 52px;
   height: 52px;

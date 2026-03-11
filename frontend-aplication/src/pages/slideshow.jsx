@@ -19,8 +19,6 @@ const slideDicts = { pt: slidePt, en: slideEn, es: slideEs };
 const FS = { col: 'slides', doc: 'current' };
 
 // ─── accent always green ──────────────────────────────────────
-const G = '#00c86e';
-const DARK = '#080e1a';
 
 // ─────────────────────────────────────────────────────────────
 // COVER — logo + big title (like slide 1)
@@ -230,7 +228,7 @@ const LAYOUTS = {
 // Main Slideshow
 // ─────────────────────────────────────────────────────────────
 const Slideshow = () => {
-  const { locale } = useLocale();
+  const { locale, setLocale } = useLocale();
   const slides = slideDicts[locale] || slidePt;
   const navigate = useNavigate();
 
@@ -238,32 +236,71 @@ const Slideshow = () => {
   const [isAuth, setIsAuth] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [sync, setSync] = useState(false);
+  const [slTheme, setSlTheme] = useState('dark');
   const [animDir, setAnimDir] = useState('next');
   const [animKey, setAnimKey] = useState(0);
+
   const syncRef = useRef(sync);
+  const localeRef = useRef(locale);
+  const themeRef = useRef(slTheme);
+
   useEffect(() => { syncRef.current = sync; }, [sync]);
+  useEffect(() => { localeRef.current = locale; }, [locale]);
+  useEffect(() => { themeRef.current = slTheme; }, [slTheme]);
 
   useEffect(() => auth.onAuthStateChanged((u) => setIsAuth(!!u)), []);
 
+  // Listen to Firestore
   useEffect(() => {
     const ref = db.collection(FS.col).doc(FS.doc);
     return ref.onSnapshot((snap) => {
-      if (!syncRef.current) return;
       if (snap.exists) {
-        const idx = snap.data().index;
-        if (typeof idx === 'number') setCurrent(idx);
+        const data = snap.data();
+
+        // Theme always syncs if present
+        if (data.theme && data.theme !== themeRef.current) {
+          setSlTheme(data.theme);
+        }
+
+        // Index and Locale only sync if sync toggle is ON
+        if (syncRef.current) {
+          if (typeof data.index === 'number') setCurrent(data.index);
+          if (data.locale && data.locale !== localeRef.current) {
+            setLocale(data.locale);
+          }
+        }
       }
     });
-  }, []);
+  }, [setLocale]);
 
-  const push = useCallback((idx) => {
+  // Push index changes
+  const pushIndex = useCallback((idx) => {
     if (!isAuth || !sync) return;
-    db.collection(FS.col).doc(FS.doc).set({ index: idx });
+    db.collection(FS.col).doc(FS.doc).update({ index: idx }).catch(() => {
+      // If doc doesn't exist, set it
+      db.collection(FS.col).doc(FS.doc).set({ index: idx, locale: localeRef.current, theme: themeRef.current });
+    });
   }, [isAuth, sync]);
 
+  // Push locale changes
+  useEffect(() => {
+    if (!isAuth || !sync) return;
+    db.collection(FS.col).doc(FS.doc).update({ locale });
+  }, [locale, isAuth, sync]);
+
+  // Push theme changes (Presenters always push theme)
+  useEffect(() => {
+    if (!isAuth) return;
+    db.collection(FS.col).doc(FS.doc).update({ theme: slTheme }).catch(() => {
+      // If doc doesn't exist, set it with current state
+      db.collection(FS.col).doc(FS.doc).set({ index: current, locale: localeRef.current, theme: slTheme });
+    });
+  }, [slTheme, isAuth]);
+
   const goTo = useCallback((next, dir) => {
-    setAnimDir(dir); setAnimKey((k) => k + 1); setCurrent(next); push(next);
-  }, [push]);
+    setAnimDir(dir); setAnimKey((k) => k + 1); setCurrent(next);
+    pushIndex(next);
+  }, [pushIndex]);
 
   const prev = useCallback(() => { if (current > 0) goTo(current - 1, 'prev'); }, [current, goTo]);
   const next = useCallback(() => { if (current < slides.length - 1) goTo(current + 1, 'next'); }, [current, slides.length, goTo]);
@@ -275,20 +312,46 @@ const Slideshow = () => {
   }, [prev, next]);
 
   const toggleFs = () => {
-    if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); setFullscreen(true); }
-    else { document.exitFullscreen(); setFullscreen(false); }
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      document.documentElement.setAttribute('data-fullscreen', 'true');
+      setFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      document.documentElement.removeAttribute('data-fullscreen');
+      setFullscreen(false);
+    }
   };
+
+  // Cleanup attribute on unmount or escape key
+  useEffect(() => {
+    const handleFsChange = () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.removeAttribute('data-fullscreen');
+        setFullscreen(false);
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFsChange);
+      document.documentElement.removeAttribute('data-fullscreen');
+    };
+  }, []);
 
   const toggleSync = () => {
     const n = !sync; setSync(n); syncRef.current = n;
-    if (n && isAuth) db.collection(FS.col).doc(FS.doc).set({ index: current });
+    if (n && isAuth) db.collection(FS.col).doc(FS.doc).set({ index: current, locale, theme: slTheme });
+  };
+
+  const toggleTheme = () => {
+    setSlTheme(t => t === 'dark' ? 'light' : 'dark');
   };
 
   const slide = slides[Math.min(current, slides.length - 1)];
   const Layout = LAYOUTS[slide.layout] || SlideBullets;
 
   return (
-    <div className="slideshow">
+    <div className="slideshow" data-theme={slTheme}>
       {/* toolbar */}
       <div className="sl-toolbar">
         <button className="sl-tbtn" onClick={() => navigate('/home')}><i className="fas fa-house" /></button>
@@ -299,7 +362,12 @@ const Slideshow = () => {
               <span>{sync ? 'Sync on' : 'Local'}</span>
             </button>
           )}
-          <button className="sl-tbtn" onClick={toggleFs}><i className={`fas fa-${fullscreen ? 'compress' : 'expand'}`} /></button>
+          <button className="sl-tbtn" onClick={toggleTheme} title="Tema da Apresentação">
+            <i className={`fas fa-${slTheme === 'dark' ? 'sun' : 'moon'}`} />
+          </button>
+          <button className="sl-tbtn" onClick={toggleFs} title={fullscreen ? 'Sair' : 'Tela Cheia'}>
+            <i className={`fas fa-${fullscreen ? 'compress' : 'expand'}`} />
+          </button>
         </div>
       </div>
 
