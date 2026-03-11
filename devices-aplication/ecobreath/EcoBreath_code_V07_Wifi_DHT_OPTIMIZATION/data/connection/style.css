@@ -1,176 +1,319 @@
-body,
-button,
-input,
-select {
-    font-family: Comfortaa, sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    text-align: center;
+:root {
+    /* Colors - AirGuard Premium Palette */
+    --bg-light: #f1f5f9;
+    --bg-dark: #020617;
+    --accent: #10b981;
+    --accent-glow: rgba(16, 185, 129, 0.3);
+
+    /* Surfaces - Light Mode */
+    --card-l: rgba(255, 255, 255, 0.7);
+    --border-l: rgba(255, 255, 255, 0.8);
+    --text-p-l: #0f172a;
+    --text-s-l: #64748b;
+
+    /* Surfaces - Dark Mode */
+    --card-d: rgba(15, 23, 42, 0.6);
+    --border-d: rgba(30, 41, 59, 0.5);
+    --text-p-d: #f8fafc;
+    --text-s-d: #94a3b8;
+
+    /* Config */
+    --header-h: 80px;
+    --radius-xl: 40px;
+    --radius-lg: 32px;
+    --radius-md: 20px;
+
+    /* Shadows & Glass */
+    --glass-blur: 15px;
+    --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+    --shadow-deep: 0 20px 50px -15px rgba(0, 0, 0, 0.1);
+
+    /* Defaults */
+    --bg: var(--bg-light);
+    --card: var(--card-l);
+    --border: var(--border-l);
+    --text-p: var(--text-p-l);
+    --text-s: var(--text-s-l);
+}
+
+[data-theme="dark"] {
+    --bg: var(--bg-dark);
+    --card: var(--card-d);
+    --border: var(--border-d);
+    --text-p: var(--text-p-d);
+    --text-s: var(--text-s-d);
+    --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg: var(--bg-dark);
+        --card: var(--card-d);
+        --border: var(--border-d);
+        --text-p: var(--text-p-d);
+        --text-s: var(--text-s-d);
+    }
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
-    background-color: #005028;
-    color: #fff;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text-p);
+    min-height: 100vh;
+    transition: background 0.6s cubic-bezier(0.23, 1, 0.32, 1);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 24px;
+    overflow-x: hidden;
+}
+
+/* Identical Radial Background Decor */
+body::before {
+    content: '';
+    position: fixed;
+    top: -10%;
+    left: -10%;
+    width: 40%;
+    height: 40%;
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* App Wrapper */
+.AppFrame {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
     flex-direction: column;
-    margin: 0;
-    height: 100vh;
+    gap: 40px;
+    animation: premiumFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+@keyframes premiumFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.98) translateY(20px);
+        filter: blur(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: blur(0);
+    }
+}
+
+.LogoArea {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.LogoJA {
+    width: 80px;
+    height: 80px;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+}
+
+.BrandName {
+    font-weight: 900;
+    font-size: 2rem;
+    color: var(--accent);
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Card Style matched to Connected */
 .Card {
-    background: #e6e6fb;
-    border-radius: 30px;
-    padding: 20px;
-    width: 300px;
-    height: 300px;
-    color: #000;
+    background: var(--card);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-radius: var(--radius-xl);
+    padding: 48px 40px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-deep);
+    width: 100%;
 }
 
+h2 {
+    font-size: 1.6rem;
+    font-weight: 900;
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+    text-align: center;
+}
+
+label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: var(--text-s);
+    margin-left: 12px;
+}
+
+/* Wi-Fi List matched spacing and feel */
 .wifi-list {
-    list-style-type: none;
-    padding: 10px;
-    margin: 10px 0;
-    background-color: #e6e6fb;
-    border-radius: 10px;
-    color: #000;
-    max-height: 60%; /* Altura máxima da lista */
-    overflow-y: auto;  /* Adiciona barra de rolagem vertical */
+    list-style: none;
+    margin: 24px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 6px;
 }
 
-/* Estilizando a barra de rolagem */
 .wifi-list::-webkit-scrollbar {
-    width: 8px; /* Largura da barra de rolagem */
+    width: 4px;
 }
 
 .wifi-list::-webkit-scrollbar-thumb {
-    background-color: #888; /* Cor da parte rolável */
-    border-radius: 10px; /* Bordas arredondadas */
+    background: var(--accent);
+    border-radius: 10px;
 }
-
-.wifi-list::-webkit-scrollbar-thumb:hover {
-    background-color: #555; /* Cor ao passar o mouse */
-}
-
-.wifi-list::-webkit-scrollbar-track {
-    background-color: #e6e6fb; /* Cor da trilha da barra de rolagem */
-    border-radius: 10px; /* Bordas arredondadas */
-}
-
-/* Estilizando a barra de rolagem no Firefox */
-.wifi-list {
-    scrollbar-width: thin; /* Largura da barra de rolagem */
-    scrollbar-color: #888 #e6e6fb; /* Cor do polegar e da trilha */
-}
-
-/* Estilizando a barra de rolagem no Firefox ao passar o mouse */
-.wifi-list:hover {
-    scrollbar-color: #555 #e6e6fb; /* Cor ao passar o mouse */
-}
-
 
 .wifi-list li {
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
+    background: var(--bg);
+    padding: 20px 24px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     display: flex;
     align-items: center;
-}
-
-.wifi-list li:last-child {
-    border-bottom: none;
+    gap: 16px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border);
 }
 
 .wifi-list li:hover {
-    background-color: #fecc0d;
-    color: #000;
+    border-color: var(--accent);
+    transform: translateX(6px);
+    background: var(--card);
 }
 
-.wifi-icon {
-    margin-right: 10px;
-}
-
+/* Modal Styling matched to Connected */
 .modal {
     display: none;
     position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.5);
+    inset: 0;
+    background: rgba(2, 6, 23, 0.4);
+    backdrop-filter: blur(12px);
+    z-index: 2000;
     align-items: center;
     justify-content: center;
+    padding: 24px;
 }
 
 .modal-content {
-    background-color: #e6e6fb;
-    margin: auto;
-    padding: 20px;
-    border: 1px solid #888;
-    border-radius: 30px;
-    width: 300px;
-    text-align: left;
-    color: #000;
+    background: var(--card);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border-radius: var(--radius-xl);
+    padding: 60px 48px;
+    width: 100%;
+    max-width: 480px;
+    position: relative;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-deep);
+    animation: premiumSlide 0.7s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
-.modal-content label {
-    display: block;
-    margin-bottom: 5px;
-}
+@keyframes premiumSlide {
+    from {
+        transform: scale(0.9) translateY(30px);
+        opacity: 0;
+    }
 
-.modal-content input {
-    background: none;
-    border: none;
-    border-bottom: 2px solid #005028;
-    color: #000;
-    margin-bottom: 10px;
-    outline: none;
-    width: calc(100%); /* Ajustar a largura do input */
-}
-
-.modal-content .input-container {
-    display: flex;
-    align-items: center;
-}
-
-.show-password {
-    cursor: pointer;
-    color: #005028;
-    font-size: 16px;
-    margin-left: 10px;
-    text-decoration: underline;
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
 }
 
 .close {
-    color: #aaa;
-    float: right;
+    position: absolute;
+    top: 32px;
+    right: 32px;
     font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: #000;
-    text-decoration: none;
     cursor: pointer;
+    color: var(--text-s);
+    transition: 0.3s;
 }
 
-button {
-    background-color: #005028;
-    border: none;
-    border-radius: 30px;
-    color: #fff;
-    font-size: 16px;
-    font-weight: 700;
-    margin-top: 10px;
-    padding: 10px;
+.close:hover {
+    color: var(--accent);
+}
+
+/* Form Elements matched style */
+input {
     width: 100%;
-    cursor: pointer;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    padding: 22px 28px;
+    border-radius: 24px;
+    color: var(--text-p);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    outline: none;
+    transition: all 0.3s ease;
 }
 
-button:hover {
-    opacity: 0.8;
+input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-glow);
+    background: var(--card);
+}
+
+.input-container {
+    position: relative;
+    width: 100%;
+}
+
+.show-password {
+    position: absolute;
+    right: 24px;
+    top: 22px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--accent);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 24px;
+    background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+    color: #fff;
+    border: none;
+    border-radius: 24px;
+    font-size: 1.2rem;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 20px 40px -10px var(--accent-glow);
+    transition: 0.4s ease;
+    margin-top: 10px;
+}
+
+button[type="submit"]:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px -12px var(--accent-glow);
+    filter: brightness(1.1);
 }

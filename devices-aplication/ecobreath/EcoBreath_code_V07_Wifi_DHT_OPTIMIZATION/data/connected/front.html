@@ -4,85 +4,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurar Wi-Fi</title>
-
-    <!-- Ícone da página -->
+    <title>EcoBreath App</title>
     <link rel="icon" href="./logo.png">
-
-    <!-- CSS Customizado -->
     <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
-    <img src="./logo.png" class="Logo">
+    <div class="AppFrame">
+        <!-- Sticky Header -->
+        <header>
+            <div class="LogoArea">
+                <img src="./logo.png" alt="EcoBreath" class="LogoSmall">
+                <span class="BrandName">EcoBreath</span>
+            </div>
+            <div class="HeaderControls">
+                <button id="langToggle" class="IconButton" title="Linguagem">
+                    <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="2" y1="12" x2="22" y2="12" />
+                        <path
+                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                </button>
+                <button id="themeToggle" class="IconButton" title="Tema">
+                    <svg id="sunIcon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5" />
+                        <line x1="12" y1="1" x2="12" y2="3" />
+                        <line x1="12" y1="21" x2="12" y2="23" />
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                        <line x1="1" y1="12" x2="3" y2="12" />
+                        <line x1="21" y1="12" x2="23" y2="12" />
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                    </svg>
+                    <svg id="moonIcon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
 
-    <!-- Páginas -->
-    <div class="Card">
-        <!-- Menu de navegação -->
-        <nav>
-            <ul>
-                <li><a href="#wifiPage" id="wifiMenu" class="nav-link" data-page="wifi">REDE</a></li>
-                <li><a href="#sensorPage" id="sensorsMenu" class="nav-link" data-page="sensors">DADOS</a></li>
-                <li><a href="#settingsPage" id="settingsMenu" class="nav-link" data-page="settings">CONFIG</a></li>
-            </ul>
-        </nav>
-        <div id="wifiPage" class="page">
-            <h2>Configurar Wi-Fi</h2>
+        <!-- Main Content Page Area -->
+        <main>
+            <div class="ContentGrid">
 
-            <label for="wifiList">Selecione a Rede Wi-Fi:</label>
-            <ul id="wifiList" class="wifi-list"></ul>
-
-            <!-- Modal -->
-            <div id="wifiModal" class="modal">
-                <div class="modal-content">
-                    <span class="close" id="closeModal">&times;</span>
-                    <h2>Conectar à rede</h2>
-                    <form id="loginForm" onsubmit="return submitForm()">
-                        <label for="ssid">SSID:</label>
-                        <input type="text" id="ssid" name="ssid" required readonly>
-
-                        <label for="password">Senha:</label>
-                        <div class="input-container">
-                            <input type="password" id="password" name="password" required>
-                            <span id="togglePassword" class="show-password">Exibir</span>
+                <!-- Sensors Dashboard -->
+                <div id="sensorsPage" class="page active">
+                    <h2 data-i18n="title_sensors">Dashboard</h2>
+                    <div class="SensorStack">
+                        <div class="AppCard">
+                            <div class="IconBox">
+                                <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M12 9a3 3 0 0 0-3 3M12 1a7 7 0 1 1 0 14V3.5h0M7 21h10a2 2 0 0 0 2-2v-4a7 7 0 0 0-14 0v4a2 2 0 0 0 2 2z" />
+                                </svg>
+                            </div>
+                            <div class="DataBox">
+                                <h3 data-i18n="label_humidity">Umidade</h3>
+                                <div id="humidityValue" class="Value">--%</div>
+                            </div>
                         </div>
-
-                        <button type="submit">Conectar</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div id="sensorsPage" class="page" style="display:none;">
-            <h2>Dados dos Sensores</h2>
-
-            <div class="sensor-data">
-                <div class="sensor">
-                    <img src="./humi.png" alt="Ícone de Umidade" class="sensor-icon">
-                    <div class="sensor-info">
-                        <label>Umidade:</label>
-                        <span id="humidityValue">0%</span>
+                        <div class="AppCard">
+                            <div class="IconBox">
+                                <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+                                </svg>
+                            </div>
+                            <div class="DataBox">
+                                <h3 data-i18n="label_temp">Temperatura</h3>
+                                <div id="temperatureValue" class="Value">--°C</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="sensor">
-                    <img src="./temp.png" alt="Ícone de Temperatura" class="sensor-icon">
-                    <div class="sensor-info">
-                        <label>Temperatura:</label>
-                        <span id="temperatureValue">0°C</span>
+                <!-- Wi-Fi Management -->
+                <div id="wifiPage" class="page">
+                    <h2 data-i18n="title_wifi">Conexão Redes</h2>
+                    <div id="wifiList" class="WifiList">
+                        <!-- Redes dinâmicas aqui -->
                     </div>
                 </div>
+
+                <!-- Device Settings -->
+                <div id="settingsPage" class="page">
+                    <h2 data-i18n="title_settings">Ajustes</h2>
+                    <div class="AppCard" style="flex-direction: column; align-items: flex-start;">
+                        <p data-i18n="text_settings_info" style="color: var(--text-s); margin-bottom: 20px;">Personalize
+                            as configurações do seu AirGuard.</p>
+                        <!-- Mais opções no futuro -->
+                    </div>
+                </div>
+
             </div>
-        </div>
+        </main>
 
-
-        <div id="settingsPage" class="page" style="display:none;">
-            <h2>Configurações</h2>
-            <!-- Conteúdo para configurações -->
-        </div>
-
+        <!-- Bottom Navigation Mobile / Sidebar Desktop -->
+        <nav class="BottomNav">
+            <a href="#" class="NavItem active" data-page="sensors">
+                <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" />
+                    <rect x="14" y="3" width="7" height="7" />
+                    <rect x="14" y="14" width="7" height="7" />
+                    <rect x="3" y="14" width="7" height="7" />
+                </svg>
+                <span data-i18n="nav_sensors">DADOS</span>
+            </a>
+            <a href="#" class="NavItem" data-page="wifi">
+                <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M5 12.55a11 11 0 0 1 14.08 0" />
+                    <path d="M1.42 9a16 16 0 0 1 21.16 0" />
+                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+                    <line x1="12" y1="20" x2="12.01" y2="20" />
+                </svg>
+                <span data-i18n="nav_wifi">REDE</span>
+            </a>
+            <a href="#" class="NavItem" data-page="settings">
+                <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                <span data-i18n="nav_settings">AJUSTES</span>
+            </a>
+        </nav>
     </div>
-    <!-- JavaScript -->
+
+    <!-- Bottom Sheet Modal Mobile-Ready -->
+    <div id="wifiModal" class="ModalOverlay">
+        <div class="ModalBody">
+            <h2 data-i18n="modal_title">Conectar Wi-Fi</h2>
+            <form id="wifiForm">
+                <div class="InputGroup">
+                    <label for="ssid" data-i18n="label_ssid">SSID</label>
+                    <input type="text" id="ssid" readonly>
+                </div>
+                <div class="InputGroup">
+                    <label for="password" data-i18n="label_password">Senha</label>
+                    <div style="position: relative;">
+                        <input type="password" id="password" required>
+                        <button type="button" id="togglePassword" class="IconButton"
+                            style="position: absolute; right: 8px; top: 8px; width: 32px; height: 32px; border: none; background: transparent;">
+                            <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" style="width: 18px;">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="PrimaryBtn" data-i18n="btn_connect">Conectar</button>
+            </form>
+        </div>
+    </div>
+
     <script src="./script.js"></script>
 </body>
 

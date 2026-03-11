@@ -1,55 +1,68 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Apply theme from localStorage if available
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+
     populateWifiList();
+
+    // Event Listeners
+    document.getElementById("closeModal").onclick = closeModal;
+    document.getElementById("togglePassword").onclick = togglePasswordVisibility;
+    document.getElementById("loginForm").onsubmit = submitForm;
+
+    window.onclick = (event) => {
+        const modal = document.getElementById("wifiModal");
+        if (event.target === modal) closeModal();
+    };
 });
 
-function fetchNetworks() {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', '/networks', false); // `false` makes the request synchronous
-    xhr.send();
-
-    if (xhr.status === 200) {
-        const response = JSON.parse(xhr.responseText);
-        return response.networks; // Return the `networks` array
-    } else {
-        alert('Erro ao buscar redes Wi-Fi.');
-        console.error('Erro ao buscar redes Wi-Fi:', xhr.status, xhr.statusText);
+async function fetchNetworks() {
+    try {
+        const response = await fetch('/networks');
+        if (!response.ok) throw new Error('Falha ao buscar redes');
+        const data = await response.json();
+        return data.networks || [];
+    } catch (error) {
+        console.error('Erro ao buscar redes Wi-Fi:', error);
         return [];
     }
 }
 
-function populateWifiList() {
-    const networks = fetchNetworks(); // Get the list of networks synchronously
+async function populateWifiList() {
     const wifiList = document.getElementById("wifiList");
+    wifiList.innerHTML = '<li style="justify-content: center; opacity: 0.6;">Buscando redes...</li>';
 
-    wifiList.innerHTML = ''; // Clear the list before populating
+    const networks = await fetchNetworks();
+    wifiList.innerHTML = '';
+
+    if (networks.length === 0) {
+        wifiList.innerHTML = '<li style="justify-content: center; opacity: 0.6;">Nenhuma rede encontrada</li>';
+        return;
+    }
 
     networks.forEach(network => {
         const li = document.createElement("li");
-
-        const text = document.createElement("span");
-        text.textContent = network.ssid; // Display the SSID
-        li.appendChild(text);
+        li.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:20px; color:var(--accent);"><path d="M5 12.55a11 11 0 0 1 14.08 0"/></svg>
+            <span>${network.ssid}</span>
+        `;
 
         li.addEventListener("click", () => {
-            document.getElementById("ssid").value = network.ssid; // Set SSID in the modal
+            document.getElementById("ssid").value = network.ssid;
             document.getElementById("wifiModal").style.display = "flex";
+            document.getElementById("password").focus();
         });
 
         wifiList.appendChild(li);
     });
 }
 
-document.getElementById("closeModal").onclick = function () {
+function closeModal() {
     document.getElementById("wifiModal").style.display = "none";
-};
+    document.getElementById("password").value = ""; // Clear password for security
+}
 
-window.onclick = function (event) {
-    if (event.target === document.getElementById("wifiModal")) {
-        document.getElementById("wifiModal").style.display = "none";
-    }
-};
-
-document.getElementById("togglePassword").onclick = function () {
+function togglePasswordVisibility() {
     const passwordInput = document.getElementById("password");
     if (passwordInput.type === "password") {
         passwordInput.type = "text";
@@ -58,27 +71,33 @@ document.getElementById("togglePassword").onclick = function () {
         passwordInput.type = "password";
         this.textContent = "Exibir";
     }
-};
+}
 
-async function submitForm() {
-    const ssid = encodeURIComponent(document.getElementById("ssid").value);
-    const password = encodeURIComponent(document.getElementById("password").value);
+async function submitForm(e) {
+    if (e) e.preventDefault();
+
+    const ssid = document.getElementById("ssid").value;
+    const password = document.getElementById("password").value;
+    const btn = document.querySelector('button[type="submit"]');
+
+    btn.disabled = true;
+    btn.textContent = "Enviando...";
 
     try {
-        const response = await fetch(`/save?ssid=${ssid}&password=${password}`, {
-            method: 'POST'
-        });
+        const url = `/save?ssid=${encodeURIComponent(ssid)}&password=${encodeURIComponent(password)}`;
+        const response = await fetch(url, { method: 'POST' });
 
-        if (!response.ok) {
-            throw new Error('Erro ao conectar');
-        }
+        if (!response.ok) throw new Error('Erro ao conectar');
 
-        alert("Conectando à rede Wi-Fi: " + ssid);
-        document.getElementById("wifiModal").style.display = "none"; // Fechar o modal após submissão
+        alert(`Configuração salva! O dispositivo tentará conectar à rede: ${ssid}`);
+        closeModal();
     } catch (error) {
         console.error('Erro:', error);
-        alert('Ocorreu um erro ao conectar à rede Wi-Fi.');
+        alert('Ocorreu um erro ao enviar as configurações.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Conectar Agora";
     }
 
-    return false; // Previne o envio real do formulário
+    return false;
 }

@@ -1,0 +1,211 @@
+[
+    {
+        "id": "slide-1",
+        "layout": "cover",
+        "title": "EcoBreath: Sistema de Gerenciamento e Monitoramento da Qualidade do Ar",
+        "subtitle": "Project EcoBreath — Apresentação do Sistema"
+    },
+    {
+        "id": "slide-2",
+        "layout": "team",
+        "title": "Membros do Grupo",
+        "members": [
+            {
+                "name": "Vitor",
+                "icon": "fa-user"
+            },
+            {
+                "name": "Matheus",
+                "icon": "fa-user"
+            },
+            {
+                "name": "Erick",
+                "icon": "fa-user"
+            }
+        ]
+    },
+    {
+        "id": "slide-3",
+        "layout": "bullets",
+        "title": "Problema",
+        "icon": "fa-triangle-exclamation",
+        "bullets": [
+            "Baixa conscientização sobre riscos de poluentes internos (COVs, partículas finas).",
+            "Exposição contínua compromete saúde, segurança e bem-estar.",
+            "Necessidade de monitoramento em tempo real da qualidade do ar.",
+            "Desenvolvimento de dispositivo que detecta poluentes e fornece feedback imediato.",
+            "Promoção de ambientes internos mais saudáveis, sustentáveis e seguros."
+        ]
+    },
+    {
+        "id": "slide-4",
+        "layout": "objectives",
+        "title": "Objetivos",
+        "icon": "fa-bullseye",
+        "items": [
+            "Criar um dispositivo capaz de monitorar a qualidade do ar",
+            "Criar alertas sobre os problemas do ar em ambientes fechados",
+            "Integrar esse dispositivo com tecnologia IoT"
+        ]
+    },
+    {
+        "id": "slide-5",
+        "layout": "tools",
+        "title": "Metodologia e Materiais",
+        "description": "A metodologia de engenharia é um conjunto de abordagens e práticas estruturadas que permitem o desenvolvimento eficiente e confiável de soluções técnicas, promovendo a qualidade, a produtividade e a inovação.",
+        "tools": [
+            {
+                "icon": "fa-code",
+                "label": "VS Code"
+            },
+            {
+                "icon": "fa-fire",
+                "label": "Firebase"
+            },
+            {
+                "icon": "fa-microchip",
+                "label": "UNO IDE"
+            }
+        ]
+    },
+    {
+        "id": "slide-6",
+        "layout": "diagram",
+        "title": "Diagrama de Funcionamento",
+        "center": "Firebase Controller",
+        "nodes": [
+            {
+                "label": "API de Integração",
+                "color": "#4ade80"
+            },
+            {
+                "label": "Firebase Firestore",
+                "color": "#4ade80"
+            },
+            {
+                "label": "Modelo IA",
+                "color": "#4ade80"
+            },
+            {
+                "label": "Barramento de Acionamento",
+                "color": "#86efac"
+            },
+            {
+                "label": "Project EcoBreath WEB",
+                "color": "#86efac"
+            },
+            {
+                "label": "ESP8266 / ESP32",
+                "color": "#86efac"
+            },
+            {
+                "label": "Fast API",
+                "color": "#4ade80"
+            },
+            {
+                "label": "Postgres Database",
+                "color": "#4ade80"
+            }
+        ]
+    },
+    {
+        "id": "slide-7",
+        "layout": "photo-title",
+        "image": "slide_sensor",
+        "title": "EcoBreath WEB",
+        "subtitle": "Aplicação web para controle e monitoramento remoto dos dispositivos"
+    },
+    {
+        "id": "slide-8",
+        "layout": "photo-title",
+        "image": "slide_home",
+        "title": "Protótipo do ESP8266",
+        "subtitle": "Hardware com sensor DHT11, display OLED e conectividade Wi-Fi"
+    },
+    {
+        "id": "slide-9",
+        "layout": "hardware",
+        "title": "Componentes do Hardware",
+        "items": [
+            {
+                "label": "Sensor MQ-135",
+                "desc": "Sensor de gases e qualidade do ar"
+            },
+            {
+                "label": "Sensor DHT-11",
+                "desc": "Temperatura e umidade relativa"
+            },
+            {
+                "label": "Display TFT",
+                "desc": "Exibição local dos dados coletados"
+            },
+            {
+                "label": "ESP32-C3 Super Mini",
+                "desc": "Microcontrolador com Wi-Fi integrado"
+            }
+        ]
+    },
+    {
+        "id": "slide-10",
+        "layout": "photo-title",
+        "image": "slide_map",
+        "title": "Prototipagem",
+        "subtitle": "Montagem e testes da placa com todos os componentes integrados"
+    },
+    {
+        "id": "slide-11",
+        "layout": "bullets",
+        "title": "Projeto de Vida",
+        "icon": "fa-earth-americas",
+        "bullets": [
+            "Como grupo, temos o objetivo de transformar o mundo em um lugar melhor.",
+            "Cuidar do nosso planeta foi um caminho que encontramos para atingir essa meta.",
+            "ODS 3 — Boa Saúde e Bem-Estar",
+            "ODS 11 — Cidades e Comunidades Sustentáveis",
+            "ODS 13 — Ação Contra a Mudança Global do Clima"
+        ]
+    },
+    {
+        "id": "slide-12",
+        "layout": "three-cols",
+        "title": "Conclusão & Considerações Finais",
+        "cols": [
+            {
+                "heading": "Objetivos Alcançados",
+                "icon": "fa-circle-check",
+                "items": [
+                    "Integração do módulo ESP32 com o banco de dados.",
+                    "Desenvolvimento da Aplicação.",
+                    "Otimização do hardware do protótipo."
+                ]
+            },
+            {
+                "heading": "Melhorias Futuras",
+                "icon": "fa-rocket",
+                "items": [
+                    "Aprimorar a interface de usuário.",
+                    "Expansão da rede e interfaces para uma conexão mais abrangente.",
+                    "Integração com mais sensores."
+                ]
+            },
+            {
+                "heading": "Síntese",
+                "icon": "fa-star",
+                "items": [
+                    "Objetivos principais atingidos.",
+                    "Desenvolvimento futuro da mecânica do protótipo."
+                ]
+            }
+        ]
+    },
+    {
+        "id": "slide-13",
+        "layout": "center-word",
+        "title": "Dúvidas?"
+    },
+    {
+        "id": "slide-14",
+        "layout": "center-word",
+        "title": "Obrigado!"
+    }
+]

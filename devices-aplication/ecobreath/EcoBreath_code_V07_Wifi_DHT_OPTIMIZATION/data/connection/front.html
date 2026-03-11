@@ -4,45 +4,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurar Wi-Fi</title>
-
-    <!-- Ícone da página -->
+    <title>AirGuard | Setup</title>
     <link rel="icon" href="./logo.png">
-
-    <!-- CSS Customizado -->
     <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
-    <img src="./logo.png" class="LogoJA">
-    <div class="Card">
-        <h2>Configurar Wi-Fi</h2>
+    <div class="AppFrame">
+        <div class="LogoArea">
+            <img src="./logo.png" class="LogoJA" alt="Logo">
+            <span class="BrandName">AirGuard</span>
+        </div>
 
-        <label for="wifiList">Selecione a Rede Wi-Fi:</label>
-        <ul id="wifiList" class="wifi-list"></ul>
+        <div class="Card">
+            <h2>Configurar Wi-Fi</h2>
+            <label for="wifiList">Selecione uma rede próxima:</label>
+            <ul id="wifiList" class="wifi-list">
+                <!-- Redes serão carregadas aqui -->
+            </ul>
+        </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal Connection -->
     <div id="wifiModal" class="modal">
         <div class="modal-content">
             <span class="close" id="closeModal">&times;</span>
-            <h2>Conectar à rede</h2>
-            <form id="loginForm" onsubmit="return submitForm()">
-                <label for="ssid">SSID:</label>
-                <input type="text" id="ssid" name="ssid" required readonly>
-
-                <label for="password">Senha:</label>
-                <div class="input-container">
-                    <input type="password" id="password" name="password" required>
-                    <span id="togglePassword" class="show-password">Exibir</span>
+            <h2>Conectar</h2>
+            <form id="loginForm">
+                <div class="InputGroup">
+                    <label for="ssid">SSID da Rede</label>
+                    <input type="text" id="ssid" name="ssid" required readonly>
                 </div>
 
-                <button type="submit">Conectar</button>
+                <div class="InputGroup">
+                    <label for="password">Senha</label>
+                    <div class="input-container">
+                        <input type="password" id="password" name="password" required>
+                        <span id="togglePassword" class="show-password">Exibir</span>
+                    </div>
+                </div>
+
+                <button type="submit">Conectar Agora</button>
             </form>
         </div>
     </div>
 
-    <!-- JavaScript -->
     <script src="./script.js"></script>
 </body>
 

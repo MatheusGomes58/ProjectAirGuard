@@ -1,0 +1,211 @@
+[
+    {
+        "id": "slide-1",
+        "layout": "cover",
+        "title": "EcoBreath: Air Quality Management and Monitoring System",
+        "subtitle": "Project EcoBreath — System Presentation"
+    },
+    {
+        "id": "slide-2",
+        "layout": "team",
+        "title": "Team Members",
+        "members": [
+            {
+                "name": "Vitor",
+                "icon": "fa-user"
+            },
+            {
+                "name": "Matheus",
+                "icon": "fa-user"
+            },
+            {
+                "name": "Erick",
+                "icon": "fa-user"
+            }
+        ]
+    },
+    {
+        "id": "slide-3",
+        "layout": "bullets",
+        "title": "Problem",
+        "icon": "fa-triangle-exclamation",
+        "bullets": [
+            "Low awareness of risks from indoor pollutants (VOCs, fine particles).",
+            "Continuous exposure compromises health, safety and well-being.",
+            "Need for real-time monitoring of air quality.",
+            "Development of a device that detects pollutants and provides immediate feedback.",
+            "Promotion of healthier, more sustainable and safer indoor environments."
+        ]
+    },
+    {
+        "id": "slide-4",
+        "layout": "objectives",
+        "title": "Objectives",
+        "icon": "fa-bullseye",
+        "items": [
+            "Create a device capable of monitoring air quality",
+            "Create alerts about air problems in closed environments",
+            "Integrate this device with IoT technology"
+        ]
+    },
+    {
+        "id": "slide-5",
+        "layout": "tools",
+        "title": "Methodology & Materials",
+        "description": "Engineering methodology is a set of structured approaches and practices that enable efficient and reliable development of technical solutions, promoting quality, productivity and innovation.",
+        "tools": [
+            {
+                "icon": "fa-code",
+                "label": "VS Code"
+            },
+            {
+                "icon": "fa-fire",
+                "label": "Firebase"
+            },
+            {
+                "icon": "fa-microchip",
+                "label": "UNO IDE"
+            }
+        ]
+    },
+    {
+        "id": "slide-6",
+        "layout": "diagram",
+        "title": "System Architecture",
+        "center": "Firebase Controller",
+        "nodes": [
+            {
+                "label": "Integration API",
+                "color": "#4ade80"
+            },
+            {
+                "label": "Firebase Firestore",
+                "color": "#4ade80"
+            },
+            {
+                "label": "AI Model",
+                "color": "#4ade80"
+            },
+            {
+                "label": "Actuation Bus",
+                "color": "#86efac"
+            },
+            {
+                "label": "Project EcoBreath WEB",
+                "color": "#86efac"
+            },
+            {
+                "label": "ESP8266 / ESP32",
+                "color": "#86efac"
+            },
+            {
+                "label": "Fast API",
+                "color": "#4ade80"
+            },
+            {
+                "label": "Postgres Database",
+                "color": "#4ade80"
+            }
+        ]
+    },
+    {
+        "id": "slide-7",
+        "layout": "photo-title",
+        "image": "slide_sensor",
+        "title": "EcoBreath WEB",
+        "subtitle": "Web application for remote control and monitoring of devices"
+    },
+    {
+        "id": "slide-8",
+        "layout": "photo-title",
+        "image": "slide_home",
+        "title": "ESP8266 Prototype",
+        "subtitle": "Hardware with DHT11 sensor, OLED display and Wi-Fi connectivity"
+    },
+    {
+        "id": "slide-9",
+        "layout": "hardware",
+        "title": "Hardware Components",
+        "items": [
+            {
+                "label": "MQ-135 Sensor",
+                "desc": "Gas and air quality sensor"
+            },
+            {
+                "label": "DHT-11 Sensor",
+                "desc": "Temperature and relative humidity"
+            },
+            {
+                "label": "TFT Display",
+                "desc": "Local display of collected data"
+            },
+            {
+                "label": "ESP32-C3 Super Mini",
+                "desc": "Microcontroller with integrated Wi-Fi"
+            }
+        ]
+    },
+    {
+        "id": "slide-10",
+        "layout": "photo-title",
+        "image": "slide_map",
+        "title": "Prototyping",
+        "subtitle": "Assembly and testing of the board with all integrated components"
+    },
+    {
+        "id": "slide-11",
+        "layout": "bullets",
+        "title": "Life Project",
+        "icon": "fa-earth-americas",
+        "bullets": [
+            "As a group, we aim to transform the world into a better place.",
+            "Taking care of our planet was a path we found to achieve this goal.",
+            "SDG 3 — Good Health and Well-Being",
+            "SDG 11 — Sustainable Cities and Communities",
+            "SDG 13 — Climate Action"
+        ]
+    },
+    {
+        "id": "slide-12",
+        "layout": "three-cols",
+        "title": "Conclusion & Final Considerations",
+        "cols": [
+            {
+                "heading": "Achieved Goals",
+                "icon": "fa-circle-check",
+                "items": [
+                    "Integration of the ESP32 module with the database.",
+                    "Application development.",
+                    "Prototype hardware optimization."
+                ]
+            },
+            {
+                "heading": "Future Improvements",
+                "icon": "fa-rocket",
+                "items": [
+                    "Improve the user interface.",
+                    "Expand the network and interfaces for broader connectivity.",
+                    "Integration with more sensors."
+                ]
+            },
+            {
+                "heading": "Summary",
+                "icon": "fa-star",
+                "items": [
+                    "Main objectives achieved.",
+                    "Future development of the prototype mechanics."
+                ]
+            }
+        ]
+    },
+    {
+        "id": "slide-13",
+        "layout": "center-word",
+        "title": "Questions?"
+    },
+    {
+        "id": "slide-14",
+        "layout": "center-word",
+        "title": "Thank you!"
+    }
+]

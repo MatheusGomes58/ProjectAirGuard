@@ -145,7 +145,10 @@ html[data-theme="light"] {
   justify-content: center;
   cursor: pointer;
   box-shadow: var(--shadow-card);
-  font-size: 1.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--color-text);
   line-height: 1;
   transition: transform 0.18s ease, background 0.18s ease;
 }
@@ -187,6 +190,13 @@ html[data-theme="light"] {
   font-size: 0.78rem;
   font-weight: 600;
   color: inherit;
+}
+
+.fabShort {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  line-height: 1;
 }
 
 /* ============================================

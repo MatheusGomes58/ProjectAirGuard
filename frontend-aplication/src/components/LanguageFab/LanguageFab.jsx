@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
-import { LANGUAGES, getLocale, setLocale } from '../../utils/i18n';
+import { useLocale } from '../../context/LocaleContext';
+
+const LANGUAGES = [
+    { code: 'pt', label: 'Português', short: 'PT' },
+    { code: 'en', label: 'English', short: 'EN' },
+    { code: 'es', label: 'Español', short: 'ES' },
+];
 
 export default function LanguageFab() {
     const [showOptions, setShowOptions] = useState(false);
-    const locale = getLocale();
+    const { locale, setLocale } = useLocale();
 
     const current = LANGUAGES.find(l => l.code === locale) || LANGUAGES[0];
 
     const handleSet = (code) => {
-        if (code === locale) { setShowOptions(false); return; }
-        setLocale(code);
+        setLocale(code);          // updates React state & localStorage — no reload
         setShowOptions(false);
-        window.location.reload();
     };
 
     return (
@@ -26,7 +30,7 @@ export default function LanguageFab() {
                             title={lang.label}
                         >
                             <span className="label">{lang.label}</span>
-                            <span style={{ fontSize: '1rem', lineHeight: 1 }}>{lang.flag}</span>
+                            <span className="fabShort">{lang.short}</span>
                         </div>
                     ))}
                 </>
@@ -37,7 +41,7 @@ export default function LanguageFab() {
                 onClick={() => setShowOptions(s => !s)}
                 title="Idioma"
             >
-                <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>{current.flag}</span>
+                <span className="fabShort">{current.short}</span>
             </button>
         </div>
     );

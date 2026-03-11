@@ -1,77 +1,321 @@
-import React, { useState, useEffect } from 'react';
-import { realTimeDB } from '../components/firebase/firebase.jsx';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { db, auth } from '../components/firebase/firebase.jsx';
+import { useLocale } from '../context/LocaleContext.jsx';
+import slidePt from '../data/strings/slides/pt.json';
+import slideEn from '../data/strings/slides/en.json';
+import slideEs from '../data/strings/slides/es.json';
+import logo from '../img/logo.png';
 import '../css/slideshow.css';
 
+const slideImages = import.meta.glob('../img/slides/*.png', { eager: true });
+const getImage = (name) => {
+  if (!name) return null;
+  const entry = Object.entries(slideImages).find(([k]) => k.includes(name));
+  return entry ? entry[1].default : null;
+};
+
+const slideDicts = { pt: slidePt, en: slideEn, es: slideEs };
+const FS = { col: 'slides', doc: 'current' };
+
+// ─── accent always green ──────────────────────────────────────
+const G = '#00c86e';
+const DARK = '#080e1a';
+
+// ─────────────────────────────────────────────────────────────
+// COVER — logo + big title (like slide 1)
+// ─────────────────────────────────────────────────────────────
+const SlideCover = ({ slide }) => (
+  <div className="sl sl-cover">
+    <div className="sl-cover-ring">
+      <img src={logo} alt="EcoBreath" className="sl-cover-logo" />
+    </div>
+    <h1 className="sl-cover-title">{slide.title}</h1>
+    {slide.subtitle && <p className="sl-cover-sub">{slide.subtitle}</p>}
+    <div className="sl-cover-bar" />
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────
+// TEAM — photo grid (like slide 2)
+// ─────────────────────────────────────────────────────────────
+const SlideTeam = ({ slide }) => (
+  <div className="sl sl-team">
+    <h2 className="sl-h2">{slide.title}</h2>
+    <div className="sl-team-grid">
+      {slide.members?.map((m, i) => (
+        <div key={i} className="sl-team-card">
+          <div className="sl-team-avatar">
+            {m.photo
+              ? <img src={m.photo} alt={m.name} />
+              : <i className={`fas ${m.icon || 'fa-user'}`} />}
+          </div>
+          <span className="sl-team-name">{m.name}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────
+// BULLETS — icon + title + bullet list (like slide 3 / 11)
+// ─────────────────────────────────────────────────────────────
+const SlideBullets = ({ slide }) => (
+  <div className="sl sl-bullets">
+    {slide.icon && (
+      <div className="sl-icon-badge">
+        <i className={`fas ${slide.icon}`} />
+      </div>
+    )}
+    <h2 className="sl-h2">{slide.title}</h2>
+    <ul className="sl-bullet-list">
+      {slide.bullets?.map((b, i) => (
+        <li key={i}>
+          <span className="sl-bullet-dot" />
+          {b}
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────
+// OBJECTIVES — icon + title + arrow items (like slide 4)
+// ─────────────────────────────────────────────────────────────
+const SlideObjectives = ({ slide }) => (
+  <div className="sl sl-objectives">
+    {slide.icon && (
+      <div className="sl-icon-badge">
+        <i className={`fas ${slide.icon}`} />
+      </div>
+    )}
+    <h2 className="sl-h2">{slide.title}</h2>
+    <div className="sl-obj-items">
+      {slide.items?.map((item, i) => (
+        <div key={i} className="sl-obj-row">
+          <span className="sl-obj-arrow"><i className="fas fa-arrow-right" /></span>
+          <p>{item}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────
+// TOOLS — 3 tool cards + description (like slide 5)
+// ─────────────────────────────────────────────────────────────
+const SlideTools = ({ slide }) => (
+  <div className="sl sl-tools">
+    <h2 className="sl-h2">{slide.title}</h2>
+    <div className="sl-tools-row">
+      {slide.tools?.map((t, i) => (
+        <div key={i} className="sl-tool-card">
+          <i className={`fas ${t.icon}`} />
+          <span>{t.label}</span>
+        </div>
+      ))}
+    </div>
+    {slide.description && <p className="sl-tools-desc">{slide.description}</p>}
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────
+// DIAGRAM — hub + satellite nodes (like slides 6 / 9)
+// ─────────────────────────────────────────────────────────────
+const SlideDiagram = ({ slide }) => (
+  <div className="sl sl-diagram">
+    <h2 className="sl-h2 sl-h2-top">{slide.title}</h2>
+    <div className="sl-diagram-body">
+      <div className="sl-diagram-center">
+        <i className="fas fa-fire" />
+        <span>{slide.center}</span>
+      </div>
+      <div className="sl-diagram-nodes">
+        {slide.nodes?.map((n, i) => (
+          <div key={i} className="sl-diagram-node" style={{ borderColor: n.color + '60', color: n.color }}>
+            {n.label}
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────
+// HARDWARE — component cards with label + description (slide 11)
+// ─────────────────────────────────────────────────────────────
+const SlideHardware = ({ slide }) => (
+  <div className="sl sl-hardware">
+    <h2 className="sl-h2">{slide.title}</h2>
+    <div className="sl-hw-grid">
+      {slide.items?.map((item, i) => (
+        <div key={i} className="sl-hw-card">
+          <i className="fas fa-microchip" />
+          <div>
+            <strong>{item.label}</strong>
+            <p>{item.desc}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────
+// PHOTO-TITLE — full-bleed app screenshot + overlay title (slides 7/8/10)
+// ─────────────────────────────────────────────────────────────
+const SlidePhotoTitle = ({ slide }) => {
+  const img = getImage(slide.image);
+  return (
+    <div className="sl sl-photo">
+      {img && <img src={img} alt={slide.title} className="sl-photo-bg" />}
+      <div className="sl-photo-overlay" />
+      <div className="sl-photo-content">
+        <div className="sl-photo-chip"><i className="fas fa-display" /> EcoBreath WEB</div>
+        <h2 className="sl-photo-title">{slide.title}</h2>
+        {slide.subtitle && <p className="sl-photo-sub">{slide.subtitle}</p>}
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────
+// THREE-COLS — conclusion slide (slide 12)
+// ─────────────────────────────────────────────────────────────
+const SlideThreeCols = ({ slide }) => (
+  <div className="sl sl-three-cols">
+    <h2 className="sl-h2 sl-h2-top">{slide.title}</h2>
+    <div className="sl-cols-divider" />
+    <div className="sl-cols-row">
+      {slide.cols?.map((col, i) => (
+        <div key={i} className="sl-col-card">
+          <div className="sl-col-icon"><i className={`fas ${col.icon}`} /></div>
+          <h3>{col.heading}</h3>
+          <ul>
+            {col.items?.map((item, j) => (
+              <li key={j}><i className="fas fa-circle-dot" />{item}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────
+// CENTER-WORD — simple word centered (slides 13/14)
+// ─────────────────────────────────────────────────────────────
+const SlideCenterWord = ({ slide }) => (
+  <div className="sl sl-center-word">
+    <div className="sl-cw-bg" />
+    <h1 className="sl-cw-title">{slide.title}</h1>
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────
+const LAYOUTS = {
+  cover: SlideCover,
+  team: SlideTeam,
+  bullets: SlideBullets,
+  objectives: SlideObjectives,
+  tools: SlideTools,
+  diagram: SlideDiagram,
+  hardware: SlideHardware,
+  'photo-title': SlidePhotoTitle,
+  'three-cols': SlideThreeCols,
+  'center-word': SlideCenterWord,
+};
+
+// ─────────────────────────────────────────────────────────────
+// Main Slideshow
+// ─────────────────────────────────────────────────────────────
 const Slideshow = () => {
-  const [images, setImages] = useState([]);
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const { locale } = useLocale();
+  const slides = slideDicts[locale] || slidePt;
+  const navigate = useNavigate();
 
-  // Vite: usar import.meta.glob no lugar de require.context (webpack-only)
+  const [current, setCurrent] = useState(0);
+  const [isAuth, setIsAuth] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [sync, setSync] = useState(false);
+  const [animDir, setAnimDir] = useState('next');
+  const [animKey, setAnimKey] = useState(0);
+  const syncRef = useRef(sync);
+  useEffect(() => { syncRef.current = sync; }, [sync]);
+
+  useEffect(() => auth.onAuthStateChanged((u) => setIsAuth(!!u)), []);
+
   useEffect(() => {
-    const modules = import.meta.glob('../img/slides/*.(png|jpg|jpeg|svg)', { eager: true });
-    const slideImages = Object.values(modules).map((mod) => mod.default);
-    setImages(slideImages);
-
-    const slideRef = realTimeDB.ref('slide');
-    slideRef.on('value', (snapshot) => {
-      const slideIndex = snapshot.val();
-      if (slideIndex !== null) {
-        setCurrentSlide(slideIndex);
+    const ref = db.collection(FS.col).doc(FS.doc);
+    return ref.onSnapshot((snap) => {
+      if (!syncRef.current) return;
+      if (snap.exists) {
+        const idx = snap.data().index;
+        if (typeof idx === 'number') setCurrent(idx);
       }
     });
-
-    return () => {
-      slideRef.off('value');
-    };
   }, []);
 
-  useEffect(() => {
-    if (images.length > 0) {
-      realTimeDB.ref('slide').set(currentSlide);
-    }
-  }, [currentSlide, images.length]);
+  const push = useCallback((idx) => {
+    if (!isAuth || !sync) return;
+    db.collection(FS.col).doc(FS.doc).set({ index: idx });
+  }, [isAuth, sync]);
 
-  const handlePreviousSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? 0 : prev - 1));
-  };
+  const goTo = useCallback((next, dir) => {
+    setAnimDir(dir); setAnimKey((k) => k + 1); setCurrent(next); push(next);
+  }, [push]);
 
-  const handleNextSlide = () => {
-    setCurrentSlide((prev) => (prev === images.length - 1 ? images.length - 1 : prev + 1));
-  };
+  const prev = useCallback(() => { if (current > 0) goTo(current - 1, 'prev'); }, [current, goTo]);
+  const next = useCallback(() => { if (current < slides.length - 1) goTo(current + 1, 'next'); }, [current, slides.length, goTo]);
 
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === 'ArrowLeft') handlePreviousSlide();
-      if (event.key === 'ArrowRight') handleNextSlide();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [images.length]);
+    const h = (e) => { if (e.key === 'ArrowLeft') prev(); if (e.key === 'ArrowRight') next(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, [prev, next]);
 
-  const toggleFullScreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    } else if (document.exitFullscreen) {
-      document.exitFullscreen();
-    }
+  const toggleFs = () => {
+    if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); setFullscreen(true); }
+    else { document.exitFullscreen(); setFullscreen(false); }
   };
+
+  const toggleSync = () => {
+    const n = !sync; setSync(n); syncRef.current = n;
+    if (n && isAuth) db.collection(FS.col).doc(FS.doc).set({ index: current });
+  };
+
+  const slide = slides[Math.min(current, slides.length - 1)];
+  const Layout = LAYOUTS[slide.layout] || SlideBullets;
 
   return (
     <div className="slideshow">
-      <button className="floating-button left" onClick={handlePreviousSlide}>
-        <i className="fas fa-arrow-left"></i>
-      </button>
-      {images.length > 0 ? (
-        <img src={images[currentSlide]} alt={`Slide ${currentSlide + 1}`} />
-      ) : (
-        <div className="slideshow-empty">Nenhuma imagem encontrada</div>
-      )}
-      <button className="floating-button right" onClick={handleNextSlide}>
-        <i className="fas fa-arrow-right"></i>
-      </button>
-      <button className="floating-button expand" onClick={toggleFullScreen}>
-        <i className="fas fa-expand"></i>
-      </button>
+      {/* toolbar */}
+      <div className="sl-toolbar">
+        <button className="sl-tbtn" onClick={() => navigate('/home')}><i className="fas fa-house" /></button>
+        <div className="sl-toolbar-r">
+          {isAuth && (
+            <button className={`sl-sync ${sync ? 'on' : ''}`} onClick={toggleSync}>
+              <i className={`fas fa-${sync ? 'wifi' : 'wifi-slash'}`} />
+              <span>{sync ? 'Sync on' : 'Local'}</span>
+            </button>
+          )}
+          <button className="sl-tbtn" onClick={toggleFs}><i className={`fas fa-${fullscreen ? 'compress' : 'expand'}`} /></button>
+        </div>
+      </div>
+
+      {/* slide */}
+      <div className={`sl-wrapper sl-anim-${animDir}`} key={animKey}>
+        <Layout slide={slide} />
+      </div>
+
+      {/* nav */}
+      <div className="sl-nav">
+        <button className="sl-nav-btn" onClick={prev} disabled={current === 0}><i className="fas fa-arrow-left" /></button>
+        <div className="sl-nav-dots">
+          {slides.map((_, i) => <span key={i} className={`sl-dot ${i === current ? 'on' : ''}`} />)}
+        </div>
+        <button className="sl-nav-btn" onClick={next} disabled={current === slides.length - 1}><i className="fas fa-arrow-right" /></button>
+      </div>
     </div>
   );
 };

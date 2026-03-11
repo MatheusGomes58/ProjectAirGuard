@@ -15,6 +15,7 @@ import MapPage from './mapPage';
 import ThemeManager from '../components/ThemeManager/ThemeManager';
 import LanguageFab from '../components/LanguageFab/LanguageFab';
 import { LocaleProvider } from '../context/LocaleContext';
+import PrivateRoute from '../components/PrivateRoute/PrivateRoute';
 
 function App() {
   useEffect(() => {
@@ -37,21 +38,24 @@ function App() {
 function AppContent() {
   const location = useLocation();
   const hideMenu = ['/', '/forgotPassword', '/slides', '/apirest'].includes(location.pathname);
-  // Also hide FABs on auth/slides pages
-  const hideFabs = ['/', '/forgotPassword', '/slides', '/apirest'].includes(location.pathname);
 
   return (
     <>
       <Routes>
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/scene" element={<Scene />} />
-        <Route path="/profileEdit" element={<ProfileEdit />} />
-        <Route path="/forgotPassword" element={<ForgotPassword />} />
-        <Route path="/slides" element={<Slideshow />} />
+        {/* ── Public routes ── */}
         <Route path="/" element={<AutenticationPage />} />
-        <Route path="/map" element={<MapPage />} />
-        <Route path="/apirest" element={<ApiRest />} />
+        <Route path="/forgotPassword" element={<ForgotPassword />} />
+
+        {/* ── Protected routes ── */}
+        <Route path="/home" element={<PrivateRoute><HomePage /></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+        <Route path="/scene" element={<PrivateRoute><Scene /></PrivateRoute>} />
+        <Route path="/profileEdit" element={<PrivateRoute><ProfileEdit /></PrivateRoute>} />
+        <Route path="/slides" element={<PrivateRoute><Slideshow /></PrivateRoute>} />
+        <Route path="/map" element={<PrivateRoute><MapPage /></PrivateRoute>} />
+        <Route path="/apirest" element={<PrivateRoute><ApiRest /></PrivateRoute>} />
+
+        {/* ── Fallback ── */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {!hideMenu && <MenuOptions />}
