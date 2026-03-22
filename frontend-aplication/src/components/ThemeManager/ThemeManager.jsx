@@ -1,10 +1,50 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { FiSun, FiMoon, FiMonitor } from 'react-icons/fi';
+import { useLocation } from 'react-router-dom';
+import { db, auth } from '../firebase/firebase.jsx';
 import '../../css/index.css';
 
 export default function ThemeManager() {
   const [themePref, setThemePref] = useState(() => localStorage.getItem('themePref') || 'auto');
   const [showOptions, setShowOptions] = useState(false);
+  const location = useLocation();
+  const isSlides = location.pathname === '/slides';
+  const themeRef = useRef(themePref);
+
+  useEffect(() => {
+    themeRef.current = themePref;
+  }, [themePref]);
+
+  // Sync with Firebase if on /slides
+  useEffect(() => {
+    if (!isSlides) return;
+
+    const FS = { col: 'slides', doc: 'current' };
+    const ref = db.collection(FS.col).doc(FS.doc);
+
+    const unsubscribe = ref.onSnapshot((snap) => {
+      if (snap.exists) {
+        const data = snap.data();
+        if (data.theme && data.theme !== themeRef.current && (data.theme === 'light' || data.theme === 'dark')) {
+          setThemePref(data.theme);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [isSlides]);
+
+  const pushToFirebase = (pref) => {
+    if (!isSlides) return;
+    const user = auth.currentUser;
+    if (!user) return; // Only authenticated users (presenters) push updates
+
+    const FS = { col: 'slides', doc: 'current' };
+    db.collection(FS.col).doc(FS.doc).update({ theme: pref }).catch(() => {
+      // If doc doesn't exist, it might be safer not to create it here to avoid overwriting other fields
+      // but slideshow.jsx already handles creating it.
+    });
+  };
 
   useEffect(() => {
     const mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
@@ -35,6 +75,7 @@ export default function ThemeManager() {
     try { localStorage.setItem('themePref', pref); } catch (e) {}
     setThemePref(pref);
     setShowOptions(false);
+    if (pref !== 'auto') pushToFirebase(pref);
   };
 
   return (

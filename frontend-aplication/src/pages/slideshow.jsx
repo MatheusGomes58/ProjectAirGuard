@@ -236,17 +236,14 @@ const Slideshow = () => {
   const [isAuth, setIsAuth] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [sync, setSync] = useState(false);
-  const [slTheme, setSlTheme] = useState('dark');
   const [animDir, setAnimDir] = useState('next');
   const [animKey, setAnimKey] = useState(0);
 
   const syncRef = useRef(sync);
   const localeRef = useRef(locale);
-  const themeRef = useRef(slTheme);
 
   useEffect(() => { syncRef.current = sync; }, [sync]);
   useEffect(() => { localeRef.current = locale; }, [locale]);
-  useEffect(() => { themeRef.current = slTheme; }, [slTheme]);
 
   useEffect(() => auth.onAuthStateChanged((u) => setIsAuth(!!u)), []);
 
@@ -256,11 +253,6 @@ const Slideshow = () => {
     return ref.onSnapshot((snap) => {
       if (snap.exists) {
         const data = snap.data();
-
-        // Theme always syncs if present
-        if (data.theme && data.theme !== themeRef.current) {
-          setSlTheme(data.theme);
-        }
 
         // Index and Locale only sync if sync toggle is ON
         if (syncRef.current) {
@@ -278,7 +270,7 @@ const Slideshow = () => {
     if (!isAuth || !sync) return;
     db.collection(FS.col).doc(FS.doc).update({ index: idx }).catch(() => {
       // If doc doesn't exist, set it
-      db.collection(FS.col).doc(FS.doc).set({ index: idx, locale: localeRef.current, theme: themeRef.current });
+      db.collection(FS.col).doc(FS.doc).set({ index: idx, locale: localeRef.current }, { merge: true });
     });
   }, [isAuth, sync]);
 
@@ -287,15 +279,6 @@ const Slideshow = () => {
     if (!isAuth || !sync) return;
     db.collection(FS.col).doc(FS.doc).update({ locale });
   }, [locale, isAuth, sync]);
-
-  // Push theme changes (Presenters always push theme)
-  useEffect(() => {
-    if (!isAuth) return;
-    db.collection(FS.col).doc(FS.doc).update({ theme: slTheme }).catch(() => {
-      // If doc doesn't exist, set it with current state
-      db.collection(FS.col).doc(FS.doc).set({ index: current, locale: localeRef.current, theme: slTheme });
-    });
-  }, [slTheme, isAuth]);
 
   const goTo = useCallback((next, dir) => {
     setAnimDir(dir); setAnimKey((k) => k + 1); setCurrent(next);
@@ -340,18 +323,14 @@ const Slideshow = () => {
 
   const toggleSync = () => {
     const n = !sync; setSync(n); syncRef.current = n;
-    if (n && isAuth) db.collection(FS.col).doc(FS.doc).set({ index: current, locale, theme: slTheme });
-  };
-
-  const toggleTheme = () => {
-    setSlTheme(t => t === 'dark' ? 'light' : 'dark');
+    if (n && isAuth) db.collection(FS.col).doc(FS.doc).set({ index: current, locale });
   };
 
   const slide = slides[Math.min(current, slides.length - 1)];
   const Layout = LAYOUTS[slide.layout] || SlideBullets;
 
   return (
-    <div className="slideshow" data-theme={slTheme}>
+    <div className="slideshow">
       {/* toolbar */}
       <div className="sl-toolbar">
         <button className="sl-tbtn" onClick={() => navigate('/home')}><i className="fas fa-house" /></button>
@@ -362,9 +341,7 @@ const Slideshow = () => {
               <span>{sync ? 'Sync on' : 'Local'}</span>
             </button>
           )}
-          <button className="sl-tbtn" onClick={toggleTheme} title="Tema da Apresentação">
-            <i className={`fas fa-${slTheme === 'dark' ? 'sun' : 'moon'}`} />
-          </button>
+          {/* Theme is now handled by the global ThemeManager FAB */}
           <button className="sl-tbtn" onClick={toggleFs} title={fullscreen ? 'Sair' : 'Tela Cheia'}>
             <i className={`fas fa-${fullscreen ? 'compress' : 'expand'}`} />
           </button>

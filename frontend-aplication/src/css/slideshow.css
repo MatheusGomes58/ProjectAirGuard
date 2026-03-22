@@ -26,7 +26,7 @@ body {
     transition: background 0.3s ease, color 0.3s ease;
 }
 
-.slideshow[data-theme="light"] {
+html[data-theme="light"] .slideshow {
     --color-bg: #f7fbf7;
     --color-surface: #ffffff;
     --color-surface-2: #f1f5f1;
@@ -43,7 +43,7 @@ body {
     --color-glass-border: rgba(0, 0, 0, 0.04);
 }
 
-.slideshow[data-theme="dark"] {
+html[data-theme="dark"] .slideshow {
     --color-bg: #0a0f0d;
     --color-surface: #141a17;
     --color-surface-2: #1e2823;
@@ -130,7 +130,7 @@ body {
     pointer-events: none;
 }
 
-.slideshow[data-theme="light"] .sl::before {
+html[data-theme="light"] .sl::before {
     background-image:
         linear-gradient(rgba(0, 0, 0, 0.01) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0, 0, 0, 0.01) 1px, transparent 1px);
