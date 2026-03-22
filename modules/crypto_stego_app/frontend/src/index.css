@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-dark-900 text-slate-200 antialiased;
+    @apply bg-slate-50 dark:bg-dark-900 text-slate-800 dark:text-slate-200 antialiased transition-colors duration-300;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 }
@@ -16,15 +16,19 @@
   }
   
   .btn-secondary {
-    @apply px-5 py-2.5 bg-dark-800 hover:bg-dark-700 text-slate-200 border border-slate-700/50 rounded-lg transition-all duration-300 font-medium;
+    @apply px-5 py-2.5 bg-white dark:bg-dark-800 hover:bg-slate-100 dark:hover:bg-dark-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700/50 rounded-lg transition-all duration-300 font-medium;
   }
   
   .card {
-    @apply bg-dark-800/80 backdrop-blur-[20px] border border-primary-500/10 rounded-[16px] p-6 transition-all duration-300;
+    @apply bg-white/80 dark:bg-dark-800/80 backdrop-blur-[20px] border border-slate-200 dark:border-primary-500/10 rounded-[16px] p-6 transition-all duration-300;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  }
+  
+  .dark .card {
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
   }
   
   .input-field {
-    @apply w-full bg-dark-900 border border-slate-700/50 rounded-lg px-4 py-3 text-slate-200 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all;
+    @apply w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700/50 rounded-lg px-4 py-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all;
   }
 }
