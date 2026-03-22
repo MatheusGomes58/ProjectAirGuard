@@ -2,9 +2,25 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 from app.routers import crypto, stego, history
+import time
+from sqlalchemy.exc import OperationalError
 
-# Create DB tables
-Base.metadata.create_all(bind=engine)
+# Robust DB initialization
+def init_db():
+    max_retries = 5
+    for i in range(max_retries):
+        try:
+            Base.metadata.create_all(bind=engine)
+            print("Database connected and tables created successfully!")
+            break
+        except Exception as e:
+            print(f"Database connection failed. Retrying in 3 seconds... ({i+1}/{max_retries})")
+            print(str(e))
+            time.sleep(3)
+    else:
+        print("Failed to connect to database after maximum retries.")
+
+init_db()
 
 app = FastAPI(title="Crypto & Stego Project")
 

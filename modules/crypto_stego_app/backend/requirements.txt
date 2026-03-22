@@ -3,6 +3,7 @@ uvicorn
 sqlalchemy
 psycopg2-binary
 cryptography
+opencv-python-headless
 stegano
 python-multipart
 pydantic
