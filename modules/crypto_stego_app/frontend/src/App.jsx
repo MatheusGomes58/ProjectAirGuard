@@ -92,7 +92,7 @@ function SymmetricTab() {
 
   return (
     <div className="card space-y-6 animate-fade-in">
-      <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-accent-500">Symmetric Cryptography (AES)</h2>
+      <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-primary-500">Symmetric Cryptography (AES)</h2>
       <p className="text-sm text-slate-400">Encrypt and decrypt files using AES-256. The key will be automatically generated and prepended to the encrypted file.</p>
       
       <div className="space-y-4">
@@ -163,7 +163,7 @@ function AsymmetricTab() {
 
   return (
     <div className="card space-y-6 animate-fade-in">
-      <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-accent-500">Asymmetric Cryptography (RSA Hybrid)</h2>
+      <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-primary-500">Asymmetric Cryptography (RSA Hybrid)</h2>
       <p className="text-sm text-slate-400">Uses RSA-2048 to safely wrap an AES key while encrypting your file. Handles files up to 500MB.</p>
       
       <div className="space-y-4">
@@ -254,7 +254,7 @@ function StegoTab() {
 
   return (
     <div className="card space-y-6 animate-fade-in">
-      <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-accent-500">Image Steganography (LSB)</h2>
+      <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-primary-500">Image Steganography (LSB)</h2>
       <p className="text-sm text-slate-400">Hide text deeply within the pixels of an image. Lossless formats like PNG are required to prevent data loss.</p>
       
       <div className="space-y-4">
@@ -366,10 +366,10 @@ export default function App() {
   return (
     <div className="min-h-screen p-8 max-w-5xl mx-auto space-y-8 animate-fade-in">
       <header className="text-center space-y-4">
-        <h1 className="text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary-500 via-accent-500 to-primary-600 drop-shadow-sm">
-          AirGuard Crypto Core
+        <h1 className="text-5xl font-extrabold tracking-tight text-slate-100 drop-shadow-sm">
+          AirGuard <span className="text-primary-500">Crypto Core</span>
         </h1>
-        <p className="text-slate-400 max-w-2xl mx-auto text-lg">
+        <p className="text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed">
           Advanced cryptosystem and steganography platform. Ensure data confidentiality and hidden transmission channels seamlessly.
         </p>
       </header>
