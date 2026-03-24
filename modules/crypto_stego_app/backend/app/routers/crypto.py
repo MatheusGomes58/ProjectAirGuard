@@ -64,7 +64,18 @@ async def symmetric_decrypt(file: UploadFile = File(...), db: Session = Depends(
         execution_time_ms=exec_time_ms
     ))
     
-    original_filename = file.filename.replace("encrypted_", "") if file.filename.startswith("encrypted_") else f"decrypted_{file.filename}"
+    # Support both English and Portuguese prefixes
+    filename = file.filename
+    if filename.startswith("encrypted_"):
+        original_filename = filename.replace("encrypted_", "", 1)
+    elif filename.startswith("criptografado_"):
+        original_filename = filename.replace("criptografado_", "", 1)
+    elif filename.startswith("rsa_encrypted_"):
+        original_filename = filename.replace("rsa_encrypted_", "", 1)
+    elif filename.startswith("rsa_criptografado_"):
+        original_filename = filename.replace("rsa_criptografado_", "", 1)
+    else:
+        original_filename = f"decrypted_{filename}"
     
     return Response(content=decrypted_data, media_type="application/octet-stream", headers={
         "Content-Disposition": f"attachment; filename={original_filename}"
@@ -123,7 +134,14 @@ async def asymmetric_decrypt(file: UploadFile = File(...), private_key: str = Fo
         execution_time_ms=exec_time_ms
     ))
     
-    original_filename = file.filename.replace("rsa_encrypted_", "")
+    # Support both English and Portuguese prefixes
+    filename = file.filename
+    if filename.startswith("rsa_encrypted_"):
+        original_filename = filename.replace("rsa_encrypted_", "", 1)
+    elif filename.startswith("rsa_criptografado_"):
+        original_filename = filename.replace("rsa_criptografado_", "", 1)
+    else:
+        original_filename = filename.replace("decrypted_", "", 1) # fallback
     return Response(content=decrypted_data, media_type="application/octet-stream", headers={
         "Content-Disposition": f"attachment; filename={original_filename}"
     })

@@ -4,7 +4,7 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 function HistoryTable({ opsFilter }) {
   const [history, setHistory] = useState([]);
-  
+
   const fetchHistory = () => {
     fetch(`${API_BASE}/history/`)
       .then(res => res.json())
@@ -79,7 +79,7 @@ function SymmetricTab() {
   const handleAction = async (action) => {
     if (!file) return alert("Selecione um arquivo primeiro");
     setLoading(true);
-    
+
     const formData = new FormData();
     formData.append("file", file);
 
@@ -88,9 +88,12 @@ function SymmetricTab() {
         method: 'POST',
         body: formData,
       });
-      
-      if (!resp.ok) throw new Error("A operação falhou");
-      
+
+      if (!resp.ok) {
+        const errorData = await resp.json().catch(() => ({}));
+        throw new Error(errorData.detail || `A operação de ${action === 'encrypt' ? 'criptografia' : 'descriptografia'} falhou.`);
+      }
+
       const blob = await resp.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -99,7 +102,7 @@ function SymmetricTab() {
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (e) {
-      alert(e.message);
+      alert(`Erro: ${e.message}`);
     } finally {
       setLoading(false);
     }
@@ -109,13 +112,13 @@ function SymmetricTab() {
     <div className="card space-y-6 animate-fade-in">
       <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-primary-500">Criptografia Simétrica (AES)</h2>
       <p className="text-sm text-slate-500 dark:text-slate-400">Criptografe e descriptografe arquivos usando AES-256. A chave será gerada automaticamente e anexada ao início do arquivo criptografado.</p>
-      
+
       <div className="space-y-4">
         <label className="block">
           <span className="text-slate-600 dark:text-slate-300">Arquivo Alvo</span>
           <input type="file" onChange={(e) => setFile(e.target.files[0])} className="input-field mt-1" />
         </label>
-        
+
         <div className="flex gap-4">
           <button className="btn-primary w-full" onClick={() => handleAction('encrypt')} disabled={loading}>
             {loading ? 'Processando...' : 'Criptografar'}
@@ -136,7 +139,7 @@ function AsymmetricTab() {
   const [publicKey, setPublicKey] = useState("");
   const [privateKey, setPrivateKey] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   const generateKeys = async () => {
     const res = await fetch(`${API_BASE}/crypto/asymmetric/keys`, { method: 'POST' });
     const data = await res.json();
@@ -151,7 +154,7 @@ function AsymmetricTab() {
     if (!file) return alert("Selecione um arquivo primeiro");
     const keyToUse = action === 'encrypt' ? publicKey : privateKey;
     if (!keyToUse) return alert("Forneça a chave PEM primeiro (use Gerar Chaves ou cole manualmente)");
-    
+
     setLoading(true);
     const formData = new FormData();
     formData.append("file", file);
@@ -162,9 +165,12 @@ function AsymmetricTab() {
         method: 'POST',
         body: formData,
       });
-      
-      if (!resp.ok) throw new Error("A operação falhou");
-      
+
+      if (!resp.ok) {
+        const errorData = await resp.json().catch(() => ({}));
+        throw new Error(errorData.detail || `A operação de ${action === 'encrypt' ? 'criptografia' : 'descriptografia'} falhou.`);
+      }
+
       const blob = await resp.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -173,7 +179,7 @@ function AsymmetricTab() {
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (e) {
-      alert(e.message);
+      alert(`Erro: ${e.message}`);
     } finally {
       setLoading(false);
     }
@@ -183,13 +189,13 @@ function AsymmetricTab() {
     <div className="card space-y-6 animate-fade-in">
       <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-primary-500">Criptografia Assimétrica (RSA Híbrido)</h2>
       <p className="text-sm text-slate-500 dark:text-slate-400">Utiliza chaves RSA-2048 para envelopar a chave AES na hora da criptografia de forma altamente segura. Suporta arquivos grandes de até 500MB.</p>
-      
+
       <div className="space-y-4">
         <label className="block">
           <span className="text-slate-600 dark:text-slate-300">Arquivo Alvo</span>
           <input type="file" onChange={(e) => setFile(e.target.files[0])} className="input-field mt-1" />
         </label>
-        
+
         <label className="block">
           <div className="flex items-center justify-between">
             <span className="text-slate-600 dark:text-slate-300">Chave Pública (Formato PEM)</span>
@@ -225,7 +231,7 @@ function AsymmetricTab() {
             placeholder="Cole a chave privada PEM aqui (necessária para descriptografar)..."
           />
         </label>
-        
+
         <div className="flex gap-4">
           <button className="btn-secondary w-full" onClick={generateKeys}>Gerar Chaves</button>
           <button className="btn-primary w-full" onClick={() => handleAction('encrypt')} disabled={loading}>Criptografar</button>
@@ -256,8 +262,11 @@ function StegoTab() {
         method: 'POST',
         body: formData,
       });
-      if (!resp.ok) throw new Error("A operação falhou");
-      
+      if (!resp.ok) {
+        const errorData = await resp.json().catch(() => ({}));
+        throw new Error(errorData.detail || "Falha ao ocultar mensagem.");
+      }
+
       const blob = await resp.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -266,7 +275,7 @@ function StegoTab() {
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (e) {
-      alert(e.message);
+      alert(`Erro: ${e.message}`);
     } finally {
       setLoading(false);
     }
@@ -276,7 +285,7 @@ function StegoTab() {
     if (!file) return alert("Selecione a imagem stego primeiro");
     setLoading(true);
     setDecodedMsg("");
-    
+
     const formData = new FormData();
     formData.append("file", file);
 
@@ -285,11 +294,14 @@ function StegoTab() {
         method: 'POST',
         body: formData,
       });
-      if (!resp.ok) throw new Error("A extração falhou");
+      if (!resp.ok) {
+        const errorData = await resp.json().catch(() => ({}));
+        throw new Error(errorData.detail || "Falha ao extrair mensagem.");
+      }
       const data = await resp.json();
       setDecodedMsg(data.secret_message);
     } catch (e) {
-      alert(e.message);
+      alert(`Erro: ${e.message}`);
     } finally {
       setLoading(false);
     }
@@ -299,29 +311,29 @@ function StegoTab() {
     <div className="card space-y-6 animate-fade-in">
       <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-primary-500">Esteganografia em Imagens (LSB)</h2>
       <p className="text-sm text-slate-500 dark:text-slate-400">Oculte textos sigilosos profundamente dentro dos bits menos significativos da sua imagem. O download sempre prioriza extensão PNG para impedir perda de dados.</p>
-      
+
       <div className="space-y-4">
         <label className="block">
           <span className="text-slate-600 dark:text-slate-300">Imagem Portadora</span>
           <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} className="input-field mt-1" />
         </label>
-        
+
         <label className="block">
           <span className="text-slate-600 dark:text-slate-300">Mensagem Secreta</span>
-          <input 
-            type="text" 
-            value={secretMsg} 
+          <input
+            type="text"
+            value={secretMsg}
             onChange={(e) => setSecretMsg(e.target.value)}
-            className="input-field mt-1" 
+            className="input-field mt-1"
             placeholder="Digite o segredo invisível aqui..."
           />
         </label>
-        
+
         <div className="flex gap-4">
           <button className="btn-primary w-full" onClick={handleEncode} disabled={loading}>{loading ? 'Injetando...' : 'Ocultar Mensagem'}</button>
           <button className="btn-secondary w-full" onClick={handleDecode} disabled={loading}>{loading ? 'Extraindo...' : 'Extrair Mensagem'}</button>
         </div>
-        
+
         {decodedMsg && (
           <div className="mt-4 p-4 bg-slate-100 dark:bg-dark-900 border border-primary-500/30 rounded-lg animate-slide-up">
             <span className="text-xs text-primary-500 dark:text-primary-400 uppercase font-bold tracking-wider">PAYLOAD DECODIFICADO COM SUCESSO:</span>
@@ -337,7 +349,7 @@ function StegoTab() {
 
 function HistoryTab() {
   const [history, setHistory] = useState([]);
-  
+
   const fetchAllHistory = () => {
     fetch(`${API_BASE}/history/`)
       .then(res => res.json())
@@ -379,7 +391,7 @@ function HistoryTab() {
           Exportar CSV
         </button>
       </div>
-      
+
       <div className="overflow-x-auto rounded-xl ring-1 ring-slate-200 dark:ring-dark-700 bg-white dark:bg-dark-800">
         <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
           <thead className="bg-slate-50 dark:bg-dark-900 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-dark-700">
@@ -439,9 +451,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen p-8 max-w-5xl mx-auto space-y-8 animate-fade-in relative">
-      
+
       {/* Theme Toggle Button */}
-      <button 
+      <button
         onClick={toggleTheme}
         className="absolute top-4 right-4 md:top-8 md:right-8 p-3 rounded-full bg-white dark:bg-dark-800 shadow-lg border border-slate-200 dark:border-slate-700/50 hover:scale-110 transition-transform duration-200 text-slate-700 dark:text-slate-200"
         title="Alternar Tema"
@@ -473,8 +485,8 @@ export default function App() {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300
-              ${activeTab === tab.id 
-                ? 'bg-primary-500 text-white shadow-lg ring-1 ring-primary-500/50' 
+              ${activeTab === tab.id
+                ? 'bg-primary-500 text-white shadow-lg ring-1 ring-primary-500/50'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-dark-700'
               }`}
           >
