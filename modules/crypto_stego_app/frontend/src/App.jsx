@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 export const uploadFileInChunks = async (file, onProgress) => {
-  const CHUNK_SIZE = 50 * 1024 * 1024; // 50MB chunks
+  const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB chunks (limite conservador para proxies)
   const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
   const uploadId = Math.random().toString(36).substring(2) + Date.now().toString(36);
   
@@ -118,7 +118,7 @@ function SymmetricTab() {
 
     try {
       let uploadId = null;
-      if (file.size > 20 * 1024 * 1024) { // acima de 20MB usa upload em partes
+      if (file.size > 2 * 1024 * 1024) { // acima de 2MB usa upload em partes
         uploadId = await uploadFileInChunks(file, setUploadProgress);
       }
 
@@ -229,7 +229,7 @@ function AsymmetricTab() {
 
     try {
       let uploadId = null;
-      if (file.size > 20 * 1024 * 1024) { // acima de 20MB
+      if (file.size > 2 * 1024 * 1024) { // acima de 2MB
         uploadId = await uploadFileInChunks(file, setUploadProgress);
       }
 
