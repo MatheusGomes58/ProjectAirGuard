@@ -2,6 +2,38 @@ import React, { useState, useEffect } from 'react';
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
+export const uploadFileInChunks = async (file, onProgress) => {
+  const CHUNK_SIZE = 50 * 1024 * 1024; // 50MB chunks
+  const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+  const uploadId = Math.random().toString(36).substring(2) + Date.now().toString(36);
+  
+  for (let i = 0; i < totalChunks; i++) {
+    const start = i * CHUNK_SIZE;
+    const end = Math.min(start + CHUNK_SIZE, file.size);
+    const chunk = file.slice(start, end);
+    
+    const formData = new FormData();
+    formData.append("upload_id", uploadId);
+    formData.append("chunk", chunk);
+    
+    const resp = await fetch(`${API_BASE}/crypto/upload_chunk`, {
+      method: 'POST',
+      body: formData,
+    });
+    
+    if (!resp.ok) {
+      throw new Error(`Falha ao fazer upload da parte ${i + 1}/${totalChunks}`);
+    }
+    
+    if (onProgress) {
+      onProgress(Math.round(((i + 1) / totalChunks) * 100));
+    }
+  }
+  
+  return uploadId;
+};
+
+
 function HistoryTable({ opsFilter }) {
   const [history, setHistory] = useState([]);
 
@@ -75,17 +107,31 @@ function HistoryTable({ opsFilter }) {
 function SymmetricTab() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const fileInputRef = React.useRef(null);
 
   const handleAction = async (action) => {
     if (!file) return alert("Selecione um arquivo primeiro");
     setLoading(true);
-
-    const formData = new FormData();
-    formData.append("file", file);
+    setUploadProgress(0);
 
     try {
+      let uploadId = null;
+      if (file.size > 20 * 1024 * 1024) { // acima de 20MB usa upload em partes
+        uploadId = await uploadFileInChunks(file, setUploadProgress);
+      }
+
+      setUploadProgress(100);
+
+      const formData = new FormData();
+      if (uploadId) {
+        formData.append("upload_id", uploadId);
+        formData.append("filename", file.name);
+      } else {
+        formData.append("file", file);
+      }
+
       const resp = await fetch(`${API_BASE}/crypto/symmetric/${action}`, {
         method: 'POST',
         body: formData,
@@ -120,7 +166,14 @@ function SymmetricTab() {
       alert(`Erro: ${e.message}`);
     } finally {
       setLoading(false);
+      setUploadProgress(0);
     }
+  };
+
+  const getButtonText = (baseText) => {
+    if (!loading) return baseText;
+    if (uploadProgress > 0 && uploadProgress < 100) return `Enviando: ${uploadProgress}%`;
+    return 'Processando...';
   };
 
   return (
@@ -136,10 +189,10 @@ function SymmetricTab() {
 
         <div className="flex gap-4">
           <button className="btn-primary w-full" onClick={() => handleAction('encrypt')} disabled={loading}>
-            {loading ? 'Processando...' : 'Criptografar'}
+            {getButtonText('Criptografar')}
           </button>
           <button className="btn-secondary w-full" onClick={() => handleAction('decrypt')} disabled={loading}>
-            {loading ? 'Processando...' : 'Descriptografar'}
+            {getButtonText('Descriptografar')}
           </button>
         </div>
       </div>
@@ -154,6 +207,7 @@ function AsymmetricTab() {
   const [publicKey, setPublicKey] = useState("");
   const [privateKey, setPrivateKey] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const fileInputRef = React.useRef(null);
 
@@ -171,11 +225,25 @@ function AsymmetricTab() {
     if (!keyToUse) return alert("Forneça a chave PEM primeiro (use Gerar Chaves ou cole manualmente)");
 
     setLoading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append(action === 'encrypt' ? "public_key" : "private_key", keyToUse.trim());
+    setUploadProgress(0);
 
     try {
+      let uploadId = null;
+      if (file.size > 20 * 1024 * 1024) { // acima de 20MB
+        uploadId = await uploadFileInChunks(file, setUploadProgress);
+      }
+
+      setUploadProgress(100);
+
+      const formData = new FormData();
+      if (uploadId) {
+        formData.append("upload_id", uploadId);
+        formData.append("filename", file.name);
+      } else {
+        formData.append("file", file);
+      }
+      formData.append(action === 'encrypt' ? "public_key" : "private_key", keyToUse.trim());
+
       const resp = await fetch(`${API_BASE}/crypto/asymmetric/${action}`, {
         method: 'POST',
         body: formData,
@@ -210,7 +278,14 @@ function AsymmetricTab() {
       alert(`Erro: ${e.message}`);
     } finally {
       setLoading(false);
+      setUploadProgress(0);
     }
+  };
+
+  const getButtonText = (baseText) => {
+    if (!loading) return baseText;
+    if (uploadProgress > 0 && uploadProgress < 100) return `Enviando: ${uploadProgress}%`;
+    return 'Processando...';
   };
 
   return (
@@ -262,8 +337,8 @@ function AsymmetricTab() {
 
         <div className="flex gap-4">
           <button className="btn-secondary w-full" onClick={generateKeys}>Gerar Chaves</button>
-          <button className="btn-primary w-full" onClick={() => handleAction('encrypt')} disabled={loading}>Criptografar</button>
-          <button className="btn-secondary w-full" onClick={() => handleAction('decrypt')} disabled={loading}>Descriptografar</button>
+          <button className="btn-primary w-full" onClick={() => handleAction('encrypt')} disabled={loading}>{getButtonText('Criptografar')}</button>
+          <button className="btn-secondary w-full" onClick={() => handleAction('decrypt')} disabled={loading}>{getButtonText('Descriptografar')}</button>
         </div>
       </div>
 
