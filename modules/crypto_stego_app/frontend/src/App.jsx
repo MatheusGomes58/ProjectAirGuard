@@ -133,26 +133,29 @@ function SymmetricTab() {
 
 function AsymmetricTab() {
   const [file, setFile] = useState(null);
-  const [keyStr, setKeyStr] = useState("");
+  const [publicKey, setPublicKey] = useState("");
+  const [privateKey, setPrivateKey] = useState("");
   const [loading, setLoading] = useState(false);
   
   const generateKeys = async () => {
     const res = await fetch(`${API_BASE}/crypto/asymmetric/keys`, { method: 'POST' });
     const data = await res.json();
-    alert("Chaves geradas! Verifique o console ou copie a chave pública logo abaixo para utilizar.");
+    alert("Chaves geradas! As chaves foram preenchidas nos campos abaixo.");
     console.log("CHAVE PRIVADA:", data.private_key);
     console.log("CHAVE PÚBLICA:", data.public_key);
-    setKeyStr(data.public_key);
+    setPublicKey(data.public_key || "");
+    setPrivateKey(data.private_key || "");
   };
 
   const handleAction = async (action) => {
     if (!file) return alert("Selecione um arquivo primeiro");
-    if (!keyStr) return alert("Forneça a chave PEM primiero");
+    const keyToUse = action === 'encrypt' ? publicKey : privateKey;
+    if (!keyToUse) return alert("Forneça a chave PEM primeiro (use Gerar Chaves ou cole manualmente)");
     
     setLoading(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append(action === 'encrypt' ? "public_key" : "private_key", keyStr);
+    formData.append(action === 'encrypt' ? "public_key" : "private_key", keyToUse);
 
     try {
       const resp = await fetch(`${API_BASE}/crypto/asymmetric/${action}`, {
@@ -188,13 +191,38 @@ function AsymmetricTab() {
         </label>
         
         <label className="block">
-          <span className="text-slate-600 dark:text-slate-300">Chave Pública / Privada (Formato PEM)</span>
-          <textarea 
-            rows="4" 
-            value={keyStr} 
-            onChange={(e) => setKeyStr(e.target.value)}
-            className="input-field mt-1 font-mono text-xs" 
-            placeholder="Cole o código da sua chave PEM aqui..."
+          <div className="flex items-center justify-between">
+            <span className="text-slate-600 dark:text-slate-300">Chave Pública (Formato PEM)</span>
+            <div className="flex gap-2">
+              <button type="button" className="text-xs btn-ghost" onClick={() => navigator.clipboard && navigator.clipboard.writeText(publicKey)}>
+                Copiar
+              </button>
+            </div>
+          </div>
+          <textarea
+            rows="4"
+            value={publicKey}
+            onChange={(e) => setPublicKey(e.target.value)}
+            className="input-field mt-1 font-mono text-xs"
+            placeholder="Cole a chave pública PEM aqui ou gere novas chaves..."
+          />
+        </label>
+
+        <label className="block">
+          <div className="flex items-center justify-between">
+            <span className="text-slate-600 dark:text-slate-300">Chave Privada (Formato PEM)</span>
+            <div className="flex gap-2">
+              <button type="button" className="text-xs btn-ghost" onClick={() => navigator.clipboard && navigator.clipboard.writeText(privateKey)}>
+                Copiar
+              </button>
+            </div>
+          </div>
+          <textarea
+            rows="6"
+            value={privateKey}
+            onChange={(e) => setPrivateKey(e.target.value)}
+            className="input-field mt-1 font-mono text-xs"
+            placeholder="Cole a chave privada PEM aqui (necessária para descriptografar)..."
           />
         </label>
         
