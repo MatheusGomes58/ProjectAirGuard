@@ -76,6 +76,8 @@ function SymmetricTab() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const fileInputRef = React.useRef(null);
+
   const handleAction = async (action) => {
     if (!file) return alert("Selecione um arquivo primeiro");
     setLoading(true);
@@ -94,13 +96,26 @@ function SymmetricTab() {
         throw new Error(errorData.detail || `A operação de ${action === 'encrypt' ? 'criptografia' : 'descriptografia'} falhou.`);
       }
 
+      const disposition = resp.headers.get('content-disposition');
+      let filename = action === 'encrypt' ? `criptografado_${file.name}` : `descriptografado_${file.name}`;
+      if (disposition && disposition.indexOf('filename=') !== -1) {
+        const matches = disposition.match(/filename="?([^"]+)"?/);
+        if (matches != null && matches[1]) {
+          filename = matches[1];
+        }
+      }
+
       const blob = await resp.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = action === 'encrypt' ? `criptografado_${file.name}` : `descriptografado_${file.name}`;
+      a.download = filename;
       a.click();
       window.URL.revokeObjectURL(url);
+      
+      // Limpar o arquivo selecionado para forçar a seleção do novo arquivo processado
+      setFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (e) {
       alert(`Erro: ${e.message}`);
     } finally {
@@ -116,7 +131,7 @@ function SymmetricTab() {
       <div className="space-y-4">
         <label className="block">
           <span className="text-slate-600 dark:text-slate-300">Arquivo Alvo</span>
-          <input type="file" onChange={(e) => setFile(e.target.files[0])} className="input-field mt-1" />
+          <input ref={fileInputRef} type="file" onChange={(e) => setFile(e.target.files[0])} className="input-field mt-1" />
         </label>
 
         <div className="flex gap-4">
@@ -140,12 +155,12 @@ function AsymmetricTab() {
   const [privateKey, setPrivateKey] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const fileInputRef = React.useRef(null);
+
   const generateKeys = async () => {
     const res = await fetch(`${API_BASE}/crypto/asymmetric/keys`, { method: 'POST' });
     const data = await res.json();
     alert("Chaves geradas! As chaves foram preenchidas nos campos abaixo.");
-    console.log("CHAVE PRIVADA:", data.private_key);
-    console.log("CHAVE PÚBLICA:", data.public_key);
     setPublicKey(data.public_key || "");
     setPrivateKey(data.private_key || "");
   };
@@ -158,7 +173,7 @@ function AsymmetricTab() {
     setLoading(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append(action === 'encrypt' ? "public_key" : "private_key", keyToUse);
+    formData.append(action === 'encrypt' ? "public_key" : "private_key", keyToUse.trim());
 
     try {
       const resp = await fetch(`${API_BASE}/crypto/asymmetric/${action}`, {
@@ -171,13 +186,26 @@ function AsymmetricTab() {
         throw new Error(errorData.detail || `A operação de ${action === 'encrypt' ? 'criptografia' : 'descriptografia'} falhou.`);
       }
 
+      const disposition = resp.headers.get('content-disposition');
+      let filename = action === 'encrypt' ? `rsa_criptografado_${file.name}` : `descriptografado_${file.name}`;
+      if (disposition && disposition.indexOf('filename=') !== -1) {
+        const matches = disposition.match(/filename="?([^"]+)"?/);
+        if (matches != null && matches[1]) {
+          filename = matches[1];
+        }
+      }
+
       const blob = await resp.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = action === 'encrypt' ? `rsa_criptografado_${file.name}` : `descriptografado_${file.name}`;
+      a.download = filename;
       a.click();
       window.URL.revokeObjectURL(url);
+      
+      // Limpar o arquivo selecionado
+      setFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (e) {
       alert(`Erro: ${e.message}`);
     } finally {
@@ -193,7 +221,7 @@ function AsymmetricTab() {
       <div className="space-y-4">
         <label className="block">
           <span className="text-slate-600 dark:text-slate-300">Arquivo Alvo</span>
-          <input type="file" onChange={(e) => setFile(e.target.files[0])} className="input-field mt-1" />
+          <input ref={fileInputRef} type="file" onChange={(e) => setFile(e.target.files[0])} className="input-field mt-1" />
         </label>
 
         <label className="block">
@@ -250,6 +278,8 @@ function StegoTab() {
   const [loading, setLoading] = useState(false);
   const [decodedMsg, setDecodedMsg] = useState("");
 
+  const fileInputRef = React.useRef(null);
+
   const handleEncode = async () => {
     if (!file || !secretMsg) return alert("Selecione uma imagem e digite uma mensagem secreta");
     setLoading(true);
@@ -267,13 +297,26 @@ function StegoTab() {
         throw new Error(errorData.detail || "Falha ao ocultar mensagem.");
       }
 
+      const disposition = resp.headers.get('content-disposition');
+      let filename = `stego_${file.name.split('.')[0]}.png`;
+      if (disposition && disposition.indexOf('filename=') !== -1) {
+        const matches = disposition.match(/filename="?([^"]+)"?/);
+        if (matches != null && matches[1]) {
+          filename = matches[1];
+        }
+      }
+
       const blob = await resp.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `stego_${file.name.split('.')[0]}.png`;
+      a.download = filename;
       a.click();
       window.URL.revokeObjectURL(url);
+      
+      // Limpar
+      setFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (e) {
       alert(`Erro: ${e.message}`);
     } finally {
@@ -315,7 +358,7 @@ function StegoTab() {
       <div className="space-y-4">
         <label className="block">
           <span className="text-slate-600 dark:text-slate-300">Imagem Portadora</span>
-          <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} className="input-field mt-1" />
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} className="input-field mt-1" />
         </label>
 
         <label className="block">
