@@ -1,5 +1,5 @@
 # ==============================================================================
-# main.py — PID Climate Controller | Raspberry Pi Pico 2W (MicroPython)
+# main.py — EcoBreath Shield | Raspberry Pi Pico 2W (MicroPython)
 # ==============================================================================
 import utime
 import uasyncio as asyncio
@@ -10,10 +10,11 @@ import gc
 from lib import shared_state
 from lib import wifi_manager as wifi
 from lib import web_server as web
+from lib import cloud_sync
 from lib.pid_controller import PID
 from lib.relay_manager import RelayManager
 from lib.config import (
-    PIN_DHT22,
+    PIN_DHT22, PIN_RELAY_FAN, PIN_RELAY_HUMID,
     PID_TEMP_KP, PID_TEMP_KI, PID_TEMP_KD,
     PID_HUM_KP, PID_HUM_KI, PID_HUM_KD,
     SENSOR_READ_MS, CONTROL_PERIOD_S, AP_SSID,
@@ -21,97 +22,154 @@ from lib.config import (
 
 
 # ==============================================================================
+# Log helper — tudo que é printado vai pro log do dashboard
+# ==============================================================================
+_original_print = print
+def log(msg):
+    _original_print(msg)
+    shared_state.add_log(str(msg))
+
+
+# ==============================================================================
 # Task: Leitura do sensor DHT22
 # ==============================================================================
 async def sensor_task():
     sensor = dht.DHT22(Pin(PIN_DHT22))
-    print("[sensor] Task iniciada.")
+    log("[sensor] Task iniciada.")
+    tick = 0
     while True:
         try:
             sensor.measure()
-            shared_state.set_sensor_data(sensor.temperature(), sensor.humidity())
+            t = sensor.temperature()
+            h = sensor.humidity()
+            shared_state.set_sensor_data(t, h)
+            tick += 1
+            if tick % 5 == 0:  # Log a cada 10s (5 * 2000ms)
+                log("[sensor] T={:.1f}C H={:.1f}%".format(t, h))
         except Exception as e:
-            print("[sensor] Erro:", e)
+            log("[sensor] Erro: {}".format(e))
         await asyncio.sleep_ms(SENSOR_READ_MS)
 
 
 # ==============================================================================
-# Task: Controle PID / Manual
+# Task: Controle (Auto com PID duty-cycle / Manual)
 # ==============================================================================
 async def control_task():
+    """Controle dinâmico baseado em setpoints e ações configuráveis.
+
+    Cada ação define:
+      - Qual relé controlar (1 ou 2)
+      - Qual setpoint usar como referência
+      - Condição: liga quando sensor > SP (above) ou < SP (below)
+      - Período: duty-cycle temporal controlado por PID (0 = liga direto)
+
+    O PID calcula quanto tempo o relé fica ligado dentro do período.
+    """
     relays = RelayManager()
-    pid1 = PID(PID_TEMP_KP, PID_TEMP_KI, PID_TEMP_KD, setpoint=0.0)
-    pid2 = PID(PID_HUM_KP, PID_HUM_KI, PID_HUM_KD, setpoint=0.0)
-    last_mode = "pid"
-    last_temp = None
-    last_hum = None
-    auto_period = CONTROL_PERIOD_S
-    print("[control] Task iniciada.")
+    # PIDs por ação (criados dinamicamente)
+    pids = {}  # action_id -> PID instance
+    # Acumuladores de duty-cycle por relé
+    cycle_accum = {1: 0.0, 2: 0.0}
+    relay_duty = {1: 0.0, 2: 0.0}
+
+    log("[control] Task iniciada.")
 
     while True:
         temp, hum = shared_state.get_sensor_data()
-        temp_sp, hum_sp = shared_state.get_setpoints()
         mode = shared_state.get_control_mode()
-        r1_sensor, r1_action, r2_sensor, r2_action, period = shared_state.get_control_config()
+        actions = shared_state.get_actions_list()
+        setpoints = shared_state.get_setpoints_list()
 
-        if mode != last_mode:
-            pid1.reset()
-            pid2.reset()
-            last_mode = mode
+        # Mapa de setpoints por id
+        sp_map = {sp["id"]: sp for sp in setpoints}
 
-        # Período de atuação
-        if period > 0:
-            act_period = period
-        else:
-            if temp is not None and last_temp is not None:
-                delta_t = abs(temp - last_temp)
-                delta_h = abs(hum - last_hum) if hum is not None and last_hum is not None else 0
-                delta = max(delta_t, delta_h)
-                if delta > 1.0:
-                    auto_period = max(5, auto_period - 1)
-                elif delta < 0.2:
-                    auto_period = min(30, auto_period + 1)
-            act_period = auto_period
-        relays._period_s = act_period
+        if mode == "auto":
+            # Reset duty para cada relé
+            duty = {1: 0.0, 2: 0.0}
 
-        if mode == "pid":
-            if temp is not None and hum is not None:
-                def calc_duty(pid, sensor_type, action, t_sp, h_sp):
-                    measured = temp if sensor_type == "temp" else hum
-                    sp = t_sp if sensor_type == "temp" else h_sp
-                    if action == "above":
-                        if measured > sp:
-                            pid.setpoint = measured
-                            return max(0.0, min(1.0, pid.compute(sp, 1.0)))
-                        else:
-                            pid.reset()
-                            return 0.0
+            for act in actions:
+                sp = sp_map.get(act["setpoint_id"])
+                if not sp:
+                    continue
+
+                # Valor do sensor
+                measured = shared_state.get_sensor_value(sp["sensor"])
+                if measured is None:
+                    continue
+
+                sp_val = sp["value"]
+                condition = act["condition"]
+                period = act["period"]
+                relay = act["relay"]
+                act_id = act["id"]
+
+                # Verifica se precisa atuar
+                needs_action = False
+                if condition == "above" and measured > sp_val:
+                    needs_action = True
+                elif condition == "below" and measured < sp_val:
+                    needs_action = True
+
+                if not needs_action:
+                    # Limpa PID se existir
+                    if act_id in pids:
+                        pids[act_id].reset()
+                    continue
+
+                if period <= 0:
+                    # Sem duty-cycle: liga direto
+                    duty[relay] = 1.0
+                else:
+                    # PID calcula o duty
+                    if act_id not in pids:
+                        kp = PID_TEMP_KP if sp["sensor"] == "temp" else PID_HUM_KP
+                        ki = PID_TEMP_KI if sp["sensor"] == "temp" else PID_HUM_KI
+                        kd = PID_TEMP_KD if sp["sensor"] == "temp" else PID_HUM_KD
+                        pids[act_id] = PID(kp, ki, kd, setpoint=0.0)
+
+                    pid = pids[act_id]
+                    if condition == "above":
+                        pid.setpoint = measured
+                        out = pid.compute(sp_val, 1.0)
                     else:
-                        pid.setpoint = sp
+                        pid.setpoint = sp_val
                         out = pid.compute(measured, 1.0)
-                        return max(0.0, min(1.0, out)) if measured < sp else 0.0
 
-                duty1 = calc_duty(pid1, r1_sensor, r1_action, temp_sp, hum_sp)
-                duty2 = calc_duty(pid2, r2_sensor, r2_action, temp_sp, hum_sp)
+                    d = max(0.0, min(1.0, out))
+                    # Maior duty ganha (se múltiplas ações no mesmo relé)
+                    if d > duty[relay]:
+                        duty[relay] = d
 
-                shared_state.set_controller_outputs(duty1, duty2)
-                relays.set_duty(duty1, duty2)
+            # Aplica duty-cycle temporal
+            for r in [1, 2]:
+                relay_duty[r] = duty[r]
 
-                shared_state.add_history_point(temp, hum, temp_sp, hum_sp, duty1, duty2)
-                if duty1 > 0 or duty2 > 0:
-                    shared_state.add_log("PID: T={:.1f} H={:.1f} R1={:.0f}% R2={:.0f}% P={}s".format(
-                        temp, hum, duty1*100, duty2*100, act_period))
-                last_temp = temp
-                last_hum = hum
-
+            relays.set_duty(duty[1], duty[2])
+            relays._period_s = CONTROL_PERIOD_S
             relays.update(1.0)
 
-        elif mode == "manual":
-            man_fan, man_humid = shared_state.get_manual_relays()
-            relays.force(man_fan, man_humid)
-            shared_state.set_controller_outputs(0.0, 0.0)
+            # Log
+            r1_on, r2_on = relays.get_status()
+            if r1_on or r2_on:
+                log("[auto] R1={} R2={} T={} H={}".format(
+                    "ON" if r1_on else "OFF", "ON" if r2_on else "OFF",
+                    "{:.1f}".format(temp) if temp else "--",
+                    "{:.1f}".format(hum) if hum else "--"))
 
-        shared_state.set_relay_status(*relays.get_status())
+        elif mode == "manual":
+            r1_man = shared_state.get_manual_relay(1)
+            r2_man = shared_state.get_manual_relay(2)
+            relays.force(r1_man, r2_man)
+
+        # Atualiza estados
+        r1_on, r2_on = relays.get_status()
+        shared_state.set_relay_state(1, r1_on)
+        shared_state.set_relay_state(2, r2_on)
+
+        # Histórico
+        if temp is not None and hum is not None:
+            shared_state.add_history_point(temp, hum, r1_on, r2_on)
+
         await asyncio.sleep_ms(1000)
 
 
@@ -123,7 +181,7 @@ async def wifi_monitor():
         await asyncio.sleep_ms(15000)
         ssid, password = wifi.load_wifi_properties()
         if ssid and not wifi.is_connected():
-            print("[wifi] Reconectando...")
+            log("[wifi] Reconectando...")
             wifi.start_ap()
             wifi.connect_to_wifi(ssid, password, save=False)
         gc.collect()
@@ -135,39 +193,61 @@ async def wifi_monitor():
 async def main():
     gc.collect()
     print("\n" + "=" * 40)
-    print("  PID Climate Controller v2.0")
+    print("  EcoBreath Shield v2.0")
     print("=" * 40 + "\n")
 
+    # Build automatico do dashboard
+    try:
+        import build
+        build.build()
+    except Exception as e:
+        print("[build] Pulou:", e)
+
     # Carrega configurações
-    shared_state.load_setpoints_file()
-    shared_state.load_relay_names_file()
-    shared_state.load_control_config()
+    shared_state.load_setpoints()
+    shared_state.load_actions()
+    shared_state.load_state()
+    shared_state.load_relay_names()
+    cloud_sync.load_cloud_config()
 
-    # AP
-    ap_ip = wifi.start_ap()
-    print("\n  AP: {} | IP: {} | http://{}\n".format(AP_SSID, ap_ip, ap_ip))
+    # Rede
+    net_mode = shared_state.get_net_mode()
+    if net_mode != 'reader':
+        # AP
+        ap_ip = wifi.start_ap()
+        log("AP: {} | IP: {} | http://{}".format(AP_SSID, ap_ip, ap_ip))
 
-    # WiFi salvo
-    ssid_salvo, _ = wifi.load_wifi_properties()
-    if ssid_salvo:
-        print("[wifi] Tentando '{}'...".format(ssid_salvo))
-        if wifi.try_saved_wifi():
-            print("[wifi] OK! IP: {}".format(wifi.get_sta_ip()))
+        # WiFi salvo
+        ssid_salvo, _ = wifi.load_wifi_properties()
+        if ssid_salvo:
+            log("[wifi] Tentando '{}'...".format(ssid_salvo))
+            if wifi.try_saved_wifi():
+                log("[wifi] OK! IP: {}".format(wifi.get_sta_ip()))
+            else:
+                log("[wifi] Falha. Use o AP.")
         else:
-            print("[wifi] Falha. Use o AP.")
+            log("[wifi] Nenhuma rede salva.")
     else:
-        print("[wifi] Nenhuma rede salva.")
+        log("[main] Modo LEITOR ativo. Rede desligada.")
 
     gc.collect()
 
     # Tasks
     asyncio.create_task(sensor_task())
     asyncio.create_task(control_task())
-    asyncio.create_task(wifi.dns_server_task())
-    asyncio.create_task(wifi_monitor())
-    asyncio.create_task(web.start_web_server(port=80))
 
-    print("\n[main] Sistema pronto.\n")
+    # Rede (só se não for modo leitor)
+    net_mode = shared_state.get_net_mode()
+    if net_mode == 'reader':
+        log("[main] Modo LEITOR: rede desligada, so sensores + PID.")
+        shared_state.set_control_mode('auto')
+    else:
+        asyncio.create_task(wifi.dns_server_task())
+        asyncio.create_task(wifi_monitor())
+        asyncio.create_task(web.start_web_server(port=80))
+        asyncio.create_task(cloud_sync.cloud_sync_task())
+
+    log("[main] Sistema pronto.")
     while True:
         await asyncio.sleep_ms(60000)
         gc.collect()

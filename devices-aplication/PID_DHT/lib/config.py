@@ -32,8 +32,8 @@ PID_HUM_KP  = 0.5
 PID_HUM_KI  = 0.04
 PID_HUM_KD  = 0.08
 
-# --- Modo de controle padrão: "pid" | "manual" ---
-DEFAULT_CONTROL_MODE = "pid"
+# --- Modo de controle padrão: "auto" | "manual" ---
+DEFAULT_CONTROL_MODE = "manual"
 
 # --- Ciclo de controle ---
 CONTROL_PERIOD_S  = 10    # Período do duty-cycle dos relés (segundos)

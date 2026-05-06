@@ -1,3 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>EcoBreath Shield</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0f0d;--sf:#141a17;--sf2:#1e2823;--bd:rgba(255,255,255,0.08);--pr:#00C853;--pd:rgba(0,200,83,0.15);--dg:#FF5252;--tx:#F0F4F2;--tm:#8A9A92;--rm:16px;--rl:24px;--rf:9999px;--tr:.25s}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;background:var(--bg);color:var(--tx);font-size:15px;min-height:100vh}
+.app{max-width:480px;margin:0 auto;padding:20px 16px;display:flex;flex-direction:column;gap:14px}
+.hd{display:flex;align-items:center;justify-content:space-between}.hd h1{font-size:1.3rem;font-weight:700}.hd p{font-size:.75rem;color:var(--tm);margin-top:2px}
+.badge{display:flex;align-items:center;gap:5px;background:var(--pd);color:var(--pr);border:1px solid rgba(0,200,83,.2);border-radius:var(--rf);padding:5px 10px;font-size:.7rem;font-weight:600}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--pr);animation:p 2s infinite}@keyframes p{50%{opacity:.4}}
+.cd{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:16px}
+.ct{font-size:.7rem;font-weight:600;color:var(--tm);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.rd{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rb{background:var(--sf2);border-radius:var(--rm);padding:14px;text-align:center;position:relative;overflow:hidden}
+.rb::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}.rb.t::before{background:var(--dg)}.rb.h::before{background:#42A5F5}
+.rv{font-size:1.6rem;font-weight:700}.rl{font-size:.68rem;color:var(--tm);margin-top:3px}.rs{font-size:.65rem;color:var(--pr);margin-top:2px;font-weight:600}
+.ms{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mb{background:var(--sf2);border:1.5px solid var(--bd);border-radius:var(--rm);padding:12px;color:var(--tm);font-size:.8rem;font-weight:600;cursor:pointer;text-align:center;transition:all var(--tr)}.mb.a{background:var(--pd);border-color:var(--pr);color:var(--pr)}
+.sr{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd)}.sr:last-child{border-bottom:none}
+.sl{font-size:.8rem;font-weight:500}.sc{display:flex;align-items:center;gap:6px}
+.sb{width:30px;height:30px;border-radius:50%;background:var(--sf2);border:1.5px solid var(--bd);color:var(--tx);font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}.sb:active{background:var(--pd);border-color:var(--pr)}
+.sp-input{width:58px;background:var(--sf2);border:1.5px solid var(--bd);border-radius:var(--rm);color:var(--tx);font-size:.85rem;padding:6px 4px;text-align:center;outline:none}.sp-input:focus{border-color:var(--pr)}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rc{background:var(--sf2);border-radius:var(--rm);padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;border:1.5px solid var(--bd);transition:all var(--tr)}.rc.on{border-color:rgba(0,200,83,.3);box-shadow:0 3px 12px rgba(0,200,83,.15)}
+.rn{font-size:.7rem;font-weight:600;color:var(--tm)}.re{font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:var(--rf)}.re.on{background:var(--pd);color:var(--pr)}.re.off{background:rgba(255,255,255,.05);color:var(--tm)}
+.sw-c{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd)}.sw-c:last-child{border-bottom:none}
+.sw{position:relative;width:42px;height:24px;background:var(--sf2);border:1.5px solid var(--bd);border-radius:var(--rf);cursor:pointer;transition:all var(--tr)}.sw.on{background:var(--pd);border-color:var(--pr)}
+.sw::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:50%;transform:translateY(-50%);background:var(--tm);border-radius:50%;transition:all var(--tr)}.sw.on::before{transform:translateX(18px) translateY(-50%);background:var(--pr)}
+.br{display:flex;align-items:center;gap:8px;margin-top:4px}.bl{font-size:.68rem;color:var(--tm);min-width:50px}.bt{flex:1;height:5px;background:var(--sf2);border-radius:3px;overflow:hidden}.bf{height:100%;border-radius:3px;transition:width .5s}.bf.t{background:var(--dg)}.bf.h{background:#42A5F5}.bv{font-size:.68rem;font-weight:600;min-width:30px;text-align:right}
+.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:2px}
+.tab{background:var(--sf);border:1.5px solid var(--bd);border-radius:var(--rf);padding:9px;text-align:center;font-size:.75rem;font-weight:600;color:var(--tm);cursor:pointer;transition:all var(--tr)}.tab.a{background:var(--pd);border-color:var(--pr);color:var(--pr)}
+.pg{display:none}.pg.a{display:flex;flex-direction:column;gap:14px}
+.wn{display:flex;align-items:center;justify-content:space-between;padding:10px;background:var(--sf2);border-radius:var(--rm);margin-bottom:6px;cursor:pointer;border:1.5px solid transparent}.wn:active{transform:scale(.97)}
+.wnl{display:flex;align-items:center;gap:8px}.wns{font-size:.82rem;font-weight:600}.wnx{font-size:.62rem;color:var(--tm)}
+.wnb{background:var(--pd);color:var(--pr);border:1px solid rgba(0,200,83,.3);border-radius:var(--rf);padding:5px 12px;font-size:.7rem;font-weight:600;cursor:pointer}
+.wi{background:var(--sf2);border-radius:var(--rm);padding:12px;margin-bottom:10px}.wr{display:flex;justify-content:space-between;padding:3px 0;font-size:.75rem}.wrl{color:var(--tm)}.wrv{font-weight:600}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}
+.mc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:20px;width:100%;max-width:340px}.mt{font-size:.95rem;font-weight:700;margin-bottom:14px}
+.mi{width:100%;background:var(--sf2);border:1.5px solid var(--bd);border-radius:var(--rm);color:var(--tx);font-size:.85rem;padding:11px 12px;outline:none;margin-bottom:10px}.mi:focus{border-color:var(--pr)}
+.mbs{display:flex;gap:8px}.mbb{flex:1;padding:11px 8px;border-radius:var(--rf);font-size:.8rem;font-weight:700;cursor:pointer;border:none;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mbb.x{background:var(--sf2);color:var(--tm)}.mbb.ok{background:linear-gradient(135deg,#00C853,#00A846);color:#000}
+.scb{width:100%;padding:11px;background:var(--sf2);border:1.5px solid var(--bd);border-radius:var(--rm);color:var(--tx);font-size:.8rem;font-weight:600;cursor:pointer;margin-bottom:10px}.scb:active{background:var(--pd);border-color:var(--pr)}
+.dcb{width:100%;padding:11px;background:rgba(255,82,82,.1);border:1.5px solid rgba(255,82,82,.3);border-radius:var(--rm);color:var(--dg);font-size:.8rem;font-weight:600;cursor:pointer;margin-top:6px}
+.ld{text-align:center;padding:16px;color:var(--tm);font-size:.78rem}.ft{text-align:center;padding:10px 0;font-size:.65rem;color:var(--tm)}
+.chart-wrap{width:100%;height:200px;background:var(--sf2);border-radius:var(--rm);overflow:hidden;margin-top:8px}.chart-wrap canvas{width:100%;height:100%;display:block}
+.chart-legend{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap}.chart-legend span{font-size:.63rem;display:flex;align-items:center;gap:3px}.chart-legend .cld{width:10px;height:3px;border-radius:2px}
+.col-hd{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}.col-hd .arrow{transition:transform .2s;font-size:.7rem;color:var(--tm)}.col-hd.open .arrow{transform:rotate(180deg)}
+.col-body{display:none;margin-top:8px}.col-body.open{display:block}
+.log-box{max-height:200px;overflow-y:auto;background:var(--sf2);border-radius:var(--rm);padding:10px}
+.log-line{font-family:monospace;font-size:.63rem;color:var(--tm);padding:2px 0;border-bottom:1px solid rgba(255,255,255,.03)}.log-line:last-child{border-bottom:none}
+.cfg-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}.cfg-row label{font-size:.75rem;color:var(--tm);min-width:50px}
+.cfg-row input,.cfg-row select{flex:1;background:var(--sf2);border:1.5px solid var(--bd);border-radius:var(--rm);color:var(--tx);font-size:.8rem;padding:8px 10px;outline:none;appearance:none;-webkit-appearance:none}
+.cfg-row input:focus,.cfg-row select:focus{border-color:var(--pr)}
+.cfg-btn{padding:9px 16px;background:var(--pd);border:1.5px solid var(--pr);border-radius:var(--rf);color:var(--pr);font-size:.75rem;font-weight:600;cursor:pointer;text-align:center;margin-top:4px}
+
+/* Gauge - Qualidade do Ar (velocimetro) */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+.gauge-wrap canvas{display:block}
+.gauge-info{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:-10px}
+.gauge-val{font-size:1.4rem;font-weight:700}
+.gauge-label{font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:var(--rf)}
+
+/* Setpoint items */
+.sp-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--sf2);border-radius:var(--rm);margin-bottom:6px;border:1px solid var(--bd)}
+.sp-info{display:flex;flex-direction:column;gap:2px}
+.sp-name{font-size:.78rem;font-weight:600}
+.sp-sensor{font-size:.6rem;color:var(--tm)}
+.sp-ctrl{display:flex;align-items:center;gap:6px}
+.sp-rm{width:24px;height:24px;border-radius:50%;background:rgba(255,82,82,.15);color:var(--dg);display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;font-weight:700}
+.sp-rm:active{background:rgba(255,82,82,.3)}
+/* Action items */
+.act-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--sf2);border-radius:var(--rm);margin-bottom:6px;border:1px solid var(--bd)}
+.act-info{display:flex;flex-direction:column;gap:2px}
+.act-name{font-size:.78rem;font-weight:600}
+.act-detail{font-size:.6rem;color:var(--tm)}
+.add-row{margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)}
+
+/* Net info */
+.net-info{font-size:.72rem;color:var(--tm);padding:6px 10px;background:var(--sf2);border-radius:var(--rm);margin-bottom:6px}
+/* Confirm modal body */
+.cf-body{font-size:.82rem;color:var(--tm);line-height:1.5;margin-bottom:14px;padding:8px 0}
+.cf-body .warn{color:var(--dg);font-weight:600;display:block;margin-top:6px}
+
+.cfg-val{font-size:.8rem;font-weight:600;color:var(--pr);flex:1;text-align:right}
+
+.relay-btn.clickable{cursor:pointer}.relay-btn.clickable:active{transform:scale(.95)}
+
+.mb.disabled{opacity:.3;pointer-events:none;cursor:not-allowed}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="hd"><div><h1>EcoBreath Shield</h1><p>v2.0</p></div><div class="badge"><span class="dot"></span><span id="ws">AP</span></div></div>
+<div class="tabs"><div class="tab a" onclick="P('c')">Controle</div><div class="tab" onclick="P('w')">WiFi</div><div class="tab" onclick="P('s')">Config</div></div>
+
+<!-- CONTROLE -->
+<div class="pg a" id="pc">
+  <!-- Qualidade do Ar -->
+  <div class="cd">
+    <div class="ct">Qualidade do Ar</div>
+    <div class="gauge-wrap"><canvas id="aqGauge" width="220" height="130"></canvas>
+    <div class="gauge-info"><span class="gauge-val" id="aqVal">--</span><span class="gauge-label" id="aqLabel">--</span></div></div>
+  </div>
+
+  <!-- Sensor -->
+  <div class="cd"><div class="ct">Sensor</div><div class="rd"><div class="rb t"><div class="rv" id="tv">--</div><div class="rl">Temperatura</div></div><div class="rb h"><div class="rv" id="hv">--</div><div class="rl">Umidade</div></div></div></div>
+
+  <!-- Reles -->
+  <div class="cd"><div class="ct">Reles</div>
+    <div class="rg">
+      <div class="rc relay-btn" id="rf" onclick="togRelayBtn(1)"><div class="rn" id="rn1">Rele 1</div><div class="re off" id="rfs">OFF</div></div>
+      <div class="rc relay-btn" id="rh" onclick="togRelayBtn(2)"><div class="rn" id="rn2">Rele 2</div><div class="re off" id="rhs">OFF</div></div>
+    </div>
+    <div id="modeHint" style="font-size:.6rem;color:var(--tm);text-align:center;margin-top:6px"></div>
+  </div>
+
+  <!-- Graficos (colapsavel) -->
+  <div class="cd"><div class="col-hd" id="chHd" onclick="togChart()"><div class="ct" style="margin-bottom:0">Graficos</div><span class="arrow">&#9660;</span></div>
+    <div class="col-body" id="chBody">
+      <div style="font-size:.65rem;color:var(--tm);margin-bottom:4px;text-transform:uppercase">Sensores</div>
+      <div class="chart-wrap"><canvas id="chart"></canvas></div>
+      <div style="font-size:.65rem;color:var(--tm);margin:10px 0 4px;text-transform:uppercase">Atuadores</div>
+      <div class="chart-wrap"><canvas id="relayChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Log (colapsavel) -->
+  <div class="cd"><div class="col-hd" id="lgHd" onclick="togLog()"><div class="ct" style="margin-bottom:0">Log</div><span class="arrow">&#9660;</span></div><div class="col-body" id="lgBody"><div class="log-box" id="logBox"><div class="log-line">Nenhum log</div></div></div></div>
+
+  <!-- Setpoints (colapsavel, só em modo auto) -->
+  <div class="cd" id="spCard" style="display:none">
+    <div class="col-hd" onclick="togSP()"><div class="ct" style="margin-bottom:0">Setpoints</div><span class="arrow">&#9660;</span></div>
+    <div class="col-body" id="spBody">
+      <div id="spList"></div>
+      <div class="cfg-btn" onclick="openModal('sp')">+ Incluir Setpoint</div>
+    </div>
+  </div>
+
+  <!-- Atuadores (colapsavel, só em modo auto) -->
+  <div class="cd" id="actCard" style="display:none">
+    <div class="col-hd" onclick="togAct()"><div class="ct" style="margin-bottom:0">Atuadores</div><span class="arrow">&#9660;</span></div>
+    <div class="col-body" id="actBody">
+      <div id="actList"></div>
+      <div class="cfg-btn" onclick="openModal('act')">+ Incluir Acao</div>
+    </div>
+  </div>
+</div>
+
+<!-- WIFI -->
+<div class="pg" id="pw">
+  <div class="cd"><div class="ct">Conexao WiFi</div><div class="wi"><div class="wr"><span class="wrl">Status</span><span class="wrv" id="wst">AP</span></div><div class="wr"><span class="wrl">SSID</span><span class="wrv" id="wss">--</span></div><div class="wr"><span class="wrl">IP WiFi</span><span class="wrv" id="wip">--</span></div><div class="wr"><span class="wrl">IP AP</span><span class="wrv" id="wap">--</span></div></div><div id="dcx" style="display:none"><div class="dcb" onclick="DC()">Desconectar</div></div></div>
+  <div class="cd"><div class="ct">Redes</div><div class="scb" onclick="SC()">Escanear WiFi</div><div id="nl"><div class="ld">Clique para escanear</div></div></div>
+</div>
+
+<!-- CONFIG -->
+<div class="pg" id="pst">
+  <div class="cd"><div class="ct">Modo de Operacao</div>
+    <div class="ms"><div class="mb" id="bp" onclick="setMode('auto')">Auto</div><div class="mb a" id="bm" onclick="setMode('manual')">Manual</div></div>
+    <div style="font-size:.6rem;color:var(--tm);margin-top:6px">Auto = PID controla reles | Manual = voce liga/desliga</div>
+  </div>
+  <div class="cd"><div class="ct">Nomes dos Reles</div>
+    <div class="cfg-row" onclick="openModal('rn1')" style="cursor:pointer"><label>Rele 1</label><span class="cfg-val" id="cfgR1v">Rele 1</span></div>
+    <div class="cfg-row" onclick="openModal('rn2')" style="cursor:pointer"><label>Rele 2</label><span class="cfg-val" id="cfgR2v">Rele 2</span></div>
+    <div style="font-size:.6rem;color:var(--tm);margin-top:4px">Toque para renomear</div>
+  </div>
+  <div class="cd"><div class="ct">Modo de Rede</div>
+    <div class="net-info" id="netInfo"></div>
+    <div class="ms" style="margin-top:8px">
+      <div class="mb" id="nbAP" onclick="setNet('ap')">AP</div>
+      <div class="mb" id="nbHY" onclick="setNet('hybrid')">Hibrido</div>
+      <div class="mb" id="nbWF" onclick="confirmWifiOnly()">So WiFi</div>
+      <div class="mb" id="nbRD" onclick="confirmReader()">Leitor</div>
+    </div>
+    <div style="font-size:.6rem;color:var(--tm);margin-top:6px">Leitor = desliga rede, so sensores + PID (economia de energia)</div>
+  </div>
+</div>
+
+<div class="ft">EcoBreath Shield v2.0</div>
+</div>
+
+<!-- MODAIS -->
+<div class="modal" id="mdWifi"><div class="mc"><div class="mt" id="mtt">Conectar</div><input class="mi" id="mp" type="password" placeholder="Senha da rede"><div class="mbs"><div class="mbb x" onclick="closeModal('mdWifi')">Cancelar</div><div class="mbb ok" onclick="WC()">Conectar</div></div></div></div>
+
+<div class="modal" id="mdSP"><div class="mc"><div class="mt">Novo Setpoint</div>
+<input class="mi" id="fSpName" type="text" placeholder="Nome (ex: Temp Max)">
+<select class="mi" id="fSpSensor"><option value="temp">Temperatura</option><option value="hum">Umidade</option></select>
+<input class="mi" id="fSpValue" type="number" step="0.5" inputmode="decimal" placeholder="Valor alvo">
+<div class="mbs"><div class="mbb x" onclick="closeModal('mdSP')">Cancelar</div><div class="mbb ok" onclick="saveSP()">Salvar</div></div></div></div>
+
+<div class="modal" id="mdAct"><div class="mc"><div class="mt">Nova Acao</div>
+<input class="mi" id="fActName" type="text" placeholder="Nome (ex: Resfriar)">
+<select class="mi" id="fActRelay"></select>
+<select class="mi" id="fActSP"></select>
+<select class="mi" id="fActCond"><option value="above">Liga acima do SP</option><option value="below">Liga abaixo do SP</option></select>
+<input class="mi" id="fActPeriod" type="number" step="1" min="0" inputmode="numeric" placeholder="Periodo (seg, 0=direto)" value="10">
+<div class="mbs"><div class="mbb x" onclick="closeModal('mdAct')">Cancelar</div><div class="mbb ok" onclick="saveAct()">Salvar</div></div></div></div>
+
+<div class="modal" id="mdRN"><div class="mc"><div class="mt">Renomear Rele</div>
+<input class="mi" id="fRNname" type="text" placeholder="Novo nome">
+<input type="hidden" id="fRNrelay">
+<div class="mbs"><div class="mbb x" onclick="closeModal('mdRN')">Cancelar</div><div class="mbb ok" onclick="saveRN()">Salvar</div></div></div></div>
+
+<div class="modal" id="mdConfirm"><div class="mc"><div class="mt" id="cfTitle">Confirmar</div><div class="cf-body" id="cfBody"></div><div class="mbs"><div class="mbb x" id="cfCancel">Cancelar</div><div class="mbb ok" id="cfOk">Confirmar</div></div></div></div>
+
+<script>
 var D={mode:'manual',relays:{},manual:{},relay_names:{}},ss='',chartOpen=false,logOpen=false,spOpen=false,actOpen=false,chartData=[];
 
 function P(p){var pages=['pc','pw','pst'],tabs=document.querySelectorAll('.tab');pages.forEach(function(id,i){document.getElementById(id).className='pg'+((p==='c'&&i===0)||(p==='w'&&i===1)||(p==='s'&&i===2)?' a':'');tabs[i].className='tab'+((p==='c'&&i===0)||(p==='w'&&i===1)||(p==='s'&&i===2)?' a':'');});}
@@ -197,3 +405,6 @@ F();drawGauge(0);
 setInterval(F,2500);
 setInterval(function(){if(chartOpen)fetchHistory();},5000);
 setInterval(function(){if(logOpen)fetchLog();},5000);
+</script>
+</body>
+</html>

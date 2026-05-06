@@ -3,30 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Climate Control</title>
+<title>EcoBreath Shield</title>
 <link rel="stylesheet" href="/web/style.css">
 </head>
 <body>
 <div class="app">
-<div class="hd"><div><h1>Climate Control</h1><p>PID Controller v2.0</p></div><div class="badge"><span class="dot"></span><span id="ws">AP</span></div></div>
+<div class="hd"><div><h1>EcoBreath Shield</h1><p>v2.0</p></div><div class="badge"><span class="dot"></span><span id="ws">AP</span></div></div>
 <div class="tabs"><div class="tab a" onclick="P('c')">Controle</div><div class="tab" onclick="P('w')">WiFi</div><div class="tab" onclick="P('s')">Config</div></div>
 
 <!-- CONTROLE -->
 <div class="pg a" id="pc">
-  <div class="cd"><div class="ct">Sensor</div><div class="rd"><div class="rb t"><div class="rv" id="tv">--</div><div class="rl">Temperatura</div><div class="rs" id="ts">SP:--</div></div><div class="rb h"><div class="rv" id="hv">--</div><div class="rl">Umidade</div><div class="rs" id="hs">SP:--</div></div></div></div>
-  <div class="cd"><div class="ct">Modo</div><div class="ms"><div class="mb a" id="bp" onclick="setMode('pid')">PID Auto</div><div class="mb" id="bm" onclick="setMode('manual')">Manual</div></div></div>
-  <div class="cd" id="ps"><div class="ct">Setpoints</div>
-    <div class="sr"><span class="sl">Temperatura (C)</span><div class="sc"><div class="sb" onclick="adjSP('t',-0.5)">-</div><input class="sp-input" id="st" type="number" step="0.5" inputmode="decimal" onchange="sendSP()"><div class="sb" onclick="adjSP('t',0.5)">+</div></div></div>
-    <div class="sr"><span class="sl">Umidade (%)</span><div class="sc"><div class="sb" onclick="adjSP('h',-1)">-</div><input class="sp-input" id="sh" type="number" step="1" inputmode="decimal" onchange="sendSP()"><div class="sb" onclick="adjSP('h',1)">+</div></div></div>
-    <div><div class="br"><span class="bl" id="r1bl">Rele 1</span><div class="bt"><div class="bf t" id="pb" style="width:0"></div></div><span class="bv" id="pv">0%</span></div>
-    <div class="br"><span class="bl" id="r2bl">Rele 2</span><div class="bt"><div class="bf h" id="hb" style="width:0"></div></div><span class="bv" id="hx">0%</span></div></div>
+  <!-- Qualidade do Ar -->
+  <div class="cd">
+    <div class="ct">Qualidade do Ar</div>
+    <div class="gauge-wrap"><canvas id="aqGauge" width="220" height="130"></canvas>
+    <div class="gauge-info"><span class="gauge-val" id="aqVal">--</span><span class="gauge-label" id="aqLabel">--</span></div></div>
   </div>
-  <div class="cd" id="mn" style="display:none"><div class="ct">Manual</div><div class="sw-c"><span class="sl" id="r1mn">Rele 1</span><div class="sw" id="sf" onclick="togMan('f')"></div></div><div class="sw-c"><span class="sl" id="r2mn">Rele 2</span><div class="sw" id="su" onclick="togMan('h')"></div></div></div>
-  <div class="cd"><div class="ct">Reles</div><div class="rg"><div class="rc" id="rf"><div class="rn" id="r1nm">Rele 1</div><div class="re off" id="rfs">OFF</div></div><div class="rc" id="rh"><div class="rn" id="r2nm">Rele 2</div><div class="re off" id="rhs">OFF</div></div></div></div>
-  <!-- Grafico -->
-  <div class="cd"><div class="col-hd" id="chHd" onclick="togChart()"><div class="ct" style="margin-bottom:0">Grafico</div><span class="arrow">&#9660;</span></div><div class="col-body" id="chBody"><div class="chart-wrap"><canvas id="chart"></canvas></div><div class="chart-legend"><span><div class="cld" style="background:#FF5252"></div>Temp</span><span><div class="cld" style="background:#42A5F5"></div>Umid</span><span><div class="cld" style="background:#FF5252;opacity:.4"></div>SP T</span><span><div class="cld" style="background:#42A5F5;opacity:.4"></div>SP H</span></div></div></div>
-  <!-- Log -->
+
+  <!-- Sensor -->
+  <div class="cd"><div class="ct">Sensor</div><div class="rd"><div class="rb t"><div class="rv" id="tv">--</div><div class="rl">Temperatura</div></div><div class="rb h"><div class="rv" id="hv">--</div><div class="rl">Umidade</div></div></div></div>
+
+  <!-- Reles -->
+  <div class="cd"><div class="ct">Reles</div>
+    <div class="rg">
+      <div class="rc relay-btn" id="rf" onclick="togRelayBtn(1)"><div class="rn" id="rn1">Rele 1</div><div class="re off" id="rfs">OFF</div></div>
+      <div class="rc relay-btn" id="rh" onclick="togRelayBtn(2)"><div class="rn" id="rn2">Rele 2</div><div class="re off" id="rhs">OFF</div></div>
+    </div>
+    <div id="modeHint" style="font-size:.6rem;color:var(--tm);text-align:center;margin-top:6px"></div>
+  </div>
+
+  <!-- Graficos (colapsavel) -->
+  <div class="cd"><div class="col-hd" id="chHd" onclick="togChart()"><div class="ct" style="margin-bottom:0">Graficos</div><span class="arrow">&#9660;</span></div>
+    <div class="col-body" id="chBody">
+      <div style="font-size:.65rem;color:var(--tm);margin-bottom:4px;text-transform:uppercase">Sensores</div>
+      <div class="chart-wrap"><canvas id="chart"></canvas></div>
+      <div style="font-size:.65rem;color:var(--tm);margin:10px 0 4px;text-transform:uppercase">Atuadores</div>
+      <div class="chart-wrap"><canvas id="relayChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Log (colapsavel) -->
   <div class="cd"><div class="col-hd" id="lgHd" onclick="togLog()"><div class="ct" style="margin-bottom:0">Log</div><span class="arrow">&#9660;</span></div><div class="col-body" id="lgBody"><div class="log-box" id="logBox"><div class="log-line">Nenhum log</div></div></div></div>
+
+  <!-- Setpoints (colapsavel, só em modo auto) -->
+  <div class="cd" id="spCard" style="display:none">
+    <div class="col-hd" onclick="togSP()"><div class="ct" style="margin-bottom:0">Setpoints</div><span class="arrow">&#9660;</span></div>
+    <div class="col-body" id="spBody">
+      <div id="spList"></div>
+      <div class="cfg-btn" onclick="openModal('sp')">+ Incluir Setpoint</div>
+    </div>
+  </div>
+
+  <!-- Atuadores (colapsavel, só em modo auto) -->
+  <div class="cd" id="actCard" style="display:none">
+    <div class="col-hd" onclick="togAct()"><div class="ct" style="margin-bottom:0">Atuadores</div><span class="arrow">&#9660;</span></div>
+    <div class="col-body" id="actBody">
+      <div id="actList"></div>
+      <div class="cfg-btn" onclick="openModal('act')">+ Incluir Acao</div>
+    </div>
+  </div>
 </div>
 
 <!-- WIFI -->
@@ -37,28 +72,53 @@
 
 <!-- CONFIG -->
 <div class="pg" id="pst">
-  <div class="cd"><div class="ct">Nomes dos Reles (Atuadores)</div>
-    <div class="cfg-row"><label>Rele 1</label><input id="cfgR1" type="text" placeholder="Ex: Ventilador, Ar Condicionado"></div>
-    <div class="cfg-row"><label>Rele 2</label><input id="cfgR2" type="text" placeholder="Ex: Umidificador, Motor Janela"></div>
-    <div class="cfg-btn" onclick="saveRelayNames()">Salvar Nomes</div>
-    <div id="cfgMsg" style="font-size:.7rem;margin-top:6px;color:var(--tm)"></div>
+  <div class="cd"><div class="ct">Modo de Operacao</div>
+    <div class="ms"><div class="mb" id="bp" onclick="setMode('auto')">Auto</div><div class="mb a" id="bm" onclick="setMode('manual')">Manual</div></div>
+    <div style="font-size:.6rem;color:var(--tm);margin-top:6px">Auto = PID controla reles | Manual = voce liga/desliga</div>
   </div>
-  <div class="cd"><div class="ct">Mapeamento Sensor &rarr; Rele</div>
-    <div class="cfg-row"><label>Rele 1</label><select id="cfgR1S"><option value="temp">Temperatura</option><option value="hum">Umidade</option></select></div>
-    <div class="cfg-row"><label>Acao 1</label><select id="cfgR1A"><option value="above">Liga acima do SP</option><option value="below">Liga abaixo do SP</option></select></div>
-    <div class="cfg-row"><label>Rele 2</label><select id="cfgR2S"><option value="temp">Temperatura</option><option value="hum">Umidade</option></select></div>
-    <div class="cfg-row"><label>Acao 2</label><select id="cfgR2A"><option value="above">Liga acima do SP</option><option value="below">Liga abaixo do SP</option></select></div>
-    <div class="cfg-row"><label>Periodo</label><input id="cfgPeriod" type="number" step="1" min="0" placeholder="0 = auto" style="width:60px"><span style="font-size:.65rem;color:var(--tm);margin-left:4px">seg (0=auto)</span></div>
-    <div class="cfg-btn" onclick="saveControl()">Salvar Controle</div>
-    <div id="ctrlMsg" style="font-size:.7rem;margin-top:6px;color:var(--tm)"></div>
+  <div class="cd"><div class="ct">Nomes dos Reles</div>
+    <div class="cfg-row" onclick="openModal('rn1')" style="cursor:pointer"><label>Rele 1</label><span class="cfg-val" id="cfgR1v">Rele 1</span></div>
+    <div class="cfg-row" onclick="openModal('rn2')" style="cursor:pointer"><label>Rele 2</label><span class="cfg-val" id="cfgR2v">Rele 2</span></div>
+    <div style="font-size:.6rem;color:var(--tm);margin-top:4px">Toque para renomear</div>
+  </div>
+  <div class="cd"><div class="ct">Modo de Rede</div>
+    <div class="net-info" id="netInfo"></div>
+    <div class="ms" style="margin-top:8px">
+      <div class="mb" id="nbAP" onclick="setNet('ap')">AP</div>
+      <div class="mb" id="nbHY" onclick="setNet('hybrid')">Hibrido</div>
+      <div class="mb" id="nbWF" onclick="confirmWifiOnly()">So WiFi</div>
+      <div class="mb" id="nbRD" onclick="confirmReader()">Leitor</div>
+    </div>
+    <div style="font-size:.6rem;color:var(--tm);margin-top:6px">Leitor = desliga rede, so sensores + PID (economia de energia)</div>
   </div>
 </div>
 
-<div class="ft">PID Climate Controller v2.0</div>
+<div class="ft">EcoBreath Shield v2.0</div>
 </div>
 
-<!-- Modal WiFi -->
-<div class="modal" id="md"><div class="mc"><div class="mt" id="mtt">Conectar</div><input class="mi" id="mp" type="password" placeholder="Senha"><div class="mbs"><div class="mbb x" onclick="CM()">Cancelar</div><div class="mbb ok" onclick="WC()">Conectar</div></div></div></div>
+<!-- MODAIS -->
+<div class="modal" id="mdWifi"><div class="mc"><div class="mt" id="mtt">Conectar</div><input class="mi" id="mp" type="password" placeholder="Senha da rede"><div class="mbs"><div class="mbb x" onclick="closeModal('mdWifi')">Cancelar</div><div class="mbb ok" onclick="WC()">Conectar</div></div></div></div>
+
+<div class="modal" id="mdSP"><div class="mc"><div class="mt">Novo Setpoint</div>
+<input class="mi" id="fSpName" type="text" placeholder="Nome (ex: Temp Max)">
+<select class="mi" id="fSpSensor"><option value="temp">Temperatura</option><option value="hum">Umidade</option></select>
+<input class="mi" id="fSpValue" type="number" step="0.5" inputmode="decimal" placeholder="Valor alvo">
+<div class="mbs"><div class="mbb x" onclick="closeModal('mdSP')">Cancelar</div><div class="mbb ok" onclick="saveSP()">Salvar</div></div></div></div>
+
+<div class="modal" id="mdAct"><div class="mc"><div class="mt">Nova Acao</div>
+<input class="mi" id="fActName" type="text" placeholder="Nome (ex: Resfriar)">
+<select class="mi" id="fActRelay"></select>
+<select class="mi" id="fActSP"></select>
+<select class="mi" id="fActCond"><option value="above">Liga acima do SP</option><option value="below">Liga abaixo do SP</option></select>
+<input class="mi" id="fActPeriod" type="number" step="1" min="0" inputmode="numeric" placeholder="Periodo (seg, 0=direto)" value="10">
+<div class="mbs"><div class="mbb x" onclick="closeModal('mdAct')">Cancelar</div><div class="mbb ok" onclick="saveAct()">Salvar</div></div></div></div>
+
+<div class="modal" id="mdRN"><div class="mc"><div class="mt">Renomear Rele</div>
+<input class="mi" id="fRNname" type="text" placeholder="Novo nome">
+<input type="hidden" id="fRNrelay">
+<div class="mbs"><div class="mbb x" onclick="closeModal('mdRN')">Cancelar</div><div class="mbb ok" onclick="saveRN()">Salvar</div></div></div></div>
+
+<div class="modal" id="mdConfirm"><div class="mc"><div class="mt" id="cfTitle">Confirmar</div><div class="cf-body" id="cfBody"></div><div class="mbs"><div class="mbb x" id="cfCancel">Cancelar</div><div class="mbb ok" id="cfOk">Confirmar</div></div></div></div>
 
 <script src="/web/app.js"></script>
 </body>

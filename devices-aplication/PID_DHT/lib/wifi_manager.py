@@ -61,23 +61,33 @@ def delete_wifi_properties():
 # Access Point (sempre aberto)
 # ==============================================================================
 def start_ap():
-    _sta_if.active(False)
+    # Desativa STA para o DHCP do AP funcionar corretamente
+    if not _sta_if.isconnected():
+        _sta_if.active(False)
     _ap_if.active(False)
     utime.sleep_ms(500)
     _ap_if.active(True)
-    for _ in range(20):
+    for _ in range(30):
         if _ap_if.active():
             break
-        utime.sleep_ms(250)
+        utime.sleep_ms(200)
+    # Configura AP aberto (sem senha)
+    # Tenta varias formas pois depende da versao do firmware
     try:
-        _ap_if.config(essid=AP_SSID, security=0)
-        print("[wifi] AP aberto")
+        _ap_if.config(essid=AP_SSID, security=0, password='')
+        print("[wifi] AP aberto (security=0)")
     except Exception:
         try:
-            _ap_if.config(essid=AP_SSID)
-        except Exception as e:
-            print("[wifi] config err:", e)
-    utime.sleep_ms(500)
+            _ap_if.config(essid=AP_SSID, authmode=0)
+            print("[wifi] AP aberto (authmode=0)")
+        except Exception:
+            try:
+                _ap_if.config(essid=AP_SSID, security=0)
+                print("[wifi] AP aberto (security only)")
+            except Exception:
+                _ap_if.config(essid=AP_SSID)
+                print("[wifi] AP (so essid)")
+    utime.sleep_ms(1000)
     ip = _ap_if.ifconfig()[0]
     print("[wifi] AP SSID={} IP={}".format(AP_SSID, ip))
     shared_state.set_wifi_ap()
@@ -134,7 +144,17 @@ def connect_to_wifi(ssid, password, save=True):
     if _sta_if.isconnected():
         ip = _sta_if.ifconfig()[0]
         print("[wifi] Conectado! IP={}".format(ip))
-        stop_ap()
+        # Comportamento do AP depende do net_mode
+        net_mode = shared_state.get_net_mode()
+        if net_mode == "wifi":
+            stop_ap()
+            print("[wifi] AP desligado (modo wifi)")
+        elif net_mode == "hybrid":
+            print("[wifi] AP mantido (modo hibrido)")
+        else:
+            # Modo AP: ao conectar, muda para hibrido automaticamente
+            shared_state.set_net_mode("hybrid")
+            print("[wifi] Mudou para modo hibrido")
         shared_state.set_wifi_connected(ssid, ip)
         if save:
             save_wifi_properties(ssid, password)
