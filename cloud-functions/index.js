@@ -8,19 +8,22 @@ const db = admin.firestore();
  * POST /sensorData
  * 
  * Recebe dados do sensor DHT22 do Pico e salva no Firestore.
+ * Retorna comandos pendentes para o dispositivo executar.
  * 
  * Body esperado:
  * {
- *   "device_id": "pico-001",       // identificador do dispositivo
- *   "temperature": 25.3,           // °C
- *   "humidity": 58.7,              // %
- *   "relay1": true,                // estado do relé 1 (opcional)
- *   "relay2": false                // estado do relé 2 (opcional)
+ *   "device_id": "pico-001",
+ *   "temperature": 25.3,
+ *   "humidity": 58.7,
+ *   "relay1": true,
+ *   "relay2": false
  * }
  * 
- * Salva em:
- *   Firestore: devices/{device_id}/readings/{auto-id}
- *   Firestore: devices/{device_id}/latest (documento único com último dado)
+ * Resposta inclui comandos pendentes (se houver):
+ * {
+ *   "status": "ok",
+ *   "commands": [{"type": "set_mode", "value": "auto"}, ...]
+ * }
  */
 exports.sensorData = functions.https.onRequest(async (req, res) => {
   // CORS
@@ -70,12 +73,30 @@ exports.sensorData = functions.https.onRequest(async (req, res) => {
       last_seen: now.toISOString(),
     }, { merge: true });
 
+    // Busca comandos pendentes
+    const cmdSnapshot = await deviceRef.collection("commands")
+      .where("executed", "==", false)
+      .orderBy("created_at", "asc")
+      .limit(10)
+      .get();
+
+    const commands = [];
+    const batch = db.batch();
+    cmdSnapshot.forEach((doc) => {
+      commands.push(doc.data());
+      // Marca como executado
+      batch.update(doc.ref, { executed: true, executed_at: now.toISOString() });
+    });
+    if (commands.length > 0) {
+      await batch.commit();
+    }
+
     return res.status(200).json({
       status: "ok",
-      message: "Dados salvos",
       device_id: device_id,
       temperature: reading.temperature,
       humidity: reading.humidity,
+      commands: commands,
     });
 
   } catch (error) {
@@ -147,6 +168,68 @@ exports.deviceData = functions.https.onRequest(async (req, res) => {
       readings: readings,
       count: readings.length,
     });
+
+  } catch (error) {
+    console.error("Erro:", error);
+    return res.status(500).json({ error: "Erro interno", detail: error.message });
+  }
+});
+
+
+/**
+ * POST /sendCommand
+ * 
+ * Envia um comando para o dispositivo (será executado no próximo sync).
+ * 
+ * Body:
+ * {
+ *   "device_id": "pico-001",
+ *   "type": "set_mode",        // tipo do comando
+ *   "value": "auto"            // valor (pode ser string, number, object)
+ * }
+ * 
+ * Tipos de comando suportados:
+ *   - set_mode: "auto" | "manual"
+ *   - set_relay: {relay: 1, state: true}
+ *   - add_setpoint: {name, sensor, value}
+ *   - remove_setpoint: {id}
+ *   - update_setpoint: {id, value}
+ *   - add_action: {name, relay, setpoint_id, condition, period}
+ *   - remove_action: {id}
+ *   - set_relay_name: {relay, name}
+ */
+exports.sendCommand = functions.https.onRequest(async (req, res) => {
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(204).send("");
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Use POST" });
+  }
+
+  try {
+    const { device_id, type, value } = req.body;
+
+    if (!device_id || !type) {
+      return res.status(400).json({ error: "device_id e type obrigatorios" });
+    }
+
+    const now = new Date();
+    const command = {
+      type: type,
+      value: value || null,
+      executed: false,
+      created_at: now.toISOString(),
+    };
+
+    await db.collection("devices").doc(device_id)
+      .collection("commands").add(command);
+
+    return res.status(200).json({ status: "ok", command: command });
 
   } catch (error) {
     console.error("Erro:", error);

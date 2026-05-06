@@ -9,6 +9,7 @@ import ProfileEdit from './profilePageEdit';
 import ForgotPassword from './fogotPassword';
 import AutenticationPage from './autentication';
 import HomePage from './homePage';
+import DevicePage from './devicePage';
 import Slideshow from './slideshow';
 import data from '../data/config.json';
 import MapPage from './mapPage';
@@ -37,7 +38,7 @@ function App() {
 
 function AppContent() {
   const location = useLocation();
-  const hideMenu = ['/', '/forgotPassword', '/slides', '/apirest'].includes(location.pathname);
+  const hideMenu = ['/', '/forgotPassword', '/slides', '/apirest'].includes(location.pathname) || location.pathname.startsWith('/device/');
 
   return (
     <>
@@ -48,6 +49,7 @@ function AppContent() {
 
         {/* ── Protected routes ── */}
         <Route path="/home" element={<PrivateRoute><HomePage /></PrivateRoute>} />
+        <Route path="/device/:deviceId" element={<PrivateRoute><DevicePage /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
         <Route path="/scene" element={<PrivateRoute><Scene /></PrivateRoute>} />
         <Route path="/profileEdit" element={<PrivateRoute><ProfileEdit /></PrivateRoute>} />

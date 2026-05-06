@@ -92,7 +92,7 @@ function HomePage() {
                         </div>
                     )}
                     {devices.map(device => (
-                        <div key={device.id} className="deviceCard" onClick={() => openModal(device)}>
+                        <div key={device.id} className="deviceCard" onClick={() => navigate(`/device/${device.code}`)}>
                             <div className={`deviceStatus ${device.state ? 'on' : 'off'}`}></div>
                             <div className="deviceCardTop">
                                 <div className="deviceIconWrapper">

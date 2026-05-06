@@ -9,6 +9,7 @@ else if(type==='act'){populateActSPSelect();document.getElementById('mdAct').cla
 else if(type==='wifi')document.getElementById('mdWifi').className='modal show';
 else if(type==='rn1'){document.getElementById('fRNrelay').value='1';document.getElementById('fRNname').value=(D.relay_names||{})['1']||'Rele 1';document.getElementById('mdRN').className='modal show';}
 else if(type==='rn2'){document.getElementById('fRNrelay').value='2';document.getElementById('fRNname').value=(D.relay_names||{})['2']||'Rele 2';document.getElementById('mdRN').className='modal show';}
+else if(type==='cloud'){document.getElementById('fCloudInterval').value=cloudCfg.interval||30;document.getElementById('mdCloud').className='modal show';}
 }
 function closeModal(id){document.getElementById(id).className='modal';}
 function showConfirm(title,body,okText,cb){
@@ -192,8 +193,36 @@ function SN(s){ss=s;document.getElementById('mtt').textContent=s;document.getEle
 function WC(){var p=document.getElementById('mp').value;closeModal('mdWifi');document.getElementById('nl').innerHTML='<div class="ld">Conectando...</div>';fetch('/wifi/connect',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ssid:ss,password:p})}).then(function(r){return r.json()}).then(function(d){if(d.status==='ok')document.getElementById('nl').innerHTML='<div class="ld" style="color:var(--pr)">OK! IP:'+d.ip+'</div>';else document.getElementById('nl').innerHTML='<div class="ld" style="color:var(--dg)">'+d.message+'</div>';F();}).catch(function(){document.getElementById('nl').innerHTML='<div class="ld" style="color:var(--dg)">Erro</div>';});}
 function DC(){fetch('/wifi/disconnect',{method:'POST'}).then(F);}
 
+// ==== CLOUD SYNC ====
+var cloudCfg={url:'',device_id:'',interval:30,enabled:false};
+
+function updateCloudUI(){
+document.getElementById('swCloud').className='sw'+(cloudCfg.enabled?' on':'');
+var status=cloudCfg.enabled?'Ativo (cada '+cloudCfg.interval+'s)':'Desativado';
+document.getElementById('cloudStatus').textContent=status;
+}
+
+function togCloud(){
+cloudCfg.enabled=!cloudCfg.enabled;
+fetch('/cloud',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({interval:cloudCfg.interval,enabled:cloudCfg.enabled})}).then(function(){updateCloudUI();});
+}
+
+function saveCloud(){
+var interval=parseInt(document.getElementById('fCloudInterval').value)||30;
+if(interval<10)interval=10;
+if(interval>600)interval=600;
+cloudCfg.interval=interval;
+fetch('/cloud',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({interval:interval,enabled:cloudCfg.enabled})}).then(function(){closeModal('mdCloud');updateCloudUI();});
+}
+
+function fetchCloudConfig(){
+fetch('/cloud').then(function(r){return r.json()}).then(function(d){
+if(d.cloud){cloudCfg=d.cloud;updateCloudUI();}
+}).catch(function(){});
+}
+
 // ==== INIT ====
-F();drawGauge(0);
+F();drawGauge(0);fetchCloudConfig();
 setInterval(F,2500);
 setInterval(function(){if(chartOpen)fetchHistory();},5000);
 setInterval(function(){if(logOpen)fetchLog();},5000);

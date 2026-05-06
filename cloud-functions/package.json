@@ -4,7 +4,7 @@
   "description": "Cloud Functions para EcoBreath Shield - recebe dados dos sensores e salva no Firestore",
   "main": "index.js",
   "engines": {
-    "node": "18"
+    "node": "20"
   },
   "scripts": {
     "serve": "firebase emulators:start --only functions",

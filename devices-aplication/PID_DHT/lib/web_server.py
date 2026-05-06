@@ -284,13 +284,11 @@ async def _h_cloud_config(writer, body):
     except Exception:
         params = {}
     if params:
-        url = params.get('url', '')
-        device_id = params.get('device_id', 'pico-001')
         interval = int(params.get('interval', 30))
         enabled = params.get('enabled', False)
         if isinstance(enabled, str):
             enabled = enabled.lower() in ('true', '1')
-        cloud_sync.set_cloud_config(url, device_id, interval, bool(enabled))
+        cloud_sync.set_cloud_config(interval, bool(enabled))
     _json_response(writer, {"status": "ok", "cloud": cloud_sync.get_cloud_config()})
 
 

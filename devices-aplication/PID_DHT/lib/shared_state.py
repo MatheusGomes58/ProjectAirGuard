@@ -40,9 +40,9 @@ _relay_states = {}   # {relay_pin: True/False}
 _manual_states = {}  # {relay_pin: True/False}
 _relay_names = {"1": "Rele 1", "2": "Rele 2"}
 _log_buffer = []
-_LOG_MAX = 50
+_LOG_MAX = 20
 _history = []
-_HISTORY_MAX = 60
+_HISTORY_MAX = 30
 
 # --- Modo de rede: "ap" | "hybrid" | "wifi" ---
 _net_mode = "ap"

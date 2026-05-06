@@ -91,6 +91,11 @@
     </div>
     <div style="font-size:.6rem;color:var(--tm);margin-top:6px">Leitor = desliga rede, so sensores + PID (economia de energia)</div>
   </div>
+  <div class="cd"><div class="ct">Cloud Sync (Firestore)</div>
+    <div class="sw-c"><span class="sl">Ativo</span><div class="sw" id="swCloud" onclick="togCloud()"></div></div>
+    <div class="cfg-row" onclick="openModal('cloud')" style="cursor:pointer"><label>Config</label><span class="cfg-val" id="cloudStatus">Nao configurado</span></div>
+    <div style="font-size:.6rem;color:var(--tm);margin-top:4px">Envia dados dos sensores para o Firestore periodicamente</div>
+  </div>
 </div>
 
 <div class="ft">EcoBreath Shield v2.0</div>
@@ -117,6 +122,12 @@
 <input class="mi" id="fRNname" type="text" placeholder="Novo nome">
 <input type="hidden" id="fRNrelay">
 <div class="mbs"><div class="mbb x" onclick="closeModal('mdRN')">Cancelar</div><div class="mbb ok" onclick="saveRN()">Salvar</div></div></div></div>
+
+<div class="modal" id="mdCloud"><div class="mc"><div class="mt">Cloud Sync</div>
+<div style="font-size:.7rem;color:var(--tm);margin-bottom:10px">Intervalo de envio (10s a 10min)</div>
+<input class="mi" id="fCloudInterval" type="number" min="10" max="600" step="1" inputmode="numeric" placeholder="Intervalo (seg)" value="30">
+<div style="font-size:.6rem;color:var(--tm);margin-bottom:10px">Device: pico-001 | URL fixa no firmware</div>
+<div class="mbs"><div class="mbb x" onclick="closeModal('mdCloud')">Cancelar</div><div class="mbb ok" onclick="saveCloud()">Salvar</div></div></div></div>
 
 <div class="modal" id="mdConfirm"><div class="mc"><div class="mt" id="cfTitle">Confirmar</div><div class="cf-body" id="cfBody"></div><div class="mbs"><div class="mbb x" id="cfCancel">Cancelar</div><div class="mbb ok" id="cfOk">Confirmar</div></div></div></div>
 
