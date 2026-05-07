@@ -66,37 +66,35 @@ exports.sensorData = functions.https.onRequest(async (req, res) => {
     const deviceRef = db.collection("devices").doc(device_id);
     await deviceRef.collection("readings").add(reading);
 
-    // Atualiza o documento "latest" com o último dado
+    // Atualiza o documento com os dados do sensor (merge para não sobrescrever config)
     await deviceRef.set({
-      ...reading,
+      temperature: reading.temperature,
+      humidity: reading.humidity,
+      relay1: reading.relay1,
+      relay2: reading.relay2,
       timestamp: timestamp,
       last_seen: now.toISOString(),
     }, { merge: true });
 
-    // Busca comandos pendentes
-    const cmdSnapshot = await deviceRef.collection("commands")
-      .where("executed", "==", false)
-      .orderBy("created_at", "asc")
-      .limit(10)
-      .get();
+    // Lê o documento completo para retornar config ao Pico
+    const deviceDoc = await deviceRef.get();
+    const deviceData = deviceDoc.exists ? deviceDoc.data() : {};
 
-    const commands = [];
-    const batch = db.batch();
-    cmdSnapshot.forEach((doc) => {
-      commands.push(doc.data());
-      // Marca como executado
-      batch.update(doc.ref, { executed: true, executed_at: now.toISOString() });
-    });
-    if (commands.length > 0) {
-      await batch.commit();
-    }
+    // Extrai config que o frontend pode ter alterado
+    const config = {
+      mode: deviceData.mode || null,
+      setpoints: deviceData.setpoints || null,
+      actions: deviceData.actions || null,
+      relay_names: deviceData.relay_names || null,
+      manual: deviceData.manual || null,
+    };
 
     return res.status(200).json({
       status: "ok",
       device_id: device_id,
       temperature: reading.temperature,
       humidity: reading.humidity,
-      commands: commands,
+      config: config,
     });
 
   } catch (error) {

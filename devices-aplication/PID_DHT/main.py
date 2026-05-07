@@ -44,7 +44,7 @@ async def sensor_task():
             h = sensor.humidity()
             shared_state.set_sensor_data(t, h)
             tick += 1
-            if tick % 5 == 0:  # Log a cada 10s (5 * 2000ms)
+            if tick % 15 == 0:  # Log a cada 30s
                 log("[sensor] T={:.1f}C H={:.1f}%".format(t, h))
         except Exception as e:
             log("[sensor] Erro: {}".format(e))
@@ -242,7 +242,9 @@ async def main():
         log("[main] Modo LEITOR: rede desligada, so sensores + PID.")
         shared_state.set_control_mode('auto')
     else:
-        asyncio.create_task(wifi.dns_server_task())
+        # DNS captivo só se não tem WiFi conectado (economiza RAM)
+        if not wifi.is_connected():
+            asyncio.create_task(wifi.dns_server_task())
         asyncio.create_task(wifi_monitor())
         asyncio.create_task(web.start_web_server(port=80))
         asyncio.create_task(cloud_sync.cloud_sync_task())

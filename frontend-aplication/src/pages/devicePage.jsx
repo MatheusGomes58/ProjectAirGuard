@@ -5,15 +5,12 @@ import { MdPowerSettingsNew, MdDelete, MdArrowBack } from 'react-icons/md';
 import { WiHumidity, WiThermometer } from 'react-icons/wi';
 import '../css/devicePage.css';
 
-const CLOUD_FUNCTION_URL = 'https://us-central1-projectairguard.cloudfunctions.net/sendCommand';
-
 export default function DevicePage() {
     const { deviceId } = useParams();
     const navigate = useNavigate();
     const [data, setData] = useState({});
     const [history, setHistory] = useState([]);
     const [tab, setTab] = useState('control');
-    // Forms
     const [spName, setSpName] = useState('');
     const [spSensor, setSpSensor] = useState('temp');
     const [spValue, setSpValue] = useState('');
@@ -24,57 +21,76 @@ export default function DevicePage() {
     const [actPeriod, setActPeriod] = useState('10');
     const [r1Name, setR1Name] = useState('');
     const [r2Name, setR2Name] = useState('');
-    // Collapses
     const [showSP, setShowSP] = useState(false);
     const [showAct, setShowAct] = useState(false);
     const [showChart, setShowChart] = useState(false);
-    const [showLog, setShowLog] = useState(false);
-    // Refs
     const gaugeRef = useRef(null);
     const chartRef = useRef(null);
     const relayChartRef = useRef(null);
 
-    // Realtime listener
+    const docRef = db.collection('devices').doc(deviceId);
+
+    // Realtime
     useEffect(() => {
         if (!deviceId) return;
-        const unsub = db.collection('devices').doc(deviceId).onSnapshot(doc => {
-            if (doc.exists) setData(doc.data());
-        });
+        const unsub = docRef.onSnapshot(doc => { if (doc.exists) setData(doc.data()); });
         return () => unsub();
     }, [deviceId]);
 
     // History
     useEffect(() => {
         if (!deviceId) return;
-        const unsub = db.collection('devices').doc(deviceId).collection('readings')
-            .orderBy('timestamp', 'desc').limit(40).onSnapshot(snap => {
-                const r = []; snap.forEach(d => r.push(d.data()));
-                setHistory(r.reverse());
-            });
+        const unsub = docRef.collection('readings').orderBy('timestamp', 'desc').limit(40)
+            .onSnapshot(snap => { const r = []; snap.forEach(d => r.push(d.data())); setHistory(r.reverse()); });
         return () => unsub();
     }, [deviceId]);
 
-    // Draw gauge
-    useEffect(() => {
-        if (gaugeRef.current && data.temperature != null && data.humidity != null) {
-            drawGauge(gaugeRef.current, calcAQ(data.temperature, data.humidity));
-        }
-    }, [data.temperature, data.humidity]);
+    useEffect(() => { if (gaugeRef.current && data.temperature != null) drawGauge(gaugeRef.current, calcAQ(data.temperature, data.humidity)); }, [data.temperature, data.humidity]);
+    useEffect(() => { if (showChart && chartRef.current && history.length > 1) drawSensorChart(chartRef.current, history); if (showChart && relayChartRef.current && history.length > 1) drawRelayChart(relayChartRef.current, history); }, [history, showChart]);
 
-    // Draw charts
-    useEffect(() => {
-        if (showChart && chartRef.current && history.length > 1) drawSensorChart(chartRef.current, history);
-        if (showChart && relayChartRef.current && history.length > 1) drawRelayChart(relayChartRef.current, history);
-    }, [history, showChart]);
+    // === Escreve direto no Firestore ===
+    function updateDoc(fields) { docRef.set(fields, { merge: true }); }
 
-    // Send command
-    async function cmd(type, value) {
-        try {
-            await fetch(CLOUD_FUNCTION_URL, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ device_id: deviceId, type, value })
-            });
-        } catch (e) { console.error(e); }
+    function handleMode(m) { updateDoc({ mode: m }); }
+    function handleRelay(r) {
+        const manual = { ...(data.manual || {}) };
+        manual[String(r)] = !(manual[String(r)] || false);
+        updateDoc({ manual });
+    }
+    function handleRelayName(r, name) {
+        if (!name) return;
+        const relay_names = { ...(data.relay_names || { '1': 'Relé 1', '2': 'Relé 2' }) };
+        relay_names[String(r)] = name;
+        updateDoc({ relay_names });
+    }
+    function handleAddSP() {
+        if (!spName || !spValue) return;
+        const sps = [...(data.setpoints || [])];
+        const id = 'sp' + Date.now();
+        sps.push({ id, name: spName, sensor: spSensor, value: parseFloat(spValue) });
+        updateDoc({ setpoints: sps });
+        setSpName(''); setSpValue('');
+    }
+    function handleUpdateSP(id, val) {
+        const sps = (data.setpoints || []).map(sp => sp.id === id ? { ...sp, value: parseFloat(val) } : sp);
+        updateDoc({ setpoints: sps });
+    }
+    function handleRemoveSP(id) {
+        const sps = (data.setpoints || []).filter(sp => sp.id !== id);
+        const acts = (data.actions || []).filter(a => a.setpoint_id !== id);
+        updateDoc({ setpoints: sps, actions: acts });
+    }
+    function handleAddAct() {
+        if (!actName || !actSP) return;
+        const acts = [...(data.actions || [])];
+        const id = 'a' + Date.now();
+        acts.push({ id, name: actName, relay: parseInt(actRelay), setpoint_id: actSP, condition: actCond, period: parseInt(actPeriod) });
+        updateDoc({ actions: acts });
+        setActName('');
+    }
+    function handleRemoveAct(id) {
+        const acts = (data.actions || []).filter(a => a.id !== id);
+        updateDoc({ actions: acts });
     }
 
     const temp = data.temperature ?? null;
@@ -90,23 +106,18 @@ export default function DevicePage() {
 
     return (
         <div className="dp">
-            {/* Header */}
             <div className="dp-header">
                 <MdArrowBack size={22} onClick={() => navigate('/home')} style={{ cursor: 'pointer' }} />
                 <h1>EcoBreath Shield</h1>
                 <div className="dp-badge">{data.last_seen ? 'Online' : 'Offline'}</div>
             </div>
-
-            {/* Tabs */}
             <div className="dp-tabs">
                 <div className={`dp-tab ${tab === 'control' ? 'active' : ''}`} onClick={() => setTab('control')}>Controle</div>
                 <div className={`dp-tab ${tab === 'config' ? 'active' : ''}`} onClick={() => setTab('config')}>Config</div>
             </div>
 
-            {/* === CONTROLE === */}
             {tab === 'control' && (
                 <div className="dp-content">
-                    {/* Gauge */}
                     <div className="dp-card">
                         <div className="dp-card-title">Qualidade do Ar</div>
                         <div className="dp-gauge-wrap">
@@ -117,176 +128,87 @@ export default function DevicePage() {
                             </div>
                         </div>
                     </div>
-
-                    {/* Sensores */}
                     <div className="dp-card">
                         <div className="dp-card-title">Sensor</div>
                         <div className="dp-sensors">
-                            <div className="dp-sensor temp">
-                                <WiThermometer size={32} />
-                                <div className="dp-sensor-val">{temp != null ? `${temp.toFixed(1)}°C` : '--'}</div>
-                                <div className="dp-sensor-lbl">Temperatura</div>
-                            </div>
-                            <div className="dp-sensor hum">
-                                <WiHumidity size={32} />
-                                <div className="dp-sensor-val">{hum != null ? `${hum.toFixed(1)}%` : '--'}</div>
-                                <div className="dp-sensor-lbl">Umidade</div>
-                            </div>
+                            <div className="dp-sensor temp"><WiThermometer size={32} /><div className="dp-sensor-val">{temp != null ? `${temp.toFixed(1)}°C` : '--'}</div><div className="dp-sensor-lbl">Temperatura</div></div>
+                            <div className="dp-sensor hum"><WiHumidity size={32} /><div className="dp-sensor-val">{hum != null ? `${hum.toFixed(1)}%` : '--'}</div><div className="dp-sensor-lbl">Umidade</div></div>
                         </div>
                     </div>
-
-                    {/* Relés */}
                     <div className="dp-card">
                         <div className="dp-card-title">Relés</div>
                         <div className="dp-relays">
                             {[1, 2].map(r => {
                                 const on = r === 1 ? r1 : r2;
-                                return (
-                                    <div key={r} className={`dp-relay ${on ? 'on' : ''} ${mode === 'manual' ? 'clickable' : ''}`}
-                                        onClick={() => mode === 'manual' && cmd('set_relay', { relay: r, state: !on })}>
-                                        <MdPowerSettingsNew size={22} />
-                                        <div className="dp-relay-name">{relayNames[String(r)]}</div>
-                                        <div className="dp-relay-state">{on ? 'ON' : 'OFF'}</div>
-                                    </div>
-                                );
+                                return (<div key={r} className={`dp-relay ${on ? 'on' : ''} ${mode === 'manual' ? 'clickable' : ''}`} onClick={() => mode === 'manual' && handleRelay(r)}>
+                                    <MdPowerSettingsNew size={22} /><div className="dp-relay-name">{relayNames[String(r)]}</div><div className="dp-relay-state">{on ? 'ON' : 'OFF'}</div>
+                                </div>);
                             })}
                         </div>
                         <div className="dp-hint">{mode === 'manual' ? 'Toque nos relés para ligar/desligar' : 'Controle automático ativo'}</div>
                     </div>
-
-                    {/* Gráficos */}
                     <div className="dp-card">
-                        <div className="dp-collapse-hd" onClick={() => setShowChart(!showChart)}>
-                            <span className="dp-card-title" style={{ marginBottom: 0 }}>Gráficos</span>
-                            <span className="dp-arrow">{showChart ? '▲' : '▼'}</span>
-                        </div>
-                        {showChart && (
-                            <div className="dp-collapse-body">
-                                <div className="dp-chart-label">Sensores</div>
-                                <div className="dp-chart-wrap"><canvas ref={chartRef} /></div>
-                                <div className="dp-chart-label">Atuadores</div>
-                                <div className="dp-chart-wrap"><canvas ref={relayChartRef} /></div>
-                            </div>
-                        )}
+                        <div className="dp-collapse-hd" onClick={() => setShowChart(!showChart)}><span className="dp-card-title" style={{ marginBottom: 0 }}>Gráficos</span><span className="dp-arrow">{showChart ? '▲' : '▼'}</span></div>
+                        {showChart && (<div className="dp-collapse-body"><div className="dp-chart-label">Sensores</div><div className="dp-chart-wrap"><canvas ref={chartRef} /></div><div className="dp-chart-label">Atuadores</div><div className="dp-chart-wrap"><canvas ref={relayChartRef} /></div></div>)}
                     </div>
-
-                    {/* Setpoints (só auto) */}
-                    {mode === 'auto' && (
-                        <>
-                            <div className="dp-card">
-                                <div className="dp-collapse-hd" onClick={() => setShowSP(!showSP)}>
-                                    <span className="dp-card-title" style={{ marginBottom: 0 }}>Setpoints</span>
-                                    <span className="dp-arrow">{showSP ? '▲' : '▼'}</span>
+                    {mode === 'auto' && (<>
+                        <div className="dp-card">
+                            <div className="dp-collapse-hd" onClick={() => setShowSP(!showSP)}><span className="dp-card-title" style={{ marginBottom: 0 }}>Setpoints</span><span className="dp-arrow">{showSP ? '▲' : '▼'}</span></div>
+                            {showSP && (<div className="dp-collapse-body">
+                                {setpoints.map(sp => (<div key={sp.id} className="dp-sp-item"><div className="dp-sp-info"><span className="dp-sp-name">{sp.name}</span><span className="dp-sp-sensor">{sp.sensor === 'temp' ? 'Temperatura' : 'Umidade'}</span></div><input type="number" className="dp-sp-input" defaultValue={sp.value} onBlur={e => handleUpdateSP(sp.id, e.target.value)} /><button className="dp-rm" onClick={() => handleRemoveSP(sp.id)}>×</button></div>))}
+                                <div className="dp-add-form">
+                                    <input placeholder="Nome" value={spName} onChange={e => setSpName(e.target.value)} />
+                                    <select value={spSensor} onChange={e => setSpSensor(e.target.value)}><option value="temp">Temp</option><option value="hum">Umid</option></select>
+                                    <input type="number" placeholder="Valor" value={spValue} onChange={e => setSpValue(e.target.value)} />
+                                    <button className="dp-add-btn" onClick={handleAddSP}>+</button>
                                 </div>
-                                {showSP && (
-                                    <div className="dp-collapse-body">
-                                        {setpoints.map(sp => (
-                                            <div key={sp.id} className="dp-sp-item">
-                                                <div className="dp-sp-info">
-                                                    <span className="dp-sp-name">{sp.name}</span>
-                                                    <span className="dp-sp-sensor">{sp.sensor === 'temp' ? 'Temperatura' : 'Umidade'}</span>
-                                                </div>
-                                                <input type="number" className="dp-sp-input" defaultValue={sp.value}
-                                                    onBlur={e => cmd('update_setpoint', { id: sp.id, value: parseFloat(e.target.value) })} />
-                                                <button className="dp-rm" onClick={() => cmd('remove_setpoint', { id: sp.id })}>×</button>
-                                            </div>
-                                        ))}
-                                        <div className="dp-add-form">
-                                            <input placeholder="Nome" value={spName} onChange={e => setSpName(e.target.value)} />
-                                            <select value={spSensor} onChange={e => setSpSensor(e.target.value)}>
-                                                <option value="temp">Temp</option><option value="hum">Umid</option>
-                                            </select>
-                                            <input type="number" placeholder="Valor" value={spValue} onChange={e => setSpValue(e.target.value)} />
-                                            <button className="dp-add-btn" onClick={() => { if (spName && spValue) { cmd('add_setpoint', { name: spName, sensor: spSensor, value: parseFloat(spValue) }); setSpName(''); setSpValue(''); } }}>+</button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="dp-card">
-                                <div className="dp-collapse-hd" onClick={() => setShowAct(!showAct)}>
-                                    <span className="dp-card-title" style={{ marginBottom: 0 }}>Atuadores</span>
-                                    <span className="dp-arrow">{showAct ? '▲' : '▼'}</span>
+                            </div>)}
+                        </div>
+                        <div className="dp-card">
+                            <div className="dp-collapse-hd" onClick={() => setShowAct(!showAct)}><span className="dp-card-title" style={{ marginBottom: 0 }}>Atuadores</span><span className="dp-arrow">{showAct ? '▲' : '▼'}</span></div>
+                            {showAct && (<div className="dp-collapse-body">
+                                {actions.map(a => (<div key={a.id} className="dp-sp-item"><div className="dp-sp-info"><span className="dp-sp-name">{a.name}</span><span className="dp-sp-sensor">{relayNames[String(a.relay)]} | {a.condition === 'above' ? 'Acima' : 'Abaixo'} | {a.period}s</span></div><button className="dp-rm" onClick={() => handleRemoveAct(a.id)}>×</button></div>))}
+                                <div className="dp-add-form">
+                                    <input placeholder="Nome" value={actName} onChange={e => setActName(e.target.value)} />
+                                    <select value={actRelay} onChange={e => setActRelay(e.target.value)}><option value="1">{relayNames['1']}</option><option value="2">{relayNames['2']}</option></select>
+                                    <select value={actSP} onChange={e => setActSP(e.target.value)}>{setpoints.map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}</select>
+                                    <select value={actCond} onChange={e => setActCond(e.target.value)}><option value="above">Acima</option><option value="below">Abaixo</option></select>
+                                    <input type="number" placeholder="Seg" value={actPeriod} onChange={e => setActPeriod(e.target.value)} style={{ width: 50 }} />
+                                    <button className="dp-add-btn" onClick={handleAddAct}>+</button>
                                 </div>
-                                {showAct && (
-                                    <div className="dp-collapse-body">
-                                        {actions.map(a => (
-                                            <div key={a.id} className="dp-sp-item">
-                                                <div className="dp-sp-info">
-                                                    <span className="dp-sp-name">{a.name}</span>
-                                                    <span className="dp-sp-sensor">{relayNames[String(a.relay)]} | {a.condition === 'above' ? 'Acima' : 'Abaixo'} | {a.period}s</span>
-                                                </div>
-                                                <button className="dp-rm" onClick={() => cmd('remove_action', { id: a.id })}>×</button>
-                                            </div>
-                                        ))}
-                                        <div className="dp-add-form">
-                                            <input placeholder="Nome" value={actName} onChange={e => setActName(e.target.value)} />
-                                            <select value={actRelay} onChange={e => setActRelay(e.target.value)}>
-                                                <option value="1">{relayNames['1']}</option><option value="2">{relayNames['2']}</option>
-                                            </select>
-                                            <select value={actSP} onChange={e => setActSP(e.target.value)}>
-                                                {setpoints.map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
-                                            </select>
-                                            <select value={actCond} onChange={e => setActCond(e.target.value)}>
-                                                <option value="above">Acima</option><option value="below">Abaixo</option>
-                                            </select>
-                                            <input type="number" placeholder="Seg" value={actPeriod} onChange={e => setActPeriod(e.target.value)} style={{ width: 50 }} />
-                                            <button className="dp-add-btn" onClick={() => { if (actName && actSP) { cmd('add_action', { name: actName, relay: parseInt(actRelay), setpoint_id: actSP, condition: actCond, period: parseInt(actPeriod) }); setActName(''); } }}>+</button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </>
-                    )}
+                            </div>)}
+                        </div>
+                    </>)}
                 </div>
             )}
 
-            {/* === CONFIG === */}
             {tab === 'config' && (
                 <div className="dp-content">
                     <div className="dp-card">
                         <div className="dp-card-title">Modo de Operação</div>
                         <div className="dp-mode-btns">
-                            <button className={`dp-mode-btn ${mode === 'auto' ? 'active' : ''}`} onClick={() => cmd('set_mode', 'auto')}>Auto</button>
-                            <button className={`dp-mode-btn ${mode === 'manual' ? 'active' : ''}`} onClick={() => cmd('set_mode', 'manual')}>Manual</button>
+                            <button className={`dp-mode-btn ${mode === 'auto' ? 'active' : ''}`} onClick={() => handleMode('auto')}>Auto</button>
+                            <button className={`dp-mode-btn ${mode === 'manual' ? 'active' : ''}`} onClick={() => handleMode('manual')}>Manual</button>
                         </div>
                         <div className="dp-hint">Auto = PID controla relés | Manual = você liga/desliga</div>
                     </div>
-
                     <div className="dp-card">
                         <div className="dp-card-title">Nomes dos Relés</div>
-                        <div className="dp-cfg-row">
-                            <label>Relé 1</label>
-                            <input value={r1Name || relayNames['1']} onChange={e => setR1Name(e.target.value)}
-                                onBlur={e => { if (e.target.value) cmd('set_relay_name', { relay: 1, name: e.target.value }); }} />
-                        </div>
-                        <div className="dp-cfg-row">
-                            <label>Relé 2</label>
-                            <input value={r2Name || relayNames['2']} onChange={e => setR2Name(e.target.value)}
-                                onBlur={e => { if (e.target.value) cmd('set_relay_name', { relay: 2, name: e.target.value }); }} />
-                        </div>
+                        <div className="dp-cfg-row"><label>Relé 1</label><input defaultValue={relayNames['1']} onBlur={e => handleRelayName(1, e.target.value)} /></div>
+                        <div className="dp-cfg-row"><label>Relé 2</label><input defaultValue={relayNames['2']} onBlur={e => handleRelayName(2, e.target.value)} /></div>
                     </div>
-
-                    {data.last_seen && (
-                        <div className="dp-card">
-                            <div className="dp-card-title">Informações</div>
-                            <div className="dp-info-row"><span>Device ID</span><span>{deviceId}</span></div>
-                            <div className="dp-info-row"><span>Última atualização</span><span>{new Date(data.last_seen).toLocaleString()}</span></div>
-                        </div>
-                    )}
+                    {data.last_seen && (<div className="dp-card">
+                        <div className="dp-card-title">Informações</div>
+                        <div className="dp-info-row"><span>Device ID</span><span>{deviceId}</span></div>
+                        <div className="dp-info-row"><span>Última atualização</span><span>{new Date(data.last_seen).toLocaleString()}</span></div>
+                    </div>)}
                 </div>
             )}
         </div>
     );
 }
 
-// === Funções auxiliares ===
-function calcAQ(t, h) {
-    let tS = 100, hS = 100;
-    if (t >= 20 && t <= 25) tS = 100; else if (t < 20) tS = Math.max(0, 100 - (20 - t) * 10); else tS = Math.max(0, 100 - (t - 25) * 10);
-    if (h >= 40 && h <= 60) hS = 100; else if (h < 40) hS = Math.max(0, 100 - (40 - h) * 3); else hS = Math.max(0, 100 - (h - 60) * 3);
-    return Math.round(tS * 0.4 + hS * 0.6);
-}
+function calcAQ(t, h) { let tS = 100, hS = 100; if (t >= 20 && t <= 25) tS = 100; else if (t < 20) tS = Math.max(0, 100 - (20 - t) * 10); else tS = Math.max(0, 100 - (t - 25) * 10); if (h >= 40 && h <= 60) hS = 100; else if (h < 40) hS = Math.max(0, 100 - (40 - h) * 3); else hS = Math.max(0, 100 - (h - 60) * 3); return Math.round(tS * 0.4 + hS * 0.6); }
 function getAQLabel(s) { if (s >= 80) return { l: 'Ótimo', c: '#00C853' }; if (s >= 60) return { l: 'Bom', c: '#66BB6A' }; if (s >= 40) return { l: 'Regular', c: '#FFEE58' }; if (s >= 20) return { l: 'Ruim', c: '#FFA726' }; return { l: 'Péssimo', c: '#FF5252' }; }
 
 function drawGauge(canvas, score) {
