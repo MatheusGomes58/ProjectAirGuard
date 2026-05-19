@@ -99,6 +99,7 @@ async def _h_data(writer):
         "humidity": round(hum, 1) if hum is not None else None,
         "mode": mode,
         "relays": relays,
+        "rpm": shared_state.get_rpm(),
         "manual": manual,
         "relay_names": shared_state.get_relay_names(),
         "setpoints": setpoints,
@@ -132,9 +133,19 @@ async def _h_manual(writer, body):
         params = {}
     relay = int(params.get('relay', 1))
     state = params.get('state', False)
-    if isinstance(state, str):
-        state = state.lower() in ('true', '1', 'on')
-    shared_state.set_manual_relay(relay, bool(state))
+    
+    if relay == 3:
+        try:
+            state = float(state)
+            state = max(0.0, min(1.0, state))
+        except:
+            state = 0.0
+    else:
+        if isinstance(state, str):
+            state = state.lower() in ('true', '1', 'on')
+        state = bool(state)
+        
+    shared_state.set_manual_relay(relay, state)
     _json_response(writer, {"status": "ok", "relay": relay, "state": shared_state.get_manual_relay(relay)})
 
 
@@ -202,7 +213,7 @@ async def _h_act_add(writer, body):
     period = int(params.get('period', 10))
     if condition not in ('above', 'below'):
         condition = 'above'
-    if relay not in (1, 2):
+    if relay not in (1, 2, 3):
         relay = 1
     act = shared_state.add_action(name, relay, sp_id, condition, period)
     _json_response(writer, {"status": "ok", "action": act})

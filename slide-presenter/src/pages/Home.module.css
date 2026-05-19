@@ -1,0 +1,335 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.headerContent {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.logoIcon { color: var(--accent); }
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.themeBtn {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.themeBtn:hover { background: var(--accent); color: white; }
+
+.remoteConnect {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+}
+
+.codeInput {
+  width: 90px;
+  text-align: center;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 10px;
+}
+
+.connectBtn {
+  background: var(--accent);
+  color: white;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.8rem;
+}
+
+.connectBtn:hover { background: var(--accent-hover); }
+
+.main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+  width: 100%;
+  flex: 1;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.breadcrumbItem {
+  background: none;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.breadcrumbItem:hover { color: var(--accent); background: var(--bg-tertiary); }
+
+.breadcrumbSep {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.toolbar h2 { font-size: 1.2rem; font-weight: 600; }
+
+.toolbarActions { display: flex; gap: 8px; }
+
+.folderBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.folderBtn:hover { background: var(--border); }
+
+.createBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.createBtn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+.btnLabel {}
+
+.newFolderRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.newFolderRow input { flex: 1; min-width: 120px; }
+
+.confirmBtn {
+  background: var(--success);
+  color: white;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.82rem;
+}
+
+.cancelBtn {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.82rem;
+}
+
+.cancelBtn:hover { color: var(--text-primary); }
+
+.loading, .empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
+
+.empty p { margin-bottom: 8px; }
+
+/* Folders Grid */
+.foldersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.folderCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+  position: relative;
+}
+
+.folderCard:hover { transform: translateY(-2px); border-color: var(--accent); }
+
+.folderIcon { color: var(--warning); }
+
+.folderName {
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: center;
+  word-break: break-word;
+}
+
+.folderDeleteBtn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 4px;
+  border-radius: 4px;
+  display: none;
+}
+
+.folderCard:hover .folderDeleteBtn { display: flex; }
+.folderDeleteBtn:hover { background: var(--danger); color: white; }
+
+/* Presentations Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover { transform: translateY(-3px); box-shadow: var(--card-hover-shadow); }
+
+.cardPreview {
+  height: 140px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 10px;
+}
+
+.slideCount {
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+}
+
+.cardBody { padding: 14px; }
+
+.cardBody h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardDate {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.cardActions { display: flex; gap: 6px; }
+
+.actionBtn, .actionBtnPlay, .actionBtnDanger {
+  padding: 8px 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.actionBtn:hover { background: var(--accent); color: white; }
+.actionBtnPlay { background: var(--success); color: white; }
+.actionBtnPlay:hover { opacity: 0.85; }
+.actionBtnDanger:hover { background: var(--danger); color: white; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header { padding: 10px 16px; }
+  .logoText { display: none; }
+  .headerActions { gap: 8px; }
+  .remoteConnect { gap: 4px; }
+  .codeInput { width: 70px; font-size: 0.8rem; padding: 6px 8px; }
+  .connectBtn { padding: 6px 10px; font-size: 0.75rem; }
+  .main { padding: 16px; }
+  .toolbar h2 { font-size: 1rem; }
+  .btnLabel { display: none; }
+  .folderBtn, .createBtn { padding: 10px 12px; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+  .cardPreview { height: 110px; }
+  .foldersGrid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+}
+
+@media (max-width: 480px) {
+  .grid { grid-template-columns: 1fr; }
+  .foldersGrid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+  .headerContent { flex-wrap: wrap; }
+}

@@ -113,6 +113,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;background:
     <div class="rg">
       <div class="rc relay-btn" id="rf" onclick="togRelayBtn(1)"><div class="rn" id="rn1">Rele 1</div><div class="re off" id="rfs">OFF</div></div>
       <div class="rc relay-btn" id="rh" onclick="togRelayBtn(2)"><div class="rn" id="rn2">Rele 2</div><div class="re off" id="rhs">OFF</div></div>
+      <div class="rc" id="r3" style="flex-direction:column;align-items:stretch;padding:12px">
+        <div class="rn" id="rn3" style="text-align:center;margin-bottom:8px">PWM</div>
+        <input type="range" id="pwmSlider" min="0" max="100" value="0" oninput="updPWMSlider(this.value)" onchange="setPWM(this.value)" style="width:100%;margin-bottom:8px">
+        <div style="font-size:0.6rem;color:var(--pr);text-align:center"><span id="rpmv">0</span> RPM | <span id="pwmPct">0</span>%</div>
+      </div>
     </div>
     <div id="modeHint" style="font-size:.6rem;color:var(--tm);text-align:center;margin-top:6px"></div>
   </div>
@@ -164,6 +169,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;background:
   <div class="cd"><div class="ct">Nomes dos Reles</div>
     <div class="cfg-row" onclick="openModal('rn1')" style="cursor:pointer"><label>Rele 1</label><span class="cfg-val" id="cfgR1v">Rele 1</span></div>
     <div class="cfg-row" onclick="openModal('rn2')" style="cursor:pointer"><label>Rele 2</label><span class="cfg-val" id="cfgR2v">Rele 2</span></div>
+    <div class="cfg-row" onclick="openModal('rn3')" style="cursor:pointer"><label>Rele 3</label><span class="cfg-val" id="cfgR3v">Rele 3</span></div>
     <div style="font-size:.6rem;color:var(--tm);margin-top:4px">Toque para renomear</div>
   </div>
   <div class="cd"><div class="ct">Modo de Rede</div>
@@ -209,9 +215,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;background:
 <div class="mbs"><div class="mbb x" onclick="closeModal('mdRN')">Cancelar</div><div class="mbb ok" onclick="saveRN()">Salvar</div></div></div></div>
 
 <div class="modal" id="mdCloud"><div class="mc"><div class="mt">Cloud Sync</div>
-<div style="font-size:.7rem;color:var(--tm);margin-bottom:10px">Intervalo de envio (10s a 10min)</div>
-<input class="mi" id="fCloudInterval" type="number" min="10" max="600" step="1" inputmode="numeric" placeholder="Intervalo (seg)" value="30">
-<div style="font-size:.6rem;color:var(--tm);margin-bottom:10px">Device: pico-001 | URL fixa no firmware</div>
+<div style="font-size:.7rem;color:var(--tm);margin-bottom:10px">Intervalo de envio (30s a 10min)</div>
+<input class="mi" id="fCloudInterval" type="number" min="30" max="600" step="10" inputmode="numeric" placeholder="Intervalo (seg)" value="60">
+<div style="font-size:.6rem;color:var(--tm);margin-bottom:10px">Device: pico-001 | Firebase Realtime Database</div>
 <div class="mbs"><div class="mbb x" onclick="closeModal('mdCloud')">Cancelar</div><div class="mbb ok" onclick="saveCloud()">Salvar</div></div></div></div>
 
 <div class="modal" id="mdConfirm"><div class="mc"><div class="mt" id="cfTitle">Confirmar</div><div class="cf-body" id="cfBody"></div><div class="mbs"><div class="mbb x" id="cfCancel">Cancelar</div><div class="mbb ok" id="cfOk">Confirmar</div></div></div></div>
@@ -228,6 +234,7 @@ else if(type==='act'){populateActSPSelect();document.getElementById('mdAct').cla
 else if(type==='wifi')document.getElementById('mdWifi').className='modal show';
 else if(type==='rn1'){document.getElementById('fRNrelay').value='1';document.getElementById('fRNname').value=(D.relay_names||{})['1']||'Rele 1';document.getElementById('mdRN').className='modal show';}
 else if(type==='rn2'){document.getElementById('fRNrelay').value='2';document.getElementById('fRNname').value=(D.relay_names||{})['2']||'Rele 2';document.getElementById('mdRN').className='modal show';}
+else if(type==='rn3'){document.getElementById('fRNrelay').value='3';document.getElementById('fRNname').value=(D.relay_names||{})['3']||'Rele 3';document.getElementById('mdRN').className='modal show';}
 else if(type==='cloud'){document.getElementById('fCloudInterval').value=cloudCfg.interval||30;document.getElementById('mdCloud').className='modal show';}
 }
 function closeModal(id){document.getElementById(id).className='modal';}
@@ -258,14 +265,35 @@ function F(){fetch('/data').then(function(r){return r.json()}).then(function(d){
 D=d;
 document.getElementById('tv').textContent=d.temperature!==null?d.temperature.toFixed(1)+'°C':'--';
 document.getElementById('hv').textContent=d.humidity!==null?d.humidity.toFixed(1)+'%':'--';
-var r1=d.relays['1']||false,r2=d.relays['2']||false;
-var rNames=d.relay_names||{'1':'Rele 1','2':'Rele 2'};
-document.getElementById('rn1').textContent=rNames['1'];
-document.getElementById('rn2').textContent=rNames['2'];
+var r1=d.relays['1']||false,r2=d.relays['2']||false,r3v=d.relays['3'];
+var r3n=typeof r3v==='boolean'?(r3v?1:0):parseFloat(r3v||0);
+var r3b=r3n>0;
+var rNames=d.relay_names||{'1':'Rele 1','2':'Rele 2','3':'Rele 3'};
+document.getElementById('rn1').textContent=rNames['1']||'Rele 1';
+document.getElementById('rn2').textContent=rNames['2']||'Rele 2';
+document.getElementById('rn3').textContent=rNames['3']||'Rele 3';
 document.getElementById('rf').className='rc relay-btn'+(r1?' on':'')+(d.mode==='manual'?' clickable':'');
 document.getElementById('rh').className='rc relay-btn'+(r2?' on':'')+(d.mode==='manual'?' clickable':'');
+document.getElementById('r3').className='rc'+(r3b?' on':'');
 document.getElementById('rfs').textContent=r1?'ON':'OFF';document.getElementById('rfs').className='re'+(r1?' on':' off');
 document.getElementById('rhs').textContent=r2?'ON':'OFF';document.getElementById('rhs').className='re'+(r2?' on':' off');
+document.getElementById('rpmv').textContent=d.rpm!==undefined?d.rpm:'--';
+var sl=document.getElementById('pwmSlider');
+if(sl&&d.mode==='manual'&&document.activeElement!==sl){
+  var raw_mv=d.manual['3'];
+  var mv=0;
+  if(typeof raw_mv==='boolean') mv=raw_mv?100:0;
+  else if(raw_mv!==undefined) mv=parseFloat(raw_mv)*100;
+  if(isNaN(mv)) mv=0;
+  
+  sl.value=Math.round(mv);
+  document.getElementById('pwmPct').textContent=Math.round(mv);
+}else if(sl&&d.mode!=='manual'){
+  var pct=Math.round(r3n*100);
+  sl.value=pct;
+  document.getElementById('pwmPct').textContent=pct;
+}
+if(sl)sl.disabled=d.mode!=='manual';
 // Modo (na config)
 document.getElementById('bp').className='mb'+(d.mode==='auto'?' a':'');
 document.getElementById('bm').className='mb'+(d.mode==='manual'?' a':'');
@@ -274,8 +302,9 @@ document.getElementById('modeHint').textContent=d.mode==='manual'?'Toque nos rel
 document.getElementById('spCard').style.display=d.mode==='auto'?'block':'none';
 document.getElementById('actCard').style.display=d.mode==='auto'?'block':'none';
 // Config tab
-var cfgR1v=document.getElementById('cfgR1v');if(cfgR1v)cfgR1v.textContent=rNames['1'];
-var cfgR2v=document.getElementById('cfgR2v');if(cfgR2v)cfgR2v.textContent=rNames['2'];
+var cfgR1v=document.getElementById('cfgR1v');if(cfgR1v)cfgR1v.textContent=rNames['1']||'Rele 1';
+var cfgR2v=document.getElementById('cfgR2v');if(cfgR2v)cfgR2v.textContent=rNames['2']||'Rele 2';
+var cfgR3v=document.getElementById('cfgR3v');if(cfgR3v)cfgR3v.textContent=rNames['3']||'Rele 3';
 // WiFi
 document.getElementById('ws').textContent=d.sta_connected?'WiFi':'AP';
 document.getElementById('wst').textContent=d.sta_connected?'Conectado':'AP Mode';
@@ -289,11 +318,20 @@ renderActions(d.actions,d.setpoints);
 updateNetUI();
 }).catch(function(){});}
 
-// ==== RELES (toggle em modo manual) ====
+// ==== RELES E PWM ====
 function togRelayBtn(r){
 if(D.mode!=='manual')return;
 var cur=D.manual[String(r)]||false;
 fetch('/manual',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({relay:r,state:!cur})}).then(F);
+}
+
+function updPWMSlider(v){
+document.getElementById('pwmPct').textContent=v;
+}
+
+function setPWM(v){
+if(D.mode!=='manual')return;
+fetch('/manual',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({relay:3,state:parseInt(v)/100.0})}).then(F);
 }
 
 // ==== MODO ====
@@ -326,14 +364,14 @@ function populateActSPSelect(){
 var sel=document.getElementById('fActSP');var sps=D.setpoints||[];
 var h='';for(var i=0;i<sps.length;i++)h+='<option value="'+sps[i].id+'">'+sps[i].name+'</option>';
 sel.innerHTML=h||'<option value="">Crie um setpoint primeiro</option>';
-var rNames=D.relay_names||{'1':'Rele 1','2':'Rele 2'};
-document.getElementById('fActRelay').innerHTML='<option value="1">'+rNames['1']+'</option><option value="2">'+rNames['2']+'</option>';}
+var rNames=D.relay_names||{'1':'Rele 1','2':'Rele 2','3':'Rele 3'};
+document.getElementById('fActRelay').innerHTML='<option value="1">'+(rNames['1']||'Rele 1')+'</option><option value="2">'+(rNames['2']||'Rele 2')+'</option><option value="3">'+(rNames['3']||'Rele 3')+'</option>';}
 
 function renderActions(acts,sps){
 var el=document.getElementById('actList');
 if(!acts||!acts.length){el.innerHTML=D.mode==='auto'?'<div class="ld">Nenhuma acao</div>':'';return;}
 var spMap={};if(sps)for(var i=0;i<sps.length;i++)spMap[sps[i].id]=sps[i].name;
-var rNames=D.relay_names||{'1':'Rele 1','2':'Rele 2'};
+var rNames=D.relay_names||{'1':'Rele 1','2':'Rele 2','3':'Rele 3'};
 var h='';for(var i=0;i<acts.length;i++){var a=acts[i];var spName=spMap[a.setpoint_id]||'?';
 h+='<div class="act-item"><div class="act-info"><span class="act-name">'+a.name+'</span>';
 h+='<span class="act-detail">'+rNames[String(a.relay)]+' | '+(a.condition==='above'?'Acima':'Abaixo')+' de "'+spName+'" | '+a.period+'s</span></div>';
@@ -404,7 +442,7 @@ function fetchLog(){fetch('/log').then(function(r){return r.json()}).then(functi
 
 function drawChart(){var canvas=document.getElementById('chart');if(!canvas||!chartOpen)return;var ctx=canvas.getContext('2d');var dpr=window.devicePixelRatio||1;var cssW=canvas.parentElement.clientWidth,cssH=canvas.parentElement.clientHeight;if(cssW===0||cssH===0)return;canvas.style.width=cssW+'px';canvas.style.height=cssH+'px';canvas.width=Math.floor(cssW*dpr);canvas.height=Math.floor(cssH*dpr);ctx.setTransform(1,0,0,1,0,0);ctx.scale(dpr,dpr);var W=cssW,H=cssH;ctx.clearRect(0,0,W,H);if(chartData.length<2)return;var allT=[],allH=[];for(var i=0;i<chartData.length;i++){if(chartData[i].t!==null)allT.push(chartData[i].t);if(chartData[i].h!==null)allH.push(chartData[i].h);}if(!allT.length||!allH.length)return;var minT=Math.min.apply(null,allT)-2,maxT=Math.max.apply(null,allT)+2;var minH=Math.min.apply(null,allH)-5,maxH=Math.max.apply(null,allH)+5;var pad={l:32,r:32,t:12,b:18},gW=W-pad.l-pad.r,gH=H-pad.t-pad.b,n=chartData.length,dx=gW/(n-1);ctx.fillStyle='rgba(0,0,0,0.15)';ctx.fillRect(pad.l,pad.t,gW,gH);ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;for(var g=0;g<=4;g++){var gy=pad.t+gH*(g/4);ctx.beginPath();ctx.moveTo(pad.l,gy);ctx.lineTo(W-pad.r,gy);ctx.stroke();}ctx.fillStyle='#FF5252';ctx.font='bold 9px sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';for(var g=0;g<=4;g++)ctx.fillText((maxT-(maxT-minT)*(g/4)).toFixed(0)+'°',pad.l-4,pad.t+gH*(g/4));ctx.fillStyle='#42A5F5';ctx.textAlign='left';for(var g=0;g<=4;g++)ctx.fillText((maxH-(maxH-minH)*(g/4)).toFixed(0)+'%',W-pad.r+4,pad.t+gH*(g/4));function mapT(v){return pad.t+gH*(1-(v-minT)/(maxT-minT));}function mapH(v){return pad.t+gH*(1-(v-minH)/(maxH-minH));}function drawL(arr,fn,col){var pts=[];for(var i=0;i<n;i++){var v=arr[i];if(v===null)continue;pts.push({x:pad.l+i*dx,y:fn(v)});}if(pts.length<2)return;var gr=ctx.createLinearGradient(0,pad.t,0,pad.t+gH);gr.addColorStop(0,col+'40');gr.addColorStop(1,col+'02');ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(pts[0].x,pad.t+gH);for(var i=0;i<pts.length;i++){if(i===0)ctx.lineTo(pts[i].x,pts[i].y);else{var xc=(pts[i].x+pts[i-1].x)/2;ctx.quadraticCurveTo(pts[i-1].x,pts[i-1].y,xc,(pts[i].y+pts[i-1].y)/2);}}ctx.lineTo(pts[pts.length-1].x,pts[pts.length-1].y);ctx.lineTo(pts[pts.length-1].x,pad.t+gH);ctx.closePath();ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);for(var i=1;i<pts.length;i++){var xc=(pts[i].x+pts[i-1].x)/2;ctx.quadraticCurveTo(pts[i-1].x,pts[i-1].y,xc,(pts[i].y+pts[i-1].y)/2);}ctx.lineTo(pts[pts.length-1].x,pts[pts.length-1].y);ctx.stroke();var last=pts[pts.length-1];ctx.beginPath();ctx.arc(last.x,last.y,3,0,2*Math.PI);ctx.fillStyle=col;ctx.fill();}var temps=[],hums=[];for(var i=0;i<n;i++){temps.push(chartData[i].t);hums.push(chartData[i].h);}drawL(temps,mapT,'#FF5252');drawL(hums,mapH,'#42A5F5');}
 
-function drawRelayChart(){var canvas=document.getElementById('relayChart');if(!canvas||!chartOpen)return;var ctx=canvas.getContext('2d');var dpr=window.devicePixelRatio||1;var cssW=canvas.parentElement.clientWidth,cssH=canvas.parentElement.clientHeight;if(cssW===0||cssH===0)return;canvas.style.width=cssW+'px';canvas.style.height=cssH+'px';canvas.width=Math.floor(cssW*dpr);canvas.height=Math.floor(cssH*dpr);ctx.setTransform(1,0,0,1,0,0);ctx.scale(dpr,dpr);var W=cssW,H=cssH;ctx.clearRect(0,0,W,H);if(chartData.length<2)return;var pad={l:40,r:12,t:12,b:12},gW=W-pad.l-pad.r,gH=H-pad.t-pad.b,n=chartData.length,dx=gW/(n-1);ctx.fillStyle='rgba(0,0,0,0.15)';ctx.fillRect(pad.l,pad.t,gW,gH);var rowH=gH/2-2;function drawBars(field,top,color,label){ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='bold 9px sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(label,pad.l-4,top+rowH/2);for(var i=0;i<n;i++){var v=chartData[i][field];if(!v)continue;var x=pad.l+i*dx;var w=Math.max(dx-1,2);ctx.fillStyle=color;ctx.fillRect(x-w/2,top,w,rowH);}ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,top+rowH);ctx.lineTo(W-pad.r,top+rowH);ctx.stroke();}drawBars('r1',pad.t,'#00C853','R1');drawBars('r2',pad.t+rowH+4,'#FFA726','R2');}
+function drawRelayChart(){var canvas=document.getElementById('relayChart');if(!canvas||!chartOpen)return;var ctx=canvas.getContext('2d');var dpr=window.devicePixelRatio||1;var cssW=canvas.parentElement.clientWidth,cssH=canvas.parentElement.clientHeight;if(cssW===0||cssH===0)return;canvas.style.width=cssW+'px';canvas.style.height=cssH+'px';canvas.width=Math.floor(cssW*dpr);canvas.height=Math.floor(cssH*dpr);ctx.setTransform(1,0,0,1,0,0);ctx.scale(dpr,dpr);var W=cssW,H=cssH;ctx.clearRect(0,0,W,H);if(chartData.length<2)return;var pad={l:40,r:12,t:12,b:12},gW=W-pad.l-pad.r,gH=H-pad.t-pad.b,n=chartData.length,dx=gW/(n-1);ctx.fillStyle='rgba(0,0,0,0.15)';ctx.fillRect(pad.l,pad.t,gW,gH);var rowH=(gH/3)-2;function drawBars(field,top,color,label){ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='bold 9px sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(label,pad.l-4,top+rowH/2);for(var i=0;i<n;i++){var v=chartData[i][field];if(!v)continue;var x=pad.l+i*dx;var w=Math.max(dx-1,2);ctx.fillStyle=color;ctx.fillRect(x-w/2,top,w,rowH);}ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,top+rowH);ctx.lineTo(W-pad.r,top+rowH);ctx.stroke();}drawBars('r1',pad.t,'#00C853','R1');drawBars('r2',pad.t+rowH+2,'#FFA726','R2');drawBars('r3',pad.t+2*rowH+4,'#42A5F5','R3');}
 
 // ==== WIFI ====
 function SC(){document.getElementById('nl').innerHTML='<div class="ld">Escaneando...</div>';fetch('/wifi/scan').then(function(r){return r.json()}).then(function(d){var h='';if(!d.networks||!d.networks.length)h='<div class="ld">Nenhuma rede</div>';else d.networks.forEach(function(n){h+='<div class="wn" onclick="SN(\''+n.ssid.replace(/'/g,"\\'")+'\')"><div class="wnl"><div><div class="wns">'+n.ssid+'</div><div class="wnx">'+(n.secure?'Protegida':'Aberta')+' '+n.rssi+'dBm</div></div></div><div class="wnb">Conectar</div></div>';});document.getElementById('nl').innerHTML=h;}).catch(function(){document.getElementById('nl').innerHTML='<div class="ld">Erro</div>';});}

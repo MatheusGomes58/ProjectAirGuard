@@ -28,6 +28,11 @@
     <div class="rg">
       <div class="rc relay-btn" id="rf" onclick="togRelayBtn(1)"><div class="rn" id="rn1">Rele 1</div><div class="re off" id="rfs">OFF</div></div>
       <div class="rc relay-btn" id="rh" onclick="togRelayBtn(2)"><div class="rn" id="rn2">Rele 2</div><div class="re off" id="rhs">OFF</div></div>
+      <div class="rc" id="r3" style="flex-direction:column;align-items:stretch;padding:12px">
+        <div class="rn" id="rn3" style="text-align:center;margin-bottom:8px">PWM</div>
+        <input type="range" id="pwmSlider" min="0" max="100" value="0" oninput="updPWMSlider(this.value)" onchange="setPWM(this.value)" style="width:100%;margin-bottom:8px">
+        <div style="font-size:0.6rem;color:var(--pr);text-align:center"><span id="rpmv">0</span> RPM | <span id="pwmPct">0</span>%</div>
+      </div>
     </div>
     <div id="modeHint" style="font-size:.6rem;color:var(--tm);text-align:center;margin-top:6px"></div>
   </div>
@@ -79,6 +84,7 @@
   <div class="cd"><div class="ct">Nomes dos Reles</div>
     <div class="cfg-row" onclick="openModal('rn1')" style="cursor:pointer"><label>Rele 1</label><span class="cfg-val" id="cfgR1v">Rele 1</span></div>
     <div class="cfg-row" onclick="openModal('rn2')" style="cursor:pointer"><label>Rele 2</label><span class="cfg-val" id="cfgR2v">Rele 2</span></div>
+    <div class="cfg-row" onclick="openModal('rn3')" style="cursor:pointer"><label>Rele 3</label><span class="cfg-val" id="cfgR3v">Rele 3</span></div>
     <div style="font-size:.6rem;color:var(--tm);margin-top:4px">Toque para renomear</div>
   </div>
   <div class="cd"><div class="ct">Modo de Rede</div>
@@ -124,9 +130,9 @@
 <div class="mbs"><div class="mbb x" onclick="closeModal('mdRN')">Cancelar</div><div class="mbb ok" onclick="saveRN()">Salvar</div></div></div></div>
 
 <div class="modal" id="mdCloud"><div class="mc"><div class="mt">Cloud Sync</div>
-<div style="font-size:.7rem;color:var(--tm);margin-bottom:10px">Intervalo de envio (10s a 10min)</div>
-<input class="mi" id="fCloudInterval" type="number" min="10" max="600" step="1" inputmode="numeric" placeholder="Intervalo (seg)" value="30">
-<div style="font-size:.6rem;color:var(--tm);margin-bottom:10px">Device: pico-001 | URL fixa no firmware</div>
+<div style="font-size:.7rem;color:var(--tm);margin-bottom:10px">Intervalo de envio (30s a 10min)</div>
+<input class="mi" id="fCloudInterval" type="number" min="30" max="600" step="10" inputmode="numeric" placeholder="Intervalo (seg)" value="60">
+<div style="font-size:.6rem;color:var(--tm);margin-bottom:10px">Device: pico-001 | Firebase Realtime Database</div>
 <div class="mbs"><div class="mbb x" onclick="closeModal('mdCloud')">Cancelar</div><div class="mbb ok" onclick="saveCloud()">Salvar</div></div></div></div>
 
 <div class="modal" id="mdConfirm"><div class="mc"><div class="mt" id="cfTitle">Confirmar</div><div class="cf-body" id="cfBody"></div><div class="mbs"><div class="mbb x" id="cfCancel">Cancelar</div><div class="mbb ok" id="cfOk">Confirmar</div></div></div></div>

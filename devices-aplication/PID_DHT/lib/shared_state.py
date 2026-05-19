@@ -38,7 +38,7 @@ _humidity = None
 _control_mode = DEFAULT_CONTROL_MODE  # "auto" | "manual"
 _relay_states = {}   # {relay_pin: True/False}
 _manual_states = {}  # {relay_pin: True/False}
-_relay_names = {"1": "Rele 1", "2": "Rele 2"}
+_relay_names = {"1": "Rele 1", "2": "Rele 2", "3": "Ventoinha PWM"}
 _log_buffer = []
 _LOG_MAX = 10
 _history = []
@@ -195,8 +195,13 @@ def load_state():
             _control_mode = data.get("mode", DEFAULT_CONTROL_MODE)
             _manual_states = data.get("manual", {})
             _net_mode = data.get("net_mode", "ap")
+            
+            # Garante que o PWM (Relé 3) inicie sempre em 0%
+            _manual_states["3"] = 0.0
+            
             print("[state] Modo: {} | Rede: {}".format(_control_mode, _net_mode))
     except (OSError, ValueError):
+        _manual_states["3"] = 0.0
         pass
 
 
@@ -237,6 +242,17 @@ def set_sensor_data(temp, hum):
 def get_sensor_data():
     with _lock:
         return _temperature, _humidity
+
+_rpm = 0
+
+def set_rpm(rpm):
+    global _rpm
+    with _lock:
+        _rpm = rpm
+
+def get_rpm():
+    with _lock:
+        return _rpm
 
 def get_sensor_value(sensor_type):
     """Retorna o valor do sensor pelo tipo ('temp' ou 'hum')."""
@@ -354,10 +370,10 @@ def get_logs():
     with _lock:
         return list(_log_buffer)
 
-def add_history_point(temp, hum, r1_on, r2_on):
+def add_history_point(temp, hum, r1_on, r2_on, r3_on, rpm=0):
     global _history
     with _lock:
-        _history.append({"t": temp, "h": hum, "r1": 1 if r1_on else 0, "r2": 1 if r2_on else 0})
+        _history.append({"t": temp, "h": hum, "r1": 1 if r1_on else 0, "r2": 1 if r2_on else 0, "r3": 1 if r3_on else 0, "rpm": rpm})
         if len(_history) > _HISTORY_MAX:
             _history = _history[-_HISTORY_MAX:]
 

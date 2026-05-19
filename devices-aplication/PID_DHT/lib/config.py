@@ -7,6 +7,8 @@
 PIN_DHT22         = 16     # GP16 — Sensor DHT22
 PIN_RELAY_FAN     = 14     # GP14 — Relé 1
 PIN_RELAY_HUMID   = 15     # GP15 — Relé 2
+PIN_PWM_FAN       = 12     # GP12 — Relé 3 (Ventoinha PWM)
+PIN_TACH_FAN      = 13     # GP13 — Sensor TACH (RPM)
 
 # --- Relé: lógica de acionamento ---
 RELAY_ACTIVE_HIGH = False

@@ -1,0 +1,481 @@
+.container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: var(--text-secondary);
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.topLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.menuBtn {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  padding: 8px;
+  border-radius: 6px;
+  display: none;
+  align-items: center;
+}
+
+.backBtn {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  padding: 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.backBtn:hover { background: var(--accent); color: white; }
+
+.titleInput {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 6px;
+  min-width: 0;
+  flex: 1;
+  max-width: 280px;
+}
+
+.titleInput:hover { border-color: var(--border); }
+.titleInput:focus { border-color: var(--accent); background: var(--bg-tertiary); }
+
+.topRight {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  padding: 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.iconBtn:hover { background: var(--accent); color: white; }
+
+.saveBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.saveBtn:hover { background: var(--accent); color: white; }
+.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.presentBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--success);
+  color: white;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.presentBtn:hover { opacity: 0.9; }
+
+.btnText {}
+
+.workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Slide List */
+.slideList {
+  width: 150px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: transform 0.3s;
+}
+
+.slideListHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.slideListActions { display: flex; gap: 4px; }
+
+.closeSidebarBtn {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 4px;
+  border-radius: 4px;
+  display: none;
+}
+
+.addSlideBtn {
+  background: var(--accent);
+  color: white;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.addSlideBtn:hover { background: var(--accent-hover); }
+
+.slideListItems {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.slideThumb {
+  position: relative;
+  cursor: pointer;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.slideThumb:hover { border-color: var(--border); }
+.slideThumbActive { border-color: var(--accent) !important; }
+
+.slideNumber {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 0.6rem;
+  padding: 2px 4px;
+  border-radius: 3px;
+  z-index: 1;
+}
+
+.slideThumbPreview { width: 100%; aspect-ratio: 16/9; }
+
+.slideThumbActions {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: none;
+  gap: 2px;
+  z-index: 1;
+}
+
+.slideThumb:hover .slideThumbActions { display: flex; }
+
+.dupSlideBtn {
+  background: var(--accent);
+  color: white;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.65rem;
+}
+
+.deleteSlideBtn {
+  background: var(--danger);
+  color: white;
+  padding: 2px;
+  border-radius: 3px;
+  display: flex;
+}
+
+/* Canvas Area */
+.canvasArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+.elementToolbar {
+  display: flex;
+  gap: 3px;
+  padding: 6px 12px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.elementToolbar button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.elementToolbar button:hover { background: var(--accent); color: white; }
+
+/* Properties Panel */
+.propertiesPanel {
+  width: 270px;
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 14px;
+  flex-shrink: 0;
+  position: relative;
+  transition: transform 0.3s;
+}
+
+.closePropsBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 4px;
+  border-radius: 4px;
+  display: none;
+}
+
+.slideProperties h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: var(--text-secondary);
+}
+
+.propGroup { margin-bottom: 12px; }
+
+.propGroup label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.propGroup input,
+.propGroup select,
+.propGroup textarea {
+  width: 100%;
+  font-size: 0.82rem;
+}
+
+.propGroup input[type="color"] {
+  height: 34px;
+  padding: 3px;
+  cursor: pointer;
+}
+
+.bgUploadBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.bgUploadBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.bgUploadBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bgGalleryBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  background: var(--accent);
+  color: white;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.bgGalleryBtn:hover {
+  background: var(--accent-hover);
+}
+
+.bgPreview {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-top: 8px;
+}
+
+.bgPreview img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  display: block;
+}
+
+.notesTextarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 60px;
+  font-size: 0.82rem;
+  padding: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-radius: 8px;
+}
+
+.notesTextarea:focus { border-color: var(--accent); }
+
+.audioUploadRow {
+  margin-bottom: 4px;
+}
+
+.audioPreview {
+  margin-top: 4px;
+}
+
+.audioRemoveBtn {
+  width: 100%;
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  margin-top: 4px;
+}
+
+.audioRemoveBtn:hover {
+  background: var(--danger);
+  color: white;
+}
+
+.mobilePropsToggle {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--accent);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  box-shadow: var(--shadow);
+  z-index: 200;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .propertiesPanel { width: 240px; }
+}
+
+@media (max-width: 768px) {
+  .menuBtn { display: flex; }
+  .closeSidebarBtn { display: flex; }
+  .closePropsBtn { display: flex; }
+  .btnText { display: none; }
+  .titleInput { max-width: 150px; font-size: 0.9rem; }
+
+  .slideList {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 300;
+    transform: translateX(-100%);
+    width: 160px;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+  }
+
+  .slideListOpen { transform: translateX(0); }
+
+  .propertiesPanel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 300;
+    transform: translateX(100%);
+    width: 260px;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.3);
+  }
+
+  .propertiesPanelOpen { transform: translateX(0); }
+
+  .mobilePropsToggle { display: block; }
+
+  .elementToolbar button span { display: none; }
+  .elementToolbar button { padding: 8px; }
+}
+
+@media (max-width: 480px) {
+  .topBar { padding: 6px 10px; }
+  .titleInput { max-width: 100px; }
+  .propertiesPanel { width: 100%; }
+  .slideList { width: 140px; }
+}

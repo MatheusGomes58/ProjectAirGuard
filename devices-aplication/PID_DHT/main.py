@@ -70,7 +70,7 @@ async def control_task():
     pids = {}  # action_id -> PID instance
     # Acumuladores de duty-cycle por relé
     cycle_accum = {1: 0.0, 2: 0.0}
-    relay_duty = {1: 0.0, 2: 0.0}
+    relay_duty = {1: 0.0, 2: 0.0, 3: 0.0}
 
     log("[control] Task iniciada.")
 
@@ -85,7 +85,7 @@ async def control_task():
 
         if mode == "auto":
             # Reset duty para cada relé
-            duty = {1: 0.0, 2: 0.0}
+            duty = {1: 0.0, 2: 0.0, 3: 0.0}
 
             for act in actions:
                 sp = sp_map.get(act["setpoint_id"])
@@ -140,35 +140,41 @@ async def control_task():
                     if d > duty[relay]:
                         duty[relay] = d
 
-            # Aplica duty-cycle temporal
-            for r in [1, 2]:
+            # Aplica duty-cycle temporal (e PWM direto pro 3)
+            for r in [1, 2, 3]:
                 relay_duty[r] = duty[r]
 
-            relays.set_duty(duty[1], duty[2])
+            relays.set_duty(duty[1], duty[2], duty[3])
             relays._period_s = CONTROL_PERIOD_S
             relays.update(1.0)
 
             # Log
-            r1_on, r2_on = relays.get_status()
-            if r1_on or r2_on:
-                log("[auto] R1={} R2={} T={} H={}".format(
-                    "ON" if r1_on else "OFF", "ON" if r2_on else "OFF",
+            r1_on, r2_on, r3_on = relays.get_status()
+            if r1_on or r2_on or r3_on:
+                log("[auto] R1={} R2={} R3={} T={} H={}".format(
+                    "ON" if r1_on else "OFF", "ON" if r2_on else "OFF", "ON" if r3_on else "OFF",
                     "{:.1f}".format(temp) if temp else "--",
                     "{:.1f}".format(hum) if hum else "--"))
 
         elif mode == "manual":
             r1_man = shared_state.get_manual_relay(1)
             r2_man = shared_state.get_manual_relay(2)
-            relays.force(r1_man, r2_man)
+            r3_man = shared_state.get_manual_relay(3)
+            relays.force(r1_man, r2_man, r3_man)
 
         # Atualiza estados
-        r1_on, r2_on = relays.get_status()
+        r1_on, r2_on, r3_on = relays.get_status()
         shared_state.set_relay_state(1, r1_on)
         shared_state.set_relay_state(2, r2_on)
+        shared_state.set_relay_state(3, r3_on)
+        
+        # Lê e salva RPM no shared state
+        rpm = relays.get_rpm()
+        shared_state.set_rpm(rpm)
 
         # Histórico
         if temp is not None and hum is not None:
-            shared_state.add_history_point(temp, hum, r1_on, r2_on)
+            shared_state.add_history_point(temp, hum, r1_on, r2_on, r3_on, rpm)
 
         await asyncio.sleep_ms(1000)
 

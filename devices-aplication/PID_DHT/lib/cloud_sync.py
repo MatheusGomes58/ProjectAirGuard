@@ -1,8 +1,12 @@
 # ==============================================================================
-# cloud_sync.py — Envia dados para Cloud Function / Firestore
+# cloud_sync.py — Sync com Firebase Realtime Database (REST API)
+# ==============================================================================
+# PUT /devices/pico-001/sensor.json → envia dados do sensor
+# GET /devices/pico-001/config.json → lê configurações remotas
 # ==============================================================================
 import uasyncio as asyncio
 import ujson
+import gc
 
 from lib import shared_state
 from lib import wifi_manager as wifi
@@ -10,14 +14,11 @@ from lib.config import CONFIG_DIR
 
 CLOUD_FILE = CONFIG_DIR + "/cloud.json"
 
-# URL fixa — não pode ser alterada pela web
-CLOUD_URL = "https://us-central1-projectairguard.cloudfunctions.net/sensorData"
-
-# Device ID fixo no código
+# Firebase Realtime Database
+DB_HOST = "projectairguard-default-rtdb.firebaseio.com"
 DEVICE_ID = "pico-001"
 
-# Configuração editável (só intervalo e enabled)
-_sync_interval = 30  # segundos (10 a 600)
+_sync_interval = 60  # segundos (30 a 600)
 _enabled = False
 
 
@@ -43,7 +44,7 @@ def load_cloud_config():
     try:
         with open(CLOUD_FILE, 'r') as f:
             data = ujson.load(f)
-            _sync_interval = data.get("interval", 30)
+            _sync_interval = data.get("interval", 60)
             _enabled = data.get("enabled", False)
             if _enabled:
                 print("[cloud] Sync ativo cada {}s".format(_sync_interval))
@@ -60,72 +61,115 @@ def set_cloud_config(interval, enabled):
 
 def get_cloud_config():
     return {
-        "url": CLOUD_URL,
         "device_id": DEVICE_ID,
         "interval": _sync_interval,
         "enabled": _enabled
     }
 
 
+def _https_request(method, path, body=None):
+    """Faz uma requisição HTTPS ao Firebase Realtime Database.
+    Retorna o body da resposta ou None em caso de erro."""
+    import usocket
+    try:
+        import ussl as ssl
+    except ImportError:
+        import ssl
+
+    gc.collect()
+    sock = None
+    try:
+        addr = usocket.getaddrinfo(DB_HOST, 443)[0][-1]
+        sock = usocket.socket()
+        sock.settimeout(10)
+        sock.connect(addr)
+        sock = ssl.wrap_socket(sock, server_hostname=DB_HOST)
+
+        if body:
+            request = "{} {} HTTP/1.0\r\nHost: {}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}".format(
+                method, path, DB_HOST, len(body), body)
+        else:
+            request = "{} {} HTTP/1.0\r\nHost: {}\r\nConnection: close\r\n\r\n".format(
+                method, path, DB_HOST)
+
+        sock.write(request.encode())
+
+        # Lê resposta completa
+        chunks = []
+        while True:
+            chunk = sock.read(512)
+            if not chunk:
+                break
+            chunks.append(chunk)
+        sock.close()
+        sock = None
+
+        response = b''.join(chunks)
+        del chunks
+        gc.collect()
+
+        if b"200" not in response:
+            return None
+
+        # Extrai body (após \r\n\r\n)
+        sep = response.find(b'\r\n\r\n')
+        if sep >= 0:
+            return response[sep + 4:]
+        return None
+
+    except Exception as e:
+        shared_state.add_log("[cloud] {}".format(e))
+        if sock:
+            try:
+                sock.close()
+            except:
+                pass
+        return None
+    finally:
+        gc.collect()
+
+
 def apply_remote_config(cfg):
-    """Aplica configurações vindas do Firestore (escritas pelo frontend web)."""
-    changed = False
-    
-    # Modo
+    """Aplica configurações vindas do Firebase."""
+    if not cfg:
+        return
+
     if cfg.get("mode") and cfg["mode"] != shared_state.get_control_mode():
         shared_state.set_control_mode(cfg["mode"])
         shared_state.add_log("[cloud] modo={}".format(cfg["mode"]))
-        changed = True
-    
-    # Manual relays
+
     if cfg.get("manual"):
         for r, state in cfg["manual"].items():
             if shared_state.get_manual_relay(int(r)) != state:
                 shared_state.set_manual_relay(int(r), state)
-                changed = True
-    
-    # Relay names
+
     if cfg.get("relay_names"):
         current = shared_state.get_relay_names()
         for r, name in cfg["relay_names"].items():
             if current.get(r) != name:
                 shared_state.set_relay_name(r, name)
-                changed = True
-    
-    # Setpoints (substitui lista inteira se diferente)
+
     if cfg.get("setpoints") is not None:
         remote_sps = cfg["setpoints"]
-        local_sps = shared_state.get_setpoints_list()
-        if remote_sps != local_sps:
-            # Substitui direto
+        if remote_sps != shared_state.get_setpoints_list():
             shared_state._setpoints = remote_sps
             shared_state.save_setpoints()
-            shared_state.add_log("[cloud] setpoints atualizados ({})".format(len(remote_sps)))
-            changed = True
-    
-    # Actions (substitui lista inteira se diferente)
+            shared_state.add_log("[cloud] SPs={}".format(len(remote_sps)))
+
     if cfg.get("actions") is not None:
         remote_acts = cfg["actions"]
-        local_acts = shared_state.get_actions_list()
-        if remote_acts != local_acts:
+        if remote_acts != shared_state.get_actions_list():
             shared_state._actions = remote_acts
             shared_state.save_actions()
-            shared_state.add_log("[cloud] acoes atualizadas ({})".format(len(remote_acts)))
-            changed = True
-    
-    if changed:
-        print("[cloud] Config remota aplicada")
+            shared_state.add_log("[cloud] ACTs={}".format(len(remote_acts)))
 
 
 async def cloud_sync_task():
-    """Task que envia dados periodicamente para a Cloud Function."""
-    import gc
+    """Task principal: envia sensor data e lê config remota."""
     print("[cloud] Task init enabled={} interval={}s".format(_enabled, _sync_interval))
-    shared_state.add_log("[cloud] Task iniciada")
 
     while True:
         await asyncio.sleep_ms(_sync_interval * 1000)
-        print("[cloud] tick enabled={} connected={}".format(_enabled, wifi.is_connected()))
 
         if not _enabled:
             continue
@@ -133,101 +177,44 @@ async def cloud_sync_task():
         if not wifi.is_connected():
             continue
 
-        print("[cloud] preparando payload...")
         temp, hum = shared_state.get_sensor_data()
         if temp is None or hum is None:
-            print("[cloud] sensor None")
             continue
 
         r1 = shared_state.get_relay_state(1)
         r2 = shared_state.get_relay_state(2)
+        r3 = shared_state.get_relay_state(3)
+        rpm = shared_state.get_rpm()
 
-        payload = ujson.dumps({
-            "device_id": DEVICE_ID,
+        # 1) PUT sensor data
+        sensor_payload = ujson.dumps({
             "temperature": round(temp, 1),
             "humidity": round(hum, 1),
             "relay1": r1,
-            "relay2": r2
+            "relay2": r2,
+            "relay3": r3,
+            "rpm": rpm,
+            "last_seen": "active"
         })
-        print("[cloud] payload ok len={}".format(len(payload)))
 
-        import gc
-        gc.collect()
-        gc.collect()
-        mem = gc.mem_free()
-        print("[cloud] mem_free={}".format(mem))
-        
-        if mem < 25000:
-            print("[cloud] RAM insuficiente, pulando")
-            shared_state.add_log("[cloud] RAM baixa: {}".format(mem))
-            continue
+        path = "/devices/{}/sensor.json".format(DEVICE_ID)
+        result = _https_request("PUT", path, sensor_payload)
 
-        sock = None
-        try:
-            import usocket
+        if result:
+            shared_state.add_log("[cloud] PUT OK T={:.1f}".format(temp))
+        else:
+            continue  # Se PUT falhou, não tenta GET
+
+        # Espera um pouco entre requests
+        await asyncio.sleep_ms(2000)
+
+        # 2) GET config remota
+        path2 = "/devices/{}/config.json".format(DEVICE_ID)
+        config_body = _https_request("GET", path2)
+
+        if config_body and config_body != b'null':
             try:
-                import ussl as ssl
-            except ImportError:
-                import ssl
-
-            url_body = CLOUD_URL.split("://")[1]
-            host = url_body.split("/")[0]
-            path = "/" + "/".join(url_body.split("/")[1:])
-
-            print("[cloud] DNS...")
-            addr = usocket.getaddrinfo(host, 443)[0][-1]
-            print("[cloud] conectando {}:443".format(addr[0]))
-            sock = usocket.socket()
-            sock.settimeout(10)
-            try:
-                sock.connect(addr)
-            except OSError as ce:
-                print("[cloud] connect err: {}".format(ce))
-                sock.close()
-                sock = None
-                continue
-            print("[cloud] TCP ok, SSL...")
-            sock = ssl.wrap_socket(sock, server_hostname=host)
-            print("[cloud] SSL ok, enviando...")
-
-            request = "POST {} HTTP/1.0\r\nHost: {}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}".format(
-                path, host, len(payload), payload)
-            sock.write(request.encode())
-            print("[cloud] enviado, lendo resposta...")
-
-            # Lê resposta completa (headers + body)
-            chunks = []
-            while True:
-                chunk = sock.read(512)
-                if not chunk:
-                    break
-                chunks.append(chunk)
-            sock.close()
-            sock = None
-            response = b''.join(chunks)
-            print("[cloud] resposta {} bytes".format(len(response)))
-
-            if response and b"200" in response:
-                shared_state.add_log("[cloud] OK T={:.1f} H={:.1f}".format(temp, hum))
-                try:
-                    # Separa headers do body (dividido por \r\n\r\n)
-                    body_start = response.find(b'\r\n\r\n')
-                    if body_start >= 0:
-                        body = response[body_start + 4:]
-                        resp_json = ujson.loads(body)
-                        cfg = resp_json.get("config")
-                        if cfg:
-                            apply_remote_config(cfg)
-                except Exception as pe:
-                    print("[cloud] parse: {}".format(pe))
-            else:
-                shared_state.add_log("[cloud] HTTP err")
-
-        except Exception as e:
-            shared_state.add_log("[cloud] {}".format(e))
-            if sock:
-                try:
-                    sock.close()
-                except:
-                    pass
-        gc.collect()
+                cfg = ujson.loads(config_body)
+                apply_remote_config(cfg)
+            except Exception as e:
+                print("[cloud] cfg parse: {}".format(e))
