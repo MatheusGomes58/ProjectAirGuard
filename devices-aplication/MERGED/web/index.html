@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>EcoBreath</title>
+<link rel="stylesheet" href="/web/style.css">
+</head>
+<body>
+<div class="app">
+<div class="hd"><div><h1>EcoBreath</h1><p>Monitor v2.0</p></div><div class="badge"><span class="dot"></span><span id="ws">AP</span></div></div>
+<div class="tabs"><div class="tab a" onclick="P('c')">Monitor</div><div class="tab" onclick="P('w')">WiFi</div><div class="tab" onclick="P('s')">Config</div></div>
+
+<!-- MONITOR -->
+<div class="pg a" id="pc">
+  <div class="cd"><div class="ct">Qualidade do Ar</div><div class="gauge-wrap"><canvas id="aqGauge" width="220" height="130"></canvas><div class="gauge-info"><span class="gauge-val" id="aqVal">--</span><span class="gauge-label" id="aqLabel">--</span></div></div></div>
+  <div class="cd"><div class="ct">Sensores</div><div class="rd"><div class="rb t"><div class="rv" id="tv">--</div><div class="rl">Temperatura</div></div><div class="rb h"><div class="rv" id="hv">--</div><div class="rl">Umidade</div></div></div></div>
+  <div class="cd"><div class="ct">Bateria</div><div class="rd"><div class="rb"><div class="rv" id="bv">--</div><div class="rl">Voltagem</div></div><div class="rb"><div class="rv" id="bp">--</div><div class="rl">Carga</div></div></div></div>
+  <div class="cd"><div class="col-hd" onclick="togCh()"><div class="ct" style="margin-bottom:0">Historico</div><span class="arrow">&#9660;</span></div><div class="col-body" id="chB"><div class="chart-wrap"><canvas id="chart"></canvas></div></div></div>
+  <div class="cd"><div class="col-hd" onclick="togLg()"><div class="ct" style="margin-bottom:0">Log</div><span class="arrow">&#9660;</span></div><div class="col-body" id="lgB"><div class="log-box" id="logBox"><div class="log-line">--</div></div></div></div>
+</div>
+
+<!-- WIFI -->
+<div class="pg" id="pw">
+  <div class="cd"><div class="ct">Conexao WiFi</div><div class="wi"><div class="wr"><span class="wrl">Status</span><span class="wrv" id="wst">AP</span></div><div class="wr"><span class="wrl">SSID</span><span class="wrv" id="wss">--</span></div><div class="wr"><span class="wrl">IP WiFi</span><span class="wrv" id="wip">--</span></div><div class="wr"><span class="wrl">IP AP</span><span class="wrv" id="wap">--</span></div></div><div id="dcx" style="display:none"><div class="dcb" onclick="DC()">Desconectar</div></div></div>
+  <div class="cd"><div class="ct">Redes</div><div class="scb" onclick="SC()">Escanear WiFi</div><div id="nl"><div class="ld">Clique para escanear</div></div></div>
+</div>
+
+<!-- CONFIG -->
+<div class="pg" id="pst">
+  <div class="cd"><div class="ct">Cloud Sync (Firebase)</div><div class="sw-c"><span>Ativo</span><div class="sw" id="swC" onclick="togCl()"></div></div><div class="cfg-row" onclick="openCl()" style="cursor:pointer"><label>Intervalo</label><span class="cfg-val" id="clS">Off</span></div></div>
+</div>
+
+<div class="ft">EcoBreath Merged v2.0</div>
+</div>
+
+<!-- Modais -->
+<div class="modal" id="mdW"><div class="mc"><div class="mt" id="mtt">Conectar</div><input class="mi" id="mp" type="password" placeholder="Senha da rede"><div class="mbs"><div class="mbb x" onclick="closeM()">Cancelar</div><div class="mbb ok" onclick="WC()">Conectar</div></div></div></div>
+<div class="modal" id="mdCl"><div class="mc"><div class="mt">Cloud Sync</div><input class="mi" id="fCI" type="number" min="30" max="600" placeholder="Intervalo (s)" value="60"><div class="mbs"><div class="mbb x" onclick="document.getElementById('mdCl').className='modal'">Cancelar</div><div class="mbb ok" onclick="saveCl()">Salvar</div></div></div></div>
+
+<script src="/web/app.js"></script>
+</body>
+</html>

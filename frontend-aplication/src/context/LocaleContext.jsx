@@ -23,6 +23,7 @@ export function LocaleProvider({ children }) {
     const setLocale = useCallback((code) => {
         localStorage.setItem('locale', code);
         setLocaleState(code);
+        window.dispatchEvent(new Event('localechange'));
     }, []);
 
     const t = useCallback((key) => {

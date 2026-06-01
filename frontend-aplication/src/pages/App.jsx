@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import MenuOptions from '../components/menu/menu';
 import ApiRest from '../components/apirest/apirest';
@@ -15,7 +15,7 @@ import data from '../data/config.json';
 import MapPage from './mapPage';
 import ThemeManager from '../components/ThemeManager/ThemeManager';
 import LanguageFab from '../components/LanguageFab/LanguageFab';
-import { LocaleProvider } from '../context/LocaleContext';
+import { LocaleProvider, useLocale } from '../context/LocaleContext';
 import PrivateRoute from '../components/PrivateRoute/PrivateRoute';
 
 function App() {
@@ -36,8 +36,17 @@ function App() {
 
 function AppContent() {
   const location = useLocation();
+  const { locale } = useLocale();
   const hideMenu = ['/', '/forgotPassword', '/slides', '/apirest'].includes(location.pathname) || location.pathname.startsWith('/device/');
   const isSlides = location.pathname === '/slides';
+
+  // Force re-render of non-slide pages when locale changes
+  const [, forceUpdate] = useState(0);
+  useEffect(() => {
+    const handler = () => forceUpdate(n => n + 1);
+    window.addEventListener('localechange', handler);
+    return () => window.removeEventListener('localechange', handler);
+  }, []);
 
   return (
     <>

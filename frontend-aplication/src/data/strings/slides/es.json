@@ -42,7 +42,7 @@
       "Sin datos, no hay forma de actuar preventivamente contra la mala calidad del aire.",
       "Se necesita un dispositivo inteligente que detecte, alerte y registre estas condiciones."
     ],
-    "background": { "type": "video", "url": "../video/pollution-loop.mp4", "loop": true, "muted": true }
+    "background": { "type": "video", "url": "../img/slides/video.mp4", "loop": true, "muted": true }
   },
   {
     "id": "slide-5",
@@ -83,7 +83,7 @@
     "title": "EcoBreath Web",
     "subtitle": "Control en la palma de tu mano",
     "fields": ["Dashboard en tiempo real", "Historial de lecturas", "Alertas configurables", "Gestión de dispositivos", "Multi-idioma", "Tema claro/oscuro"],
-    "media": { "type": "video", "url": "../video/web-demo.mp4", "autoplay": true },
+    "media": { "type": "video", "url": "../img/slides/video.mp4", "autoplay": true },
     "background": { "type": "image", "url": "../img/slides/mockup-blur.jpg" }
   },
   {
@@ -176,7 +176,7 @@
     "id": "slide-15",
     "layout": "center-word",
     "title": "¿Preguntas?",
-    "background": { "type": "video", "url": "../video/questions-loop.mp4", "loop": true, "muted": true }
+    "background": { "type": "video", "url": "../img/slides/video.mp4", "loop": true, "muted": true }
   },
   {
     "id": "slide-16",

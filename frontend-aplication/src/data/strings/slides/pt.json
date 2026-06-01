@@ -25,7 +25,7 @@
     "stats": [
       { "value": "4M+", "label": "mortes/ano por poluição interna (OMS)" },
       { "value": "CO", "label": "gás incolor e inodoro" },
-      { "value": "0s", "label": "tempo para perceber sem sensor" }
+      { "value": "0s", "label": "tempo para perceber com o sensor" }
     ],
     "footnote": "Em 2023, uma família de 4 pessoas morreu em SC após dormir com aquecedor a gás em quarto fechado. Em SP, um casal foi encontrado morto por CO de esquentador sem manutenção. Um simples sensor IoT poderia ter salvado essas vidas.",
     "background": { "type": "color", "value": "#1a0a0a" }
@@ -42,7 +42,7 @@
       "Sem dados, não há como agir preventivamente contra a má qualidade do ar.",
       "É necessário um dispositivo inteligente que detecte, alerte e registre essas condições."
     ],
-    "background": { "type": "video", "url": "../video/pollution-loop.mp4", "loop": true, "muted": true }
+    "background": { "type": "video", "url": "../img/slides/", "loop": true, "muted": true }
   },
   {
     "id": "slide-5",
@@ -83,17 +83,8 @@
     "title": "EcoBreath Web",
     "subtitle": "Controle na palma da mão",
     "fields": ["Dashboard em tempo real", "Histórico de leituras", "Alertas configuráveis", "Gerenciamento de dispositivos", "Multi-idioma", "Tema claro/escuro"],
-    "media": { "type": "video", "url": "../video/web-demo.mp4", "autoplay": true },
+    "media": { "type": "video", "url": "../img/slides/video.mp4", "autoplay": true },
     "background": { "type": "image", "url": "../img/slides/mockup-blur.jpg" }
-  },
-  {
-    "id": "slide-9",
-    "layout": "hardware",
-    "title": "Hardware",
-    "subtitle": "Protótipo funcional",
-    "components": ["Paspberry Pico 2w", "Sensor DHT-11", "Display TFT GC9A01", "Alimentação 5V USB"],
-    "media": { "type": "image", "url": "../img/slides/pipico.jpeg" },
-    "background": { "type": "color", "value": "#0a0f0d" }
   },
   {
     "id": "slide-10",
@@ -109,16 +100,22 @@
     "background": { "type": "color", "value": "#0a1a12" }
   },
   {
-    "id": "slide-11",
-    "layout": "diagram",
-    "title": "Fluxo de Dados",
-    "icon": "fa-sitemap",
-    "components": [
-      "Sensores", "PI PICO 2W", "Wi-Fi",
-      "Firebase", "Cloud Functions", "Web App",
-      "Usuário", "Alertas", "Histórico"
-    ],
-    "background": { "type": "color", "value": "#0a1a12" }
+    "id": "slide-9",
+    "layout": "hardware",
+    "title": "Hardware",
+    "subtitle": "Protótipo funcional",
+    "components": ["Paspberry Pico 2w", "Sensor DHT-11", "Display TFT GC9A01", "Alimentação por Bateria"],
+    "media": { "type": "image", "url": "../img/slides/pipico.jpeg" },
+    "background": { "type": "color", "value": "#0a0f0d" }
+  },
+  {
+    "id": "slide-10",
+    "layout": "mockup",
+    "title": "EcoBreath Web",
+    "subtitle": "Controle na palma da mão",
+    "fields": ["Dashboard em tempo real", "Histórico de leituras", "Alertas configuráveis", "Gerenciamento de dispositivos", "Multi-idioma", "Tema claro/escuro"],
+    "media": { "type": "video", "url": "../img/slides/video.mp4", "autoplay": true },
+    "background": { "type": "image", "url": "../img/slides/mockup-blur.jpg" }
   },
   {
     "id": "slide-12",
@@ -175,7 +172,7 @@
     "id": "slide-15",
     "layout": "center-word",
     "title": "Dúvidas?",
-    "background": { "type": "video", "url": "../video/questions-loop.mp4", "loop": true, "muted": true }
+    "background": { "type": "video", "url": "../img/slides/video.mp4", "loop": true, "muted": true }
   },
   {
     "id": "slide-16",

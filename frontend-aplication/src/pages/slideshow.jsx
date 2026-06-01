@@ -11,7 +11,7 @@ import '../css/slideshow.css';
 // ─── MAPEAMENTO DINÂMICO DOS ARQUIVOS (VITE) ─────────────────
 const slideImages = import.meta.glob('../img/slides/*.{png,jpg,jpeg,svg,PNG,JPG,JPEG}', { eager: true });
 const teamImages = import.meta.glob('../img/team/*.{png,jpg,jpeg,svg,PNG,JPG,JPEG}', { eager: true });
-const slideVideos = import.meta.glob('../video/*.{mp4,webm,MP4,WEBM}', { eager: true });
+const slideVideos = import.meta.glob(['../video/*.{mp4,webm,MP4,WEBM}', '../img/slides/*.{mp4,webm,MP4,WEBM}'], { eager: true });
 
 const getImage = (pathOrName) => {
   if (!pathOrName) return null;
@@ -116,7 +116,7 @@ const LAYOUTS = {
 // ─────────────────────────────────────────────────────────────
 // WHITEBOARD (LOUSA) — Desenho livre + texto, salvo no Firebase
 // ─────────────────────────────────────────────────────────────
-const Whiteboard = ({ visible, onClose }) => {
+const Whiteboard = ({ visible, onClose, isPresenter }) => {
   const canvasRef = useRef(null);
   const [drawing, setDrawing] = useState(false);
   const [tool, setTool] = useState('pen'); // pen | line | eraser | text
@@ -134,6 +134,7 @@ const Whiteboard = ({ visible, onClose }) => {
     const canvas = canvasRef.current;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    // Load initial image
     db.collection('whiteboard').doc('canvas').get().then(snap => {
       if (snap.exists && snap.data().image) {
         const img = new Image();
@@ -141,7 +142,22 @@ const Whiteboard = ({ visible, onClose }) => {
         img.src = snap.data().image;
       }
     });
-  }, [visible]);
+    // Screen mode: listen for realtime updates
+    if (!isPresenter) {
+      const unsub = db.collection('whiteboard').doc('canvas').onSnapshot(snap => {
+        if (snap.exists && snap.data().image) {
+          const img = new Image();
+          img.onload = () => {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+          };
+          img.src = snap.data().image;
+        }
+      });
+      return () => unsub();
+    }
+  }, [visible, isPresenter]);
 
   const saveToFirebase = useCallback(() => {
     if (!canvasRef.current) return;
@@ -230,26 +246,28 @@ const Whiteboard = ({ visible, onClose }) => {
 
   return (
     <div className="sl-whiteboard-overlay">
-      <div className="sl-wb-toolbar">
-        <button className={`sl-wb-btn ${tool === 'pen' ? 'active' : ''}`} onClick={() => setTool('pen')} title="Caneta"><i className="fas fa-pen" /></button>
-        <button className={`sl-wb-btn ${tool === 'line' ? 'active' : ''}`} onClick={() => setTool('line')} title="Linha reta"><i className="fas fa-minus" /></button>
-        <button className={`sl-wb-btn ${tool === 'text' ? 'active' : ''}`} onClick={() => setTool('text')} title="Texto"><i className="fas fa-font" /></button>
-        <button className={`sl-wb-btn ${tool === 'eraser' ? 'active' : ''}`} onClick={() => setTool('eraser')} title="Borracha"><i className="fas fa-eraser" /></button>
-        <div className="sl-wb-separator" />
-        <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="sl-wb-color" title="Cor" />
-        {tool !== 'text' && <input type="range" min="1" max="12" value={lineWidth} onChange={(e) => setLineWidth(+e.target.value)} className="sl-wb-size" title="Espessura" />}
-        {tool === 'text' && <input type="range" min="12" max="72" value={fontSize} onChange={(e) => setFontSize(+e.target.value)} className="sl-wb-size" title="Tamanho da fonte" />}
-        {tool === 'text' && <span className="sl-wb-font-label">{fontSize}px</span>}
-        <div className="sl-wb-separator" />
-        <button className="sl-wb-btn" onClick={clearCanvas} title="Limpar tudo"><i className="fas fa-trash" /></button>
-        <button className="sl-wb-btn sl-wb-close" onClick={() => { if (textPos) commitText(); onClose(); }} title="Fechar"><i className="fas fa-xmark" /></button>
-      </div>
+      {isPresenter && (
+        <div className="sl-wb-toolbar">
+          <button className={`sl-wb-btn ${tool === 'pen' ? 'active' : ''}`} onClick={() => setTool('pen')} title="Caneta"><i className="fas fa-pen" /></button>
+          <button className={`sl-wb-btn ${tool === 'line' ? 'active' : ''}`} onClick={() => setTool('line')} title="Linha reta"><i className="fas fa-minus" /></button>
+          <button className={`sl-wb-btn ${tool === 'text' ? 'active' : ''}`} onClick={() => setTool('text')} title="Texto"><i className="fas fa-font" /></button>
+          <button className={`sl-wb-btn ${tool === 'eraser' ? 'active' : ''}`} onClick={() => setTool('eraser')} title="Borracha"><i className="fas fa-eraser" /></button>
+          <div className="sl-wb-separator" />
+          <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="sl-wb-color" title="Cor" />
+          {tool !== 'text' && <input type="range" min="1" max="12" value={lineWidth} onChange={(e) => setLineWidth(+e.target.value)} className="sl-wb-size" title="Espessura" />}
+          {tool === 'text' && <input type="range" min="12" max="72" value={fontSize} onChange={(e) => setFontSize(+e.target.value)} className="sl-wb-size" title="Tamanho da fonte" />}
+          {tool === 'text' && <span className="sl-wb-font-label">{fontSize}px</span>}
+          <div className="sl-wb-separator" />
+          <button className="sl-wb-btn" onClick={clearCanvas} title="Limpar tudo"><i className="fas fa-trash" /></button>
+          <button className="sl-wb-btn sl-wb-close" onClick={() => { if (textPos) commitText(); onClose(); }} title="Fechar"><i className="fas fa-xmark" /></button>
+        </div>
+      )}
       <div className="sl-wb-canvas-wrap">
         <canvas
           ref={canvasRef}
           className="sl-wb-canvas"
-          onMouseDown={startDraw} onMouseMove={draw} onMouseUp={endDraw} onMouseLeave={endDraw}
-          onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={endDraw}
+          {...(isPresenter ? { onMouseDown: startDraw, onMouseMove: draw, onMouseUp: endDraw, onMouseLeave: endDraw, onTouchStart: startDraw, onTouchMove: draw, onTouchEnd: endDraw } : {})}
+          style={isPresenter ? { cursor: 'crosshair' } : { cursor: 'default' }}
         />
         {textPos && (
           <input
@@ -271,6 +289,122 @@ const Whiteboard = ({ visible, onClose }) => {
         )}
       </div>
     </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────
+// ANNOTATION OVERLAY — Desenhar sobre os slides (sync via Firebase)
+// ─────────────────────────────────────────────────────────────
+const AnnotationOverlay = ({ visible, isPresenter, slideIndex }) => {
+  const canvasRef = useRef(null);
+  const [drawing, setDrawing] = useState(false);
+  const [tool, setTool] = useState('pen'); // pen | eraser
+  const [color, setColor] = useState('#ef4444');
+  const penWidth = 3;
+  const eraserWidth = 24;
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    db.collection('annotations').doc(`slide-${slideIndex}`).get().then(snap => {
+      if (snap.exists && snap.data().image) {
+        const img = new Image();
+        img.onload = () => canvas.getContext('2d').drawImage(img, 0, 0);
+        img.src = snap.data().image;
+      }
+    });
+    if (!isPresenter) {
+      const unsub = db.collection('annotations').doc(`slide-${slideIndex}`).onSnapshot(snap => {
+        if (snap.exists && snap.data().image) {
+          const img = new Image();
+          img.onload = () => {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+          };
+          img.src = snap.data().image;
+        } else {
+          canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        }
+      });
+      return () => unsub();
+    }
+  }, [visible, slideIndex, isPresenter]);
+
+  const saveAnnotation = useCallback(() => {
+    if (!canvasRef.current || !isPresenter) return;
+    const image = canvasRef.current.toDataURL('image/png');
+    db.collection('annotations').doc(`slide-${slideIndex}`).set({ image, updatedAt: Date.now() });
+  }, [slideIndex, isPresenter]);
+
+  const clearAnnotation = () => {
+    if (!canvasRef.current) return;
+    const ctx = canvasRef.current.getContext('2d');
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    db.collection('annotations').doc(`slide-${slideIndex}`).delete();
+  };
+
+  const getPos = (e) => {
+    const rect = canvasRef.current.getBoundingClientRect();
+    const touch = e.touches ? e.touches[0] : e;
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+  };
+
+  const startDraw = (e) => {
+    if (!isPresenter) return;
+    setDrawing(true);
+    const ctx = canvasRef.current.getContext('2d');
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  };
+
+  const draw = (e) => {
+    if (!drawing || !isPresenter) return;
+    const ctx = canvasRef.current.getContext('2d');
+    const pos = getPos(e);
+    if (tool === 'eraser') {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.lineWidth = eraserWidth;
+    } else {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = penWidth;
+    }
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+  };
+
+  const endDraw = () => {
+    if (!drawing) return;
+    setDrawing(false);
+    if (canvasRef.current) canvasRef.current.getContext('2d').globalCompositeOperation = 'source-over';
+    saveAnnotation();
+  };
+
+  if (!visible) return null;
+
+  return (
+    <>
+      <canvas
+        ref={canvasRef}
+        className="sl-annotation-canvas"
+        {...(isPresenter ? { onMouseDown: startDraw, onMouseMove: draw, onMouseUp: endDraw, onMouseLeave: endDraw, onTouchStart: startDraw, onTouchMove: draw, onTouchEnd: endDraw } : {})}
+        style={{ cursor: isPresenter ? (tool === 'eraser' ? 'cell' : 'crosshair') : 'default', pointerEvents: isPresenter ? 'auto' : 'none' }}
+      />
+      {isPresenter && (
+        <div className="sl-annot-toolbar">
+          <button className={`sl-wb-btn ${tool === 'pen' ? 'active' : ''}`} onClick={() => setTool('pen')} title="Caneta"><i className="fas fa-pen" /></button>
+          <button className={`sl-wb-btn ${tool === 'eraser' ? 'active' : ''}`} onClick={() => setTool('eraser')} title="Borracha"><i className="fas fa-eraser" /></button>
+          <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="sl-wb-color" title="Cor" />
+          <button className="sl-wb-btn" onClick={clearAnnotation} title="Apagar tudo"><i className="fas fa-trash" /></button>
+        </div>
+      )}
+    </>
   );
 };
 
@@ -346,6 +480,7 @@ const Slideshow = () => {
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [blackout, setBlackout] = useState(false);
   const [showWhiteboard, setShowWhiteboard] = useState(false);
+  const [annotating, setAnnotating] = useState(false);
   const [hiddenSlides, setHiddenSlides] = useState(new Set());
   const [showPreview, setShowPreview] = useState(true);
   const [animDir, setAnimDir] = useState('next');
@@ -375,22 +510,35 @@ const Slideshow = () => {
           if (typeof data.index === 'number') setCurrent(data.index);
           if (data.locale && data.locale !== localeRef.current) setLocale(data.locale);
           if (data.blackout !== undefined) setBlackout(data.blackout);
+          if (data.whiteboardOpen !== undefined && roleRef.current === 'screen') setShowWhiteboard(data.whiteboardOpen);
+          if (data.annotating !== undefined && roleRef.current === 'screen') setAnnotating(data.annotating);
         }
       }
     });
   }, [setLocale]);
 
   const pushState = useCallback((updates) => {
-    if (!isAuth || !sync || role !== 'presenter') return;
+    if (!sync || role !== 'presenter') return;
     db.collection(FS.col).doc(FS.doc).update(updates).catch(() => {
       db.collection(FS.col).doc(FS.doc).set({ index: current, locale: localeRef.current, blackout: false, ...updates }, { merge: true });
     });
-  }, [isAuth, sync, role, current]);
+  }, [sync, role, current]);
 
   useEffect(() => {
-    if (!isAuth || !sync || role !== 'presenter') return;
+    if (!sync || role !== 'presenter') return;
     db.collection(FS.col).doc(FS.doc).update({ locale });
-  }, [locale, isAuth, sync, role]);
+  }, [locale, sync, role]);
+
+  // Sync whiteboard & annotation state to Firebase (presenter pushes)
+  useEffect(() => {
+    if (!sync || role !== 'presenter') return;
+    db.collection(FS.col).doc(FS.doc).update({ whiteboardOpen: showWhiteboard }).catch(() => {});
+  }, [showWhiteboard, sync, role]);
+
+  useEffect(() => {
+    if (!sync || role !== 'presenter') return;
+    db.collection(FS.col).doc(FS.doc).update({ annotating }).catch(() => {});
+  }, [annotating, sync, role]);
 
   // Encontra o próximo slide visível (pula ocultos)
   const getNextVisible = useCallback((from, dir) => {
@@ -415,6 +563,7 @@ const Slideshow = () => {
       if (e.key === 'ArrowRight') next();
       if (e.key === 'b' || e.key === 'B') toggleBlackout();
       if (e.key === 'w' || e.key === 'W') setShowWhiteboard(v => !v);
+      if (e.key === 'a' || e.key === 'A') setAnnotating(v => !v);
     };
     document.addEventListener('keydown', h);
     return () => document.removeEventListener('keydown', h);
@@ -460,7 +609,7 @@ const Slideshow = () => {
 
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole); setSync(true); syncRef.current = true; setShowRoleModal(false);
-    if (selectedRole === 'presenter' && isAuth) {
+    if (selectedRole === 'presenter') {
       db.collection(FS.col).doc(FS.doc).set({ index: current, locale, blackout }, { merge: true });
     }
   };
@@ -516,6 +665,7 @@ const Slideshow = () => {
               <>
                 <button className={`sl-tbtn ${showPreview ? 'sl-tbtn-active' : ''}`} onClick={() => setShowPreview(!showPreview)} title="Preview (V)"><i className="fas fa-eye" /></button>
                 <button className="sl-tbtn" onClick={() => setShowWhiteboard(true)} title="Lousa (W)"><i className="fas fa-chalkboard" /></button>
+                <button className={`sl-tbtn ${annotating ? 'sl-tbtn-active' : ''}`} onClick={() => setAnnotating(!annotating)} title="Anotar no slide (A)"><i className="fas fa-pen-fancy" /></button>
                 <button className={`sl-tbtn ${blackout ? 'sl-tbtn-active' : ''}`} onClick={toggleBlackout} title="Tela preta (B)"><i className="fas fa-moon" /></button>
                 <div className="sl-lang-wrap">
                   <button className="sl-tbtn" onClick={() => { setThemeOpen(!themeOpen); setLangOpen(false); }} title="Tema"><i className="fas fa-circle-half-stroke" /></button>
@@ -546,12 +696,10 @@ const Slideshow = () => {
                 </div>
               </>
             )}
-            {/* ── Sync / Live (sempre visível se autenticado) ── */}
-            {isAuth && (
-              <button className={`sl-tbtn ${sync ? 'sl-tbtn-active' : ''}`} onClick={handleSyncToggle} title={sync ? (role === 'presenter' ? 'Presenter' : 'Tela') : 'Modo Live (offline)'}>
-                <i className={sync ? 'fas fa-wifi' : 'fas fa-wifi sl-icon-slashed'} />
-              </button>
-            )}
+            {/* ── Sempre visíveis ── */}
+            <button className={`sl-tbtn ${sync ? 'sl-tbtn-active' : ''}`} onClick={handleSyncToggle} title={sync ? (role === 'presenter' ? 'Presenter' : 'Tela') : 'Modo Live (offline)'}>
+              <i className={sync ? 'fas fa-wifi' : 'fas fa-wifi sl-icon-slashed'} />
+            </button>
             <button className="sl-tbtn" onClick={toggleFs} title="Tela Cheia"><i className={`fas fa-${fullscreen ? 'compress' : 'expand'}`} /></button>
           </div>
         </div>
@@ -604,8 +752,11 @@ const Slideshow = () => {
         </div>
       )}
 
-      {/* Whiteboard */}
-      <Whiteboard visible={showWhiteboard} onClose={() => setShowWhiteboard(false)} />
+      {/* Whiteboard — presenter draws, screen sees */}
+      <Whiteboard visible={showWhiteboard} onClose={() => setShowWhiteboard(false)} isPresenter={role === 'presenter'} />
+
+      {/* Annotation overlay on slides — presenter draws, screen always shows if data exists */}
+      <AnnotationOverlay visible={annotating || role === 'screen'} isPresenter={role === 'presenter'} slideIndex={current} />
 
       {/* Role selection modal */}
       {showRoleModal && <RoleModal onSelect={handleRoleSelect} onClose={() => setShowRoleModal(false)} />}

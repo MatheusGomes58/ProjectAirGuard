@@ -1,6 +1,7 @@
 import pt from '../data/strings/pt.json';
 import en from '../data/strings/en.json';
 import es from '../data/strings/es.json';
+import { useState, useEffect, useCallback } from 'react';
 
 const locales = { pt, en, es };
 
@@ -22,6 +23,23 @@ export function t(key) {
 
 export function setLocale(l) {
   localStorage.setItem('locale', l);
-  // Dispatch a custom event so components can re-render if needed
   window.dispatchEvent(new Event('localechange'));
+}
+
+// Hook that re-renders component when locale changes
+export function useTranslation() {
+  const [locale, setLocaleState] = useState(getLocale);
+
+  useEffect(() => {
+    const handler = () => setLocaleState(getLocale());
+    window.addEventListener('localechange', handler);
+    return () => window.removeEventListener('localechange', handler);
+  }, []);
+
+  const translate = useCallback((key) => {
+    const dict = locales[locale] || locales['pt'];
+    return dict[key] || key;
+  }, [locale]);
+
+  return { t: translate, locale };
 }
