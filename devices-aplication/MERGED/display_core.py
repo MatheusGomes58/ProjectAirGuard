@@ -267,9 +267,13 @@ def run():
                 _last_wifi_status = cur
                 _refresh_wifi()
 
-        # Battery update (screen 2)
-        if screen_index == 2 and time.ticks_diff(now, last_battery_read) >= BATTERY_INTERVAL:
+        # Battery update — always read (for web dashboard), only redraw on screen 2
+        if time.ticks_diff(now, last_battery_read) >= BATTERY_INTERVAL:
             last_battery_read = now
-            draw_screen_battery()
+            vbat = read_battery_voltage()
+            pct = voltage_to_percent(vbat)
+            shared_state.set_battery_data(vbat, pct)
+            if screen_index == 2:
+                draw_screen_battery()
 
         time.sleep_ms(10)
