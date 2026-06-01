@@ -27,8 +27,6 @@ function App() {
     <LocaleProvider>
       <Router>
         <div className="app-shell">
-          <ThemeManager />
-          <LanguageFab />
           <AppContent />
         </div>
       </Router>
@@ -39,9 +37,12 @@ function App() {
 function AppContent() {
   const location = useLocation();
   const hideMenu = ['/', '/forgotPassword', '/slides', '/apirest'].includes(location.pathname) || location.pathname.startsWith('/device/');
+  const isSlides = location.pathname === '/slides';
 
   return (
     <>
+      {!isSlides && <ThemeManager />}
+      {!isSlides && <LanguageFab />}
       <Routes>
         {/* ── Public routes ── */}
         <Route path="/" element={<AutenticationPage />} />
@@ -53,7 +54,7 @@ function AppContent() {
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
         <Route path="/scene" element={<PrivateRoute><Scene /></PrivateRoute>} />
         <Route path="/profileEdit" element={<PrivateRoute><ProfileEdit /></PrivateRoute>} />
-        <Route path="/slides" element={<PrivateRoute><Slideshow /></PrivateRoute>} />
+        <Route path="/slides" element={<Slideshow />} />
         <Route path="/map" element={<PrivateRoute><MapPage /></PrivateRoute>} />
         <Route path="/apirest" element={<PrivateRoute><ApiRest /></PrivateRoute>} />
 

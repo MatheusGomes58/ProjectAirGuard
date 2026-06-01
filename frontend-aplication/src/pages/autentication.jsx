@@ -8,11 +8,18 @@ import React, { useState, useEffect } from 'react';
 
 function Auth() {
     const [activeTab, setActiveTab] = useState('login');
+    const [logoClicks, setLogoClicks] = useState(0);
     const navigate = useNavigate();
 
     useEffect(() => {
         userValidation();
     }, []);
+
+    useEffect(() => {
+        if (logoClicks >= 7) {
+            navigate('/slides');
+        }
+    }, [logoClicks, navigate]);
 
     async function userValidation() {
         const authTime = localStorage.getItem('authTime');
@@ -36,7 +43,7 @@ function Auth() {
     return (
         <div className="Auth">
             <div className='containerAuth logoArea'>
-                <img src={LogoJA} className='LogoJA' alt={t('brandName') + ' Logo'} />
+                <img src={LogoJA} className='LogoJA' alt={t('brandName') + ' Logo'} onClick={() => setLogoClicks(c => c + 1)} style={{ cursor: 'pointer' }} />
                 <h1 className="brandName">{t('brandName')}</h1>
                 <p className="brandTagline">{t('brandTagline')}</p>
             </div>

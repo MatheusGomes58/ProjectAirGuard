@@ -171,9 +171,12 @@ async def _h_sp_add(writer, body):
     name = params.get('name', 'Setpoint')
     sensor = params.get('sensor', 'temp')
     value = float(params.get('value', 25.0))
+    condition = params.get('condition', 'above')
     if sensor not in ('temp', 'hum'):
         sensor = 'temp'
-    sp = shared_state.add_setpoint(name, sensor, value)
+    if condition not in ('above', 'below'):
+        condition = 'above'
+    sp = shared_state.add_setpoint(name, sensor, value, condition)
     _json_response(writer, {"status": "ok", "setpoint": sp})
 
 
@@ -184,8 +187,11 @@ async def _h_sp_update(writer, body):
         params = {}
     sp_id = params.get('id', '')
     value = params.get('value', None)
+    name = params.get('name', None)
+    sensor = params.get('sensor', None)
+    condition = params.get('condition', None)
     if sp_id and value is not None:
-        shared_state.update_setpoint(sp_id, float(value))
+        shared_state.update_setpoint(sp_id, float(value), name, sensor, condition)
     _json_response(writer, {"status": "ok", "setpoints": shared_state.get_setpoints_list()})
 
 
@@ -209,14 +215,26 @@ async def _h_act_add(writer, body):
     name = params.get('name', 'Acao')
     relay = int(params.get('relay', 1))
     sp_id = params.get('setpoint_id', '')
-    condition = params.get('condition', 'above')
     period = int(params.get('period', 10))
-    if condition not in ('above', 'below'):
-        condition = 'above'
     if relay not in (1, 2, 3):
         relay = 1
-    act = shared_state.add_action(name, relay, sp_id, condition, period)
+    act = shared_state.add_action(name, relay, sp_id, period)
     _json_response(writer, {"status": "ok", "action": act})
+
+
+async def _h_act_update(writer, body):
+    try:
+        params = ujson.loads(body)
+    except Exception:
+        params = {}
+    act_id = params.get('id', '')
+    name = params.get('name', '')
+    relay = int(params.get('relay', 1))
+    sp_id = params.get('setpoint_id', '')
+    period = int(params.get('period', 10))
+    if act_id and name and sp_id:
+        shared_state.update_action(act_id, name, relay, sp_id, period)
+    _json_response(writer, {"status": "ok", "actions": shared_state.get_actions_list()})
 
 
 async def _h_act_remove(writer, body):
@@ -338,6 +356,8 @@ async def _handle(reader, writer):
             await _h_sp_remove(writer, body)
         elif path == '/actions/add' and method == 'POST':
             await _h_act_add(writer, body)
+        elif path == '/actions/update' and method == 'POST':
+            await _h_act_update(writer, body)
         elif path == '/actions/remove' and method == 'POST':
             await _h_act_remove(writer, body)
         elif path == '/wifi/scan':

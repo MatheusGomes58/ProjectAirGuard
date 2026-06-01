@@ -64,6 +64,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;background:
 .sp-ctrl{display:flex;align-items:center;gap:6px}
 .sp-rm{width:24px;height:24px;border-radius:50%;background:rgba(255,82,82,.15);color:var(--dg);display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;font-weight:700}
 .sp-rm:active{background:rgba(255,82,82,.3)}
+.sp-edit{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.05);color:var(--tm);display:flex;align-items:center;justify-content:center;font-size:0.75rem;cursor:pointer;margin-right:2px}
+.sp-edit:active{background:rgba(255,255,255,0.15)}
 /* Action items */
 .act-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--sf2);border-radius:var(--rm);margin-bottom:6px;border:1px solid var(--bd)}
 .act-info{display:flex;flex-direction:column;gap:2px}

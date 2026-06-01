@@ -1,211 +1,187 @@
 [
-    {
-        "id": "slide-1",
-        "layout": "cover",
-        "title": "EcoBreath: Air Quality Management and Monitoring System",
-        "subtitle": "Project EcoBreath — System Presentation"
-    },
-    {
-        "id": "slide-2",
-        "layout": "team",
-        "title": "Team Members",
-        "members": [
-            {
-                "name": "Vitor",
-                "icon": "fa-user"
-            },
-            {
-                "name": "Matheus",
-                "icon": "fa-user"
-            },
-            {
-                "name": "Erick",
-                "icon": "fa-user"
-            }
-        ]
-    },
-    {
-        "id": "slide-3",
-        "layout": "bullets",
-        "title": "Problem",
-        "icon": "fa-triangle-exclamation",
-        "bullets": [
-            "Low awareness of risks from indoor pollutants (VOCs, fine particles).",
-            "Continuous exposure compromises health, safety and well-being.",
-            "Need for real-time monitoring of air quality.",
-            "Development of a device that detects pollutants and provides immediate feedback.",
-            "Promotion of healthier, more sustainable and safer indoor environments."
-        ]
-    },
-    {
-        "id": "slide-4",
-        "layout": "objectives",
-        "title": "Objectives",
-        "icon": "fa-bullseye",
+  {
+    "id": "slide-1",
+    "layout": "cover",
+    "title": "EcoBreath: Smart Air Quality Monitoring",
+    "subtitle": "Breathe with awareness",
+    "background": { "type": "image", "url": "../img/slides/cover-bg.jpg" }
+  },
+  {
+    "id": "slide-2",
+    "layout": "team",
+    "title": "Who We Are",
+    "members": [
+      { "name": "Vitor", "icon": "fa-user", "avatar": "../img/team/vitor.png" },
+      { "name": "Matheus", "icon": "fa-user", "avatar": "../img/team/matheus.png" },
+      { "name": "Erick", "icon": "fa-user", "avatar": "../img/team/erick.png" }
+    ],
+    "background": { "type": "color", "value": "#0a1a12" }
+  },
+  {
+    "id": "slide-3",
+    "layout": "stats",
+    "title": "The Silent Killer",
+    "icon": "fa-skull-crossbones",
+    "stats": [
+      { "value": "4M+", "label": "deaths/year from indoor pollution (WHO)" },
+      { "value": "CO", "label": "colorless and odorless gas" },
+      { "value": "0s", "label": "time to notice without a sensor" }
+    ],
+    "footnote": "In 2023, a family of 4 died in Brazil after sleeping with a gas heater in a closed room. In São Paulo, a couple was found dead from CO buildup. A simple IoT sensor could have saved these lives.",
+    "background": { "type": "color", "value": "#1a0a0a" }
+  },
+  {
+    "id": "slide-4",
+    "layout": "bullets",
+    "title": "The Problem",
+    "icon": "fa-triangle-exclamation",
+    "bullets": [
+      "Most people are unaware of indoor pollutant risks like VOCs and fine particles.",
+      "Enclosed spaces without ventilation silently accumulate toxic gases.",
+      "There is no affordable real-time monitoring for homes and offices.",
+      "Without data, there is no way to act preventively against poor air quality.",
+      "A smart device that detects, alerts and logs these conditions is needed."
+    ],
+    "background": { "type": "video", "url": "../video/pollution-loop.mp4", "loop": true, "muted": true }
+  },
+  {
+    "id": "slide-5",
+    "layout": "objectives",
+    "title": "Our Objectives",
+    "icon": "fa-bullseye",
+    "items": [
+      "Develop an IoT device capable of monitoring air quality in real time",
+      "Generate automatic alerts when dangerous levels are detected",
+      "Integrate hardware, firmware and web application into a complete ecosystem"
+    ],
+    "background": { "type": "image", "url": "../img/slides/objectives-bg.jpg" }
+  },
+  {
+    "id": "slide-6",
+    "layout": "tools",
+    "title": "Tools & Technologies",
+    "description": "We use a modern stack combining rapid hardware prototyping with real-time web development, ensuring end-to-end integration.",
+    "tools": ["VS Code", "Firebase", "Thonny IDE"],
+    "background": { "type": "color", "value": "#0a1a12" }
+  },
+  {
+    "id": "slide-7",
+    "layout": "diagram",
+    "title": "System Architecture",
+    "icon": "fa-network-wired",
+    "components": [
+      "PI PICO 2W", "Sensors (MQ-135, DHT-11)", "Firebase Realtime DB",
+      "Cloud Functions", "EcoBreath Web App", "Push Notifications",
+      "Fast API", "AI Model", "Dashboard"
+    ],
+    "media": { "type": "image", "url": "../img/slides/funcionamento.png" },
+    "background": { "type": "color", "value": "#0a1a12" }
+  },
+  {
+    "id": "slide-8",
+    "layout": "mockup",
+    "title": "EcoBreath Web",
+    "subtitle": "Control at your fingertips",
+    "fields": ["Real-time dashboard", "Reading history", "Configurable alerts", "Device management", "Multi-language", "Light/dark theme"],
+    "media": { "type": "video", "url": "../video/web-demo.mp4", "autoplay": true },
+    "background": { "type": "image", "url": "../img/slides/mockup-blur.jpg" }
+  },
+  {
+    "id": "slide-9",
+    "layout": "hardware",
+    "title": "Hardware: PI PICO 2W",
+    "subtitle": "Functional prototype",
+    "components": ["Paspberry pi pico 2 w", "MQ-135 Sensor", "DHT-11 Sensor", "TFT Display GC9A01", "Relay Module", "5V USB Power"],
+    "media": { "type": "image", "url": "../img/slides/PI PICO 2W-schematic.png" },
+    "background": { "type": "color", "value": "#0a0f0d" }
+  },
+  {
+    "id": "slide-10",
+    "layout": "icon-list",
+    "title": "Prototype Components",
+    "icon": "fa-microchip",
+    "items": [
+      { "icon": "fa-wind", "heading": "MQ-135 Sensor", "desc": "Detects harmful gases and measures air quality" },
+      { "icon": "fa-wifi", "heading": "Paspberry pi pico 2 w", "desc": "Microcontroller with integrated Wi-Fi" },
+      { "icon": "fa-display", "heading": "TFT Display GC9A01", "desc": "Real-time local visual feedback" },
+      { "icon": "fa-temperature-half", "heading": "DHT-11 Sensor", "desc": "Measures temperature and relative humidity" }
+    ],
+    "media": { "type": "image", "url": "../img/slides/prototype-photo.jpg" },
+    "background": { "type": "color", "value": "#0a1a12" }
+  },
+  {
+    "id": "slide-11",
+    "layout": "diagram",
+    "title": "Data Flow",
+    "icon": "fa-sitemap",
+    "components": [
+      "Sensors", "PI PICO 2W", "Wi-Fi",
+      "Firebase", "Cloud Functions", "Web App",
+      "User", "Alerts", "History"
+    ],
+    "background": { "type": "color", "value": "#0a1a12" }
+  },
+  {
+    "id": "slide-12",
+    "layout": "highlight",
+    "title": "Technology that Saves Lives",
+    "icon": "fa-hand-holding-heart",
+    "subtitle": "EcoBreath democratizes air quality monitoring, preventing fatal domestic accidents and raising environmental awareness through real and accessible data for homes and small businesses.",
+    "background": { "type": "color", "value": "#0a1a12" }
+  },
+  {
+    "id": "slide-13",
+    "layout": "highlight",
+    "title": "SDG Alignment",
+    "icon": "fa-earth-americas",
+    "subtitle": "Our goal is to make indoor environments safer and healthier, directly contributing to the UN Sustainable Development Goals.",
+    "ods": ["SDG 3 — Health and Well-Being", "SDG 11 — Sustainable Cities", "SDG 13 — Climate Action"],
+    "background": { "type": "image", "url": "../img/slides/ods-earth.jpg" }
+  },
+  {
+    "id": "slide-14",
+    "layout": "three-cols",
+    "title": "Results & Next Steps",
+    "cols": [
+      {
+        "heading": "Achievements",
+        "icon": "fa-circle-check",
         "items": [
-            "Create a device capable of monitoring air quality",
-            "Create alerts about air problems in closed environments",
-            "Integrate this device with IoT technology"
+          "PI PICO 2W integrated with Firebase in real time.",
+          "Functional web application with dashboard.",
+          "Validated hardware prototype."
         ]
-    },
-    {
-        "id": "slide-5",
-        "layout": "tools",
-        "title": "Methodology & Materials",
-        "description": "Engineering methodology is a set of structured approaches and practices that enable efficient and reliable development of technical solutions, promoting quality, productivity and innovation.",
-        "tools": [
-            {
-                "icon": "fa-code",
-                "label": "VS Code"
-            },
-            {
-                "icon": "fa-fire",
-                "label": "Firebase"
-            },
-            {
-                "icon": "fa-microchip",
-                "label": "UNO IDE"
-            }
-        ]
-    },
-    {
-        "id": "slide-6",
-        "layout": "diagram",
-        "title": "System Architecture",
-        "center": "Firebase Controller",
-        "nodes": [
-            {
-                "label": "Integration API",
-                "color": "#4ade80"
-            },
-            {
-                "label": "Firebase Firestore",
-                "color": "#4ade80"
-            },
-            {
-                "label": "AI Model",
-                "color": "#4ade80"
-            },
-            {
-                "label": "Actuation Bus",
-                "color": "#86efac"
-            },
-            {
-                "label": "Project EcoBreath WEB",
-                "color": "#86efac"
-            },
-            {
-                "label": "ESP8266 / ESP32",
-                "color": "#86efac"
-            },
-            {
-                "label": "Fast API",
-                "color": "#4ade80"
-            },
-            {
-                "label": "Postgres Database",
-                "color": "#4ade80"
-            }
-        ]
-    },
-    {
-        "id": "slide-7",
-        "layout": "photo-title",
-        "image": "slide_sensor",
-        "title": "EcoBreath WEB",
-        "subtitle": "Web application for remote control and monitoring of devices"
-    },
-    {
-        "id": "slide-8",
-        "layout": "photo-title",
-        "image": "slide_home",
-        "title": "ESP8266 Prototype",
-        "subtitle": "Hardware with DHT11 sensor, OLED display and Wi-Fi connectivity"
-    },
-    {
-        "id": "slide-9",
-        "layout": "hardware",
-        "title": "Hardware Components",
+      },
+      {
+        "heading": "Evolution",
+        "icon": "fa-rocket",
         "items": [
-            {
-                "label": "MQ-135 Sensor",
-                "desc": "Gas and air quality sensor"
-            },
-            {
-                "label": "DHT-11 Sensor",
-                "desc": "Temperature and relative humidity"
-            },
-            {
-                "label": "TFT Display",
-                "desc": "Local display of collected data"
-            },
-            {
-                "label": "ESP32-C3 Super Mini",
-                "desc": "Microcontroller with integrated Wi-Fi"
-            }
+          "Add more sensors (CO₂, PM2.5).",
+          "Implement predictive AI model.",
+          "Launch native mobile app."
         ]
-    },
-    {
-        "id": "slide-10",
-        "layout": "photo-title",
-        "image": "slide_map",
-        "title": "Prototyping",
-        "subtitle": "Assembly and testing of the board with all integrated components"
-    },
-    {
-        "id": "slide-11",
-        "layout": "bullets",
-        "title": "Life Project",
-        "icon": "fa-earth-americas",
-        "bullets": [
-            "As a group, we aim to transform the world into a better place.",
-            "Taking care of our planet was a path we found to achieve this goal.",
-            "SDG 3 — Good Health and Well-Being",
-            "SDG 11 — Sustainable Cities and Communities",
-            "SDG 13 — Climate Action"
+      },
+      {
+        "heading": "Vision",
+        "icon": "fa-star",
+        "items": [
+          "Make EcoBreath an affordable product.",
+          "Expand to schools and hospitals."
         ]
-    },
-    {
-        "id": "slide-12",
-        "layout": "three-cols",
-        "title": "Conclusion & Final Considerations",
-        "cols": [
-            {
-                "heading": "Achieved Goals",
-                "icon": "fa-circle-check",
-                "items": [
-                    "Integration of the ESP32 module with the database.",
-                    "Application development.",
-                    "Prototype hardware optimization."
-                ]
-            },
-            {
-                "heading": "Future Improvements",
-                "icon": "fa-rocket",
-                "items": [
-                    "Improve the user interface.",
-                    "Expand the network and interfaces for broader connectivity.",
-                    "Integration with more sensors."
-                ]
-            },
-            {
-                "heading": "Summary",
-                "icon": "fa-star",
-                "items": [
-                    "Main objectives achieved.",
-                    "Future development of the prototype mechanics."
-                ]
-            }
-        ]
-    },
-    {
-        "id": "slide-13",
-        "layout": "center-word",
-        "title": "Questions?"
-    },
-    {
-        "id": "slide-14",
-        "layout": "center-word",
-        "title": "Thank you!"
-    }
+      }
+    ],
+    "background": { "type": "color", "value": "#0a1a12" }
+  },
+  {
+    "id": "slide-15",
+    "layout": "center-word",
+    "title": "Questions?",
+    "background": { "type": "video", "url": "../video/questions-loop.mp4", "loop": true, "muted": true }
+  },
+  {
+    "id": "slide-16",
+    "layout": "center-word",
+    "title": "Thank you!",
+    "background": { "type": "image", "url": "../img/slides/thank-you.jpg" }
+  }
 ]

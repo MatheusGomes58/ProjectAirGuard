@@ -82,27 +82,36 @@ def load_setpoints():
         with open(SETPOINTS_FILE, 'r') as f:
             data = ujson.load(f)
             _setpoints = data.get("setpoints", [])
+            for sp in _setpoints:
+                if "value" in sp:
+                    sp["value"] = float(sp["value"])
             _next_sp_id = data.get("next_id", 1)
             print("[state] {} setpoints carregados".format(len(_setpoints)))
     except (OSError, ValueError):
         pass
 
 
-def add_setpoint(name, sensor, value):
+def add_setpoint(name, sensor, value, condition="above"):
     global _next_sp_id
     with _lock:
-        sp = {"id": "sp{}".format(_next_sp_id), "name": name, "sensor": sensor, "value": float(value)}
+        sp = {"id": "sp{}".format(_next_sp_id), "name": name, "sensor": sensor, "value": float(value), "condition": condition}
         _setpoints.append(sp)
         _next_sp_id += 1
     save_setpoints()
     return sp
 
 
-def update_setpoint(sp_id, value):
+def update_setpoint(sp_id, value, name=None, sensor=None, condition=None):
     with _lock:
         for sp in _setpoints:
             if sp["id"] == sp_id:
                 sp["value"] = float(value)
+                if name is not None:
+                    sp["name"] = name
+                if sensor is not None:
+                    sp["sensor"] = sensor
+                if condition is not None:
+                    sp["condition"] = condition
                 break
     save_setpoints()
 
@@ -140,13 +149,18 @@ def load_actions():
         with open(ACTIONS_FILE, 'r') as f:
             data = ujson.load(f)
             _actions = data.get("actions", [])
+            for act in _actions:
+                if "relay" in act:
+                    act["relay"] = int(act["relay"])
+                if "period" in act:
+                    act["period"] = int(act["period"])
             _next_act_id = data.get("next_id", 1)
             print("[state] {} acoes carregadas".format(len(_actions)))
     except (OSError, ValueError):
         pass
 
 
-def add_action(name, relay, setpoint_id, condition, period):
+def add_action(name, relay, setpoint_id, period):
     global _next_act_id
     with _lock:
         act = {
@@ -154,13 +168,24 @@ def add_action(name, relay, setpoint_id, condition, period):
             "name": name,
             "relay": int(relay),
             "setpoint_id": setpoint_id,
-            "condition": condition,
             "period": int(period)
         }
         _actions.append(act)
         _next_act_id += 1
     save_actions()
     return act
+
+
+def update_action(act_id, name, relay, setpoint_id, period):
+    with _lock:
+        for a in _actions:
+            if a["id"] == act_id:
+                a["name"] = name
+                a["relay"] = int(relay)
+                a["setpoint_id"] = setpoint_id
+                a["period"] = int(period)
+                break
+    save_actions()
 
 
 def remove_action(act_id):
@@ -373,7 +398,7 @@ def get_logs():
 def add_history_point(temp, hum, r1_on, r2_on, r3_on, rpm=0):
     global _history
     with _lock:
-        _history.append({"t": temp, "h": hum, "r1": 1 if r1_on else 0, "r2": 1 if r2_on else 0, "r3": 1 if r3_on else 0, "rpm": rpm})
+        _history.append({"t": temp, "h": hum, "r1": float(r1_on), "r2": float(r2_on), "r3": float(r3_on), "rpm": rpm})
         if len(_history) > _HISTORY_MAX:
             _history = _history[-_HISTORY_MAX:]
 
