@@ -42,7 +42,7 @@
       "Sem dados, não há como agir preventivamente contra a má qualidade do ar.",
       "É necessário um dispositivo inteligente que detecte, alerte e registre essas condições."
     ],
-    "background": { "type": "video", "url": "../img/slides/", "loop": true, "muted": true }
+    "background": { "type": "video", "url": "", "loop": true, "muted": true }
   },
   {
     "id": "slide-5",
@@ -172,7 +172,7 @@
     "id": "slide-15",
     "layout": "center-word",
     "title": "Dúvidas?",
-    "background": { "type": "video", "url": "../img/slides/video.mp4", "loop": true, "muted": true }
+    "background": { "type": "video", "url": "", "loop": true, "muted": true }
   },
   {
     "id": "slide-16",
