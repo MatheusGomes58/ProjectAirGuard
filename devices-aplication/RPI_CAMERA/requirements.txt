@@ -1,2 +1,0 @@
-picamera2==0.3.12
-websockets==12.0

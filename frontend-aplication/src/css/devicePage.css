@@ -1,4 +1,4 @@
-.dp{max-width:600px;margin:0 auto;padding:16px;min-height:100vh;width:100%}
+.dp{max-width:600px;margin:0 auto;padding:20px;min-height:100vh;width:100%;text-align:center}
 .dp-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
 .dp-header h1{flex:1;font-size:clamp(1rem, 4vw, 1.3rem);font-weight:700;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dp-badge{font-size:.65rem;font-weight:600;padding:4px 10px;border-radius:20px;background:rgba(0,200,83,.15);color:#00C853;border:1px solid rgba(0,200,83,.2);white-space:nowrap}
@@ -7,7 +7,7 @@
 .dp-tab.active{background:rgba(0,200,83,.15);border-color:#00C853;color:#00C853}
 .dp-content{display:flex;flex-direction:column;gap:12px;padding-bottom:24px}
 .dp-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:20px;padding:16px}
-.dp-card-title{font-size:.7rem;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.dp-card-title{font-size:.8rem;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
 .dp-gauge-wrap{display:flex;flex-direction:column;align-items:center}
 .dp-gauge-wrap canvas{display:block;max-width:100%}
 .dp-gauge-info{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:-8px}
@@ -20,7 +20,7 @@
 .dp-sensor svg{color:var(--color-text-muted)}
 .dp-sensor.temp svg{color:#FF5252}.dp-sensor.hum svg{color:#42A5F5}
 .dp-sensor-val{font-size:clamp(1.1rem, 4vw, 1.5rem);font-weight:700;margin-top:4px}
-.dp-sensor-lbl{font-size:.65rem;color:var(--color-text-muted);margin-top:2px}
+.dp-sensor-lbl{font-size:.75rem;color:var(--color-text-muted);margin-top:2px}
 .dp-relays{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .dp-relay{background:var(--color-bg);border-radius:14px;padding:12px;text-align:center;border:1.5px solid var(--color-border);transition:.2s;display:flex;flex-direction:column;align-items:center;gap:4px}
 .dp-relay.on{border-color:rgba(0,200,83,.3);box-shadow:0 3px 12px rgba(0,200,83,.12)}
@@ -29,11 +29,11 @@
 .dp-relay-name{font-size:.7rem;color:var(--color-text-muted)}
 .dp-relay-state{font-size:.65rem;font-weight:700}
 .dp-relay.on .dp-relay-state{color:#00C853}
-.dp-hint{font-size:.6rem;color:var(--color-text-muted);text-align:center;margin-top:6px}
+.dp-hint{font-size:.7rem;color:var(--color-text-muted);text-align:center;margin-top:6px}
 .dp-collapse-hd{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
 .dp-arrow{font-size:.7rem;color:var(--color-text-muted)}
 .dp-collapse-body{margin-top:10px}
-.dp-chart-label{font-size:.6rem;color:var(--color-text-muted);text-transform:uppercase;margin:8px 0 4px}
+.dp-chart-label{font-size:.7rem;color:var(--color-text-muted);text-transform:uppercase;margin:8px 0 4px}
 .dp-chart-wrap{background:rgba(0,0,0,.12);border-radius:12px;padding:4px;overflow:hidden}
 .dp-chart-wrap canvas{display:block;width:100%;height:auto}
 .dp-sp-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--color-bg);border-radius:12px;margin-bottom:6px;border:1px solid var(--color-border);flex-wrap:wrap}

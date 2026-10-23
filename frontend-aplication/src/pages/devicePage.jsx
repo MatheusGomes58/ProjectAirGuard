@@ -27,6 +27,7 @@ export default function DevicePage() {
     const gaugeRef = useRef(null);
     const chartRef = useRef(null);
     const relayChartRef = useRef(null);
+    const chartSignatureRef = useRef('');
 
     const docRef = db.collection('devices').doc(deviceId);
 
@@ -46,7 +47,16 @@ export default function DevicePage() {
     }, [deviceId]);
 
     useEffect(() => { if (gaugeRef.current && data.temperature != null) drawGauge(gaugeRef.current, calcAQ(data.temperature, data.humidity)); }, [data.temperature, data.humidity]);
-    useEffect(() => { if (showChart && chartRef.current && history.length > 1) drawSensorChart(chartRef.current, history); if (showChart && relayChartRef.current && history.length > 1) drawRelayChart(relayChartRef.current, history); }, [history, showChart]);
+    useEffect(() => {
+        if (!showChart) { chartSignatureRef.current = ''; return; }
+        if (history.length <= 1) return;
+        const signature = JSON.stringify(history);
+        if (signature !== chartSignatureRef.current) {
+            chartSignatureRef.current = signature;
+            if (chartRef.current) drawSensorChart(chartRef.current, history);
+            if (relayChartRef.current) drawRelayChart(relayChartRef.current, history);
+        }
+    }, [history, showChart]);
 
     // === Escreve direto no Firestore ===
     function updateDoc(fields) { docRef.set(fields, { merge: true }); }
@@ -129,7 +139,7 @@ export default function DevicePage() {
                         </div>
                     </div>
                     <div className="dp-card">
-                        <div className="dp-card-title">Sensor</div>
+                            <div className="dp-card-title">Sensores</div>
                         <div className="dp-sensors">
                             <div className="dp-sensor temp"><WiThermometer size={32} /><div className="dp-sensor-val">{temp != null ? `${temp.toFixed(1)}°C` : '--'}</div><div className="dp-sensor-lbl">Temperatura</div></div>
                             <div className="dp-sensor hum"><WiHumidity size={32} /><div className="dp-sensor-val">{hum != null ? `${hum.toFixed(1)}%` : '--'}</div><div className="dp-sensor-lbl">Umidade</div></div>
@@ -241,8 +251,10 @@ function drawSensorChart(canvas, data) {
     ctx.clearRect(0, 0, cssW, cssH); if (data.length < 2) return;
     const temps = data.map(d => d.temperature).filter(v => v != null);
     const hums = data.map(d => d.humidity).filter(v => v != null);
+    const eco2s = data.map(d => d.eco2 ?? d.co2).filter(v => v != null);
     if (!temps.length || !hums.length) return;
     const minT = Math.min(...temps) - 2, maxT = Math.max(...temps) + 2, minH = Math.min(...hums) - 5, maxH = Math.max(...hums) + 5;
+    const minC = eco2s.length ? Math.max(0, Math.min(...eco2s) - 50) : 0, maxC = eco2s.length ? Math.max(...eco2s) + 50 : 2000;
     const pad = { l: 30, r: 30, t: 10, b: 15 }, gW = cssW - pad.l - pad.r, gH = cssH - pad.t - pad.b, n = data.length, dx = gW / (n - 1);
     ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fillRect(pad.l, pad.t, gW, gH);
     ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1;
@@ -253,9 +265,11 @@ function drawSensorChart(canvas, data) {
     for (let g = 0; g <= 4; g++) ctx.fillText((maxH - (maxH - minH) * (g / 4)).toFixed(0) + '%', cssW - pad.r + 3, pad.t + gH * (g / 4));
     const mapT = v => pad.t + gH * (1 - (v - minT) / (maxT - minT));
     const mapH = v => pad.t + gH * (1 - (v - minH) / (maxH - minH));
+    const mapC = v => pad.t + gH * (1 - (v - minC) / (maxC - minC));
     function drawL(arr, fn, col) { const pts = arr.map((v, i) => v != null ? { x: pad.l + i * dx, y: fn(v) } : null).filter(Boolean); if (pts.length < 2) return; const gr = ctx.createLinearGradient(0, pad.t, 0, pad.t + gH); gr.addColorStop(0, col + '40'); gr.addColorStop(1, col + '02'); ctx.fillStyle = gr; ctx.beginPath(); ctx.moveTo(pts[0].x, pad.t + gH); for (let i = 0; i < pts.length; i++) { if (i === 0) ctx.lineTo(pts[i].x, pts[i].y); else { const xc = (pts[i].x + pts[i - 1].x) / 2; ctx.quadraticCurveTo(pts[i - 1].x, pts[i - 1].y, xc, (pts[i].y + pts[i - 1].y) / 2); } } ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y); ctx.lineTo(pts[pts.length - 1].x, pad.t + gH); ctx.closePath(); ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); for (let i = 1; i < pts.length; i++) { const xc = (pts[i].x + pts[i - 1].x) / 2; ctx.quadraticCurveTo(pts[i - 1].x, pts[i - 1].y, xc, (pts[i].y + pts[i - 1].y) / 2); } ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y); ctx.stroke(); const last = pts[pts.length - 1]; ctx.beginPath(); ctx.arc(last.x, last.y, 3, 0, 2 * Math.PI); ctx.fillStyle = col; ctx.fill(); }
     drawL(data.map(d => d.temperature), mapT, '#FF5252');
     drawL(data.map(d => d.humidity), mapH, '#42A5F5');
+    drawL(data.map(d => d.eco2 ?? d.co2), mapC, '#FFA726');
 }
 
 function drawRelayChart(canvas, data) {
