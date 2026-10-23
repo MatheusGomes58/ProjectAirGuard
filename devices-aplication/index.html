@@ -51,32 +51,44 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;background:
 .gauge-val{font-size:1.4rem;font-weight:700}
 .gauge-label{font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:var(--rf)}
 
+/* Preferencias visuais sincronizadas com o frontend-aplication. */
+html[data-theme="light"]{--bg:#f7fbf7;--sf:#ffffff;--sf2:#f1f5f1;--bd:rgba(0,0,0,.06);--tx:#0b2a17;--tm:#6b7a72}
+.pref-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--bd);font-size:.78rem}.pref-row:last-child{border-bottom:0}
+.pref-row label{color:var(--tm)}.pref-select{min-width:120px;background:var(--sf2);border:1.5px solid var(--bd);border-radius:10px;color:var(--tx);font-size:.75rem;padding:7px 9px;outline:none}.pref-select:focus{border-color:var(--pr)}
+html[data-theme="light"] .badge{background:rgba(0,200,83,.08)}
+body,.cd,.tab,.rb,.wi,.wn,.scb,.modal .mc,.mi,.sw,.pref-select{transition:background-color .28s ease,border-color .28s ease,color .28s ease,box-shadow .28s ease}
+.pref-card{overflow:hidden}.pref-row{min-height:58px}.pref-copy{display:flex;flex-direction:column;gap:3px;min-width:0}.pref-copy strong{font-size:.78rem}.pref-copy span{font-size:.62rem;color:var(--tm)}
+.energy-toggle{cursor:pointer}.energy-actions{display:flex;align-items:center;gap:10px}.energy-arrow{font-size:.65rem;color:var(--tm);transition:transform .2s}.energy-panel{display:none;margin:2px 0 4px;padding:10px 12px;background:var(--sf2);border-radius:14px}.energy-panel.open{display:block}.energy-panel-title{font-size:.68rem;font-weight:700;color:var(--pr);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}.energy-closed{color:var(--tm)}
+.segmented{display:flex;gap:4px;padding:3px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;flex-shrink:0}.seg-btn{border:0;background:transparent;color:var(--tm);border-radius:9px;padding:7px 10px;font-size:.68rem;font-weight:700;cursor:pointer;transition:all .22s ease}.seg-btn:hover{color:var(--tx)}.seg-btn.active{background:var(--pd);color:var(--pr);box-shadow:0 0 0 1px rgba(0,200,83,.22)}.language-control .seg-btn{min-width:32px;padding-left:7px;padding-right:7px}
+@media (max-width:360px){.pref-row{align-items:flex-start;flex-direction:column;gap:7px}.segmented{width:100%}.seg-btn{flex:1}}
+
 </style>
 </head>
 <body>
 <div class="app">
-<div class="hd"><div><h1>EcoBreath</h1><p>Monitor v2.0</p></div><div class="badge"><span class="dot"></span><span id="ws">AP</span></div></div>
-<div class="tabs"><div class="tab a" onclick="P('c')">Monitor</div><div class="tab" onclick="P('w')">WiFi</div><div class="tab" onclick="P('s')">Config</div></div>
+<div class="hd"><div><h1 data-i18n="brand">EcoBreath</h1><p data-i18n="version">Monitor v2.0</p></div><div class="badge"><span class="dot"></span><span id="ws">AP</span></div></div>
+<div class="tabs"><div class="tab a" onclick="P('c')" data-i18n="monitor">Monitor</div><div class="tab" onclick="P('w')" data-i18n="wifi">WiFi</div><div class="tab" onclick="P('s')" data-i18n="config">Config</div></div>
 
 <!-- MONITOR -->
 <div class="pg a" id="pc">
-  <div class="cd"><div class="ct">Qualidade do Ar (AQI)</div><div class="gauge-wrap"><canvas id="aqGauge" width="220" height="130"></canvas><div class="gauge-info"><span class="gauge-val" id="aqVal">--</span><span class="gauge-label" id="aqLabel">--</span></div></div></div>
-  <div class="cd"><div class="ct">Clima (AHT21)</div><div class="rd"><div class="rb t"><div class="rv" id="tv">--</div><div class="rl">Temperatura</div></div><div class="rb h"><div class="rv" id="hv">--</div><div class="rl">Umidade</div></div></div></div>
-  <div class="cd"><div class="ct">Poluentes (ENS160)</div><div class="rd3"><div class="rb v"><div class="rv sm" id="aqiv">--</div><div class="rl">AQI</div></div><div class="rb v"><div class="rv sm" id="tvo">--</div><div class="rl">TVOC (ppb)</div></div><div class="rb v eco"><div class="rv sm" id="eco">--</div><div class="rl">eCO2 (ppm)</div></div></div></div>
-  <div class="cd"><div class="ct">Bateria</div><div class="rd"><div class="rb"><div class="rv" id="bv">--</div><div class="rl">Voltagem</div></div><div class="rb"><div class="rv" id="bp">--</div><div class="rl">Carga</div></div></div></div>
+  <div class="cd"><div class="ct" data-i18n="airQuality">Qualidade do Ar (AQI)</div><div class="gauge-wrap"><canvas id="aqGauge" width="220" height="130"></canvas><div class="gauge-info"><span class="gauge-val" id="aqVal">--</span><span class="gauge-label" id="aqLabel">--</span></div></div></div>
+  <div class="cd"><div class="ct" data-i18n="climate">Clima (AHT21)</div><div class="rd"><div class="rb t"><div class="rv" id="tv">--</div><div class="rl" data-i18n="temperature">Temperatura</div></div><div class="rb h"><div class="rv" id="hv">--</div><div class="rl" data-i18n="humidity">Umidade</div></div></div></div>
+  <div class="cd"><div class="ct" data-i18n="pollutants">Poluentes (ENS160)</div><div class="rd3"><div class="rb v"><div class="rv sm" id="aqiv">--</div><div class="rl">AQI</div></div><div class="rb v"><div class="rv sm" id="tvo">--</div><div class="rl">TVOC (ppb)</div></div><div class="rb v eco"><div class="rv sm" id="eco">--</div><div class="rl">eCO2 (ppm)</div></div></div></div>
+  <div class="cd"><div class="ct" data-i18n="battery">Bateria</div><div class="rd"><div class="rb"><div class="rv" id="bv">--</div><div class="rl" data-i18n="voltage">Voltagem</div></div><div class="rb"><div class="rv" id="bp">--</div><div class="rl" data-i18n="charge">Carga</div></div></div></div>
   <div class="cd"><div class="col-hd" onclick="togCh()"><div class="ct" style="margin-bottom:0">Historico</div><span class="arrow">&#9660;</span></div><div class="col-body" id="chB"><div class="chart-wrap"><canvas id="chart"></canvas></div></div></div>
   <div class="cd"><div class="col-hd" onclick="togLg()"><div class="ct" style="margin-bottom:0">Log</div><span class="arrow">&#9660;</span></div><div class="col-body" id="lgB"><div class="log-box" id="logBox"><div class="log-line">--</div></div></div></div>
 </div>
 
 <!-- WIFI -->
 <div class="pg" id="pw">
-  <div class="cd"><div class="ct">Conexao WiFi</div><div class="wi"><div class="wr"><span class="wrl">Status</span><span class="wrv" id="wst">AP</span></div><div class="wr"><span class="wrl">SSID</span><span class="wrv" id="wss">--</span></div><div class="wr"><span class="wrl">IP WiFi</span><span class="wrv" id="wip">--</span></div><div class="wr"><span class="wrl">IP AP</span><span class="wrv" id="wap">--</span></div></div><div id="dcx" style="display:none"><div class="dcb" onclick="DC()">Desconectar</div></div></div>
-  <div class="cd"><div class="ct">Redes</div><div class="scb" onclick="SC()">Escanear WiFi</div><div id="nl"><div class="ld">Clique para escanear</div></div></div>
+  <div class="cd"><div class="ct" data-i18n="wifiConnection">Conexao WiFi</div><div class="wi"><div class="wr"><span class="wrl" data-i18n="status">Status</span><span class="wrv" id="wst">AP</span></div><div class="wr"><span class="wrl">SSID</span><span class="wrv" id="wss">--</span></div><div class="wr"><span class="wrl">IP WiFi</span><span class="wrv" id="wip">--</span></div><div class="wr"><span class="wrl">IP AP</span><span class="wrv" id="wap">--</span></div></div><div id="dcx" style="display:none"><div class="dcb" onclick="DC()" data-i18n="disconnect">Desconectar</div></div></div>
+  <div class="cd"><div class="ct" data-i18n="networks">Redes</div><div class="scb" onclick="SC()" data-i18n="scanWifi">Escanear WiFi</div><div id="nl"><div class="ld" data-i18n="scanHint">Clique para escanear</div></div></div>
 </div>
 
 <!-- CONFIG -->
 <div class="pg" id="pst">
-  <div class="cd"><div class="ct">Cloud Sync (Firebase)</div><div class="sw-c"><span>Ativo</span><div class="sw" id="swC" onclick="togCl()"></div></div><div class="cfg-row" onclick="openCl()" style="cursor:pointer"><label>Intervalo</label><span class="cfg-val" id="clS">Off</span></div></div>
+  <div class="cd"><div class="ct" data-i18n="cloudSync">Cloud Sync (Firebase)</div><div class="sw-c"><span data-i18n="active">Ativo</span><div class="sw" id="swC" onclick="togCl()"></div></div><div class="cfg-row" onclick="openCl()" style="cursor:pointer"><label data-i18n="interval">Intervalo</label><span class="cfg-val" id="clS">Off</span></div></div>
+  <div class="cd pref-card"><div class="ct" data-i18n="appearance">Aparencia</div><div class="pref-row"><div class="pref-copy"><strong data-i18n="theme">Tema</strong><span data-i18n="themeHint">Escolha a aparencia do painel</span></div><div class="segmented" id="themeControl"><button class="seg-btn" data-value="dark" onclick="setPref('theme','dark')" data-i18n="darkMode">Dark</button><button class="seg-btn" data-value="light" onclick="setPref('theme','light')" data-i18n="lightMode">Light</button></div></div><div class="pref-row"><div class="pref-copy"><strong data-i18n="language">Idioma</strong><span data-i18n="languageHint">Textos do dashboard</span></div><div class="segmented language-control" id="langControl"><button class="seg-btn" data-value="pt" onclick="setPref('language','pt')">PT</button><button class="seg-btn" data-value="en" onclick="setPref('language','en')">EN</button><button class="seg-btn" data-value="es" onclick="setPref('language','es')">ES</button></div></div><div class="pref-row energy-toggle" onclick="toggleEnergyPanel()"><div class="pref-copy"><strong data-i18n="energySaver">Economia de energia</strong><span data-i18n="energyHint">Reduz brilho e atualizações</span><span id="energyOptionsHint" class="energy-closed" data-i18n="energyOptionsClosed">Ative a economia para ver estas opcoes</span></div><div class="energy-actions"><span class="energy-arrow">&#9660;</span><div class="sw" id="energySw" onclick="event.stopPropagation();toggleEnergy()"></div></div></div><div class="energy-panel" id="energyPanel"><div class="energy-panel-title" data-i18n="energyOptions">Opcoes de economia</div><div class="pref-row"><div class="pref-copy"><strong data-i18n="displayEnabled">Tela local</strong><span data-i18n="displayHint">Desliga a tela redonda para economizar</span></div><div class="sw on" id="displaySw" onclick="toggleDisplay()"></div></div><div class="pref-row"><div class="pref-copy"><strong data-i18n="cloudSync">Cloud Sync</strong><span>Desative a sincronizacao para poupar rede e bateria</span></div><div class="sw" id="swC" onclick="togCl()"></div></div><div class="cfg-row" onclick="openCl()" style="cursor:pointer"><label data-i18n="interval">Intervalo</label><span class="cfg-val" id="clS">Off</span></div></div></div>
 </div>
 
 <div class="ft">EcoBreath Merged v2.0 — ENS160 + AHT21</div>
@@ -88,6 +100,47 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;background:
 
 <script>
 var ss='',chO=false,lgO=false,clCfg={interval:60,enabled:false};
+var prefs={theme:'dark',language:'pt',energy_saver:false,display_enabled:true};
+var lastChartSignature='';
+var lastDataSignature='';
+var pollTimer=null;
+var auxTimer=null;
+var TXT={
+  pt:{brand:'EcoBreath',version:'Monitor v2.0',monitor:'Monitor',wifi:'WiFi',config:'Config',airQuality:'Qualidade do Ar (AQI)',climate:'Clima (AHT21)',temperature:'Temperatura',humidity:'Umidade',pollutants:'Poluentes (ENS160)',battery:'Bateria',voltage:'Voltagem',charge:'Carga',wifiConnection:'Conexao WiFi',status:'Status',disconnect:'Desconectar',networks:'Redes',scanWifi:'Escanear WiFi',scanHint:'Clique para escanear',cloudSync:'Cloud Sync (Firebase)',active:'Ativo',interval:'Intervalo',appearance:'Aparencia',theme:'Tema',themeHint:'Escolha a aparencia do painel',language:'Idioma',languageHint:'Textos do dashboard',darkMode:'Dark',lightMode:'Light',displayEnabled:'Tela local',displayHint:'Desliga a tela redonda para economizar',energySaver:'Economia de energia',energyHint:'Reduz brilho e atualizacoes',energyOptions:'Opcoes de economia',energyOptionsHint:'Desative funcoes extras para poupar bateria',energyOptionsClosed:'Ative a economia para ver estas opcoes'},
+  en:{brand:'EcoBreath',version:'Monitor v2.0',monitor:'Monitor',wifi:'WiFi',config:'Settings',airQuality:'Air Quality (AQI)',climate:'Climate (AHT21)',temperature:'Temperature',humidity:'Humidity',pollutants:'Pollutants (ENS160)',battery:'Battery',voltage:'Voltage',charge:'Charge',wifiConnection:'WiFi connection',status:'Status',disconnect:'Disconnect',networks:'Networks',scanWifi:'Scan WiFi',scanHint:'Tap to scan',cloudSync:'Cloud Sync (Firebase)',active:'Enabled',interval:'Interval',appearance:'Appearance',theme:'Theme',themeHint:'Choose the panel appearance',language:'Language',languageHint:'Dashboard text',darkMode:'Dark',lightMode:'Light',displayEnabled:'Local screen',displayHint:'Turn the round screen on or off',energySaver:'Energy saver',energyHint:'Reduces brightness and updates',energyOptions:'Power-saving options',energyOptionsHint:'Disable extra features to save battery',energyOptionsClosed:'Enable energy saver to see these options'},
+  es:{brand:'EcoBreath',version:'Monitor v2.0',monitor:'Monitor',wifi:'WiFi',config:'Config',airQuality:'Calidad del aire (AQI)',climate:'Clima (AHT21)',temperature:'Temperatura',humidity:'Humedad',pollutants:'Contaminantes (ENS160)',battery:'Bateria',voltage:'Voltaje',charge:'Carga',wifiConnection:'Conexion WiFi',status:'Estado',disconnect:'Desconectar',networks:'Redes',scanWifi:'Buscar WiFi',scanHint:'Pulsa para buscar',cloudSync:'Cloud Sync (Firebase)',active:'Activo',interval:'Intervalo',appearance:'Apariencia',theme:'Tema',themeHint:'Elige la apariencia del panel',language:'Idioma',languageHint:'Texto del dashboard',darkMode:'Dark',lightMode:'Light',displayEnabled:'Pantalla local',displayHint:'Enciende o apaga la pantalla redonda',energySaver:'Ahorro de energia',energyHint:'Reduce brillo y actualizaciones',energyOptions:'Opciones de ahorro',energyOptionsHint:'Desactiva funciones extra para ahorrar bateria',energyOptionsClosed:'Activa el ahorro para ver estas opciones'}
+};
+
+function applyPrefs(){
+  document.documentElement.setAttribute('data-theme',prefs.theme==='light'?'light':'dark');
+  document.documentElement.setAttribute('lang',prefs.language==='pt'?'pt-BR':prefs.language);
+  var dict=TXT[prefs.language]||TXT.pt;
+  document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(dict[k])el.textContent=dict[k];});
+  document.querySelectorAll('#themeControl .seg-btn').forEach(function(b){b.className='seg-btn'+(b.getAttribute('data-value')===prefs.theme?' active':'');});
+  document.querySelectorAll('#langControl .seg-btn').forEach(function(b){b.className='seg-btn'+(b.getAttribute('data-value')===prefs.language?' active':'');});
+  var es=document.getElementById('energySw');
+  if(es)es.className='sw'+(prefs.energy_saver?' on':'');
+  var ds=document.getElementById('displaySw');
+  if(ds)ds.className='sw'+(prefs.display_enabled!==false?' on':'');
+  var panel=document.getElementById('energyPanel');
+  if(panel)panel.style.display=prefs.energy_saver?'block':'none';
+  var hint=document.getElementById('energyOptionsHint');
+  if(hint)hint.textContent=prefs.energy_saver?(dict.energyOptionsHint||''):dict.energyOptionsClosed;
+  restartPolling();
+}
+function loadPrefs(){fetch('/settings').then(r=>r.json()).then(d=>{if(d.preferences){prefs=d.preferences;applyPrefs();}}).catch(()=>{applyPrefs();});}
+function setPref(key,value){
+  prefs[key]=value;applyPrefs();
+  fetch('/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(prefs)})
+    .then(r=>r.json()).then(d=>{if(d.preferences){prefs=d.preferences;applyPrefs();}}).catch(()=>{});
+}
+function toggleEnergy(){setPref('energy_saver',!prefs.energy_saver);}
+function toggleDisplay(){setPref('display_enabled',prefs.display_enabled===false);}
+function toggleEnergyPanel(){
+  if(!prefs.energy_saver)return;
+  var panel=document.getElementById('energyPanel');
+  if(panel)panel.classList.toggle('open');
+}
 
 // Tabela AQI UBA (1-5) do ENS160
 var AQI_INFO={
@@ -110,6 +163,9 @@ function P(p){
 // Atualiza todos os campos do dashboard com os dados da API
 function F(){
   fetch('/data').then(r=>r.json()).then(d=>{
+    var signature=JSON.stringify([d.temperature,d.humidity,d.aqi,d.tvoc,d.eco2,d.battery_volt,d.battery_pct,d.sta_connected,d.wifi_ssid,d.wifi_ip,d.ap_ip]);
+    if(signature===lastDataSignature)return;
+    lastDataSignature=signature;
     // Clima (AHT21)
     document.getElementById('tv').textContent=d.temperature!==null?d.temperature.toFixed(1)+'°C':'--';
     document.getElementById('hv').textContent=d.humidity!==null?d.humidity.toFixed(1)+'%':'--';
@@ -266,7 +322,7 @@ function fetchCl(){fetch('/cloud').then(r=>r.json()).then(d=>{if(d.cloud){clCfg=
 // ============================================================
 function togCh(){chO=!chO;document.getElementById('chB').className='col-body'+(chO?' open':'');if(chO)fetchHist();}
 function togLg(){lgO=!lgO;document.getElementById('lgB').className='col-body'+(lgO?' open':'');if(lgO)fetchLog();}
-function fetchHist(){fetch('/history').then(r=>r.json()).then(d=>{if(d.history&&d.history.length>1)drawChart(d.history);}).catch(()=>{});}
+function fetchHist(){fetch('/history').then(r=>r.json()).then(d=>{if(d.history&&d.history.length>1){var sig=JSON.stringify(d.history);if(sig!==lastChartSignature){lastChartSignature=sig;drawChart(d.history);}}}).catch(()=>{});}
 function fetchLog(){
   fetch('/log').then(r=>r.json()).then(d=>{
     var box=document.getElementById('logBox');
@@ -347,10 +403,16 @@ function drawChart(data){
   if(eco2s.length>1){ctx.fillStyle='#FFA726';ctx.fillRect(pad.l+115,H-12,10,3);ctx.fillText('eCO2',pad.l+129,H-10);}
 }
 
+function restartPolling(){
+  if(pollTimer)clearInterval(pollTimer);
+  if(auxTimer)clearInterval(auxTimer);
+  pollTimer=setInterval(F,prefs.energy_saver?10000:3000);
+  auxTimer=setInterval(()=>{if(chO)fetchHist();if(lgO)fetchLog();},prefs.energy_saver?15000:5000);
+}
+
 // Init
-F();fetchCl();drawGauge(0,'#8A9A92');
-setInterval(F,3000);
-setInterval(()=>{if(chO)fetchHist();if(lgO)fetchLog();},5000);
+loadPrefs();F();fetchCl();drawGauge(0,'#8A9A92');
+restartPolling();
 
 </script>
 </body>

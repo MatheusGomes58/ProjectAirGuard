@@ -43,13 +43,16 @@ home_btn    = None
 
 # --- Screen state ---
 screen_index  = 0
-TOTAL_SCREENS = 5          # 0=Temp 1=Umidade 2=AQ 3=WiFi 4=Bateria
+TOTAL_SCREENS = 6          # 0=Logo 1=Temp 2=Umidade 3=AQ 4=WiFi 5=Bateria
 energy_saver = False
 display_enabled = True
 display_theme = "dark"
 display_language = "pt"
 display_unlocked = False
 unlock_deadline = 0
+energy_sleeping = False
+energy_sleep_deadline = 0
+ENERGY_SCREEN_TIMEOUT = 10000
 backlight_pwm = None
 last_sensor_read  = 0
 SENSOR_INTERVAL   = 4000
@@ -66,6 +69,7 @@ _last_eco2 = None
 _last_vbat = None
 _last_pct  = None
 _last_display_signature = None
+_last_energy_signature = None
 
 BATTERY_TABLE = [
     (4.029, 100), (3.960, 90), (3.918, 80), (3.866, 70),
@@ -180,8 +184,8 @@ def draw_circle_outline(cx, cy, r, color, thickness=1):
 def draw_indicators(active):
     """Indicadores de posição com área reservada para o rodapé."""
     tft.fill_rect(42, 218, 156, 1, mono_color(PANEL2))
-    cx = 120; y = 220; s = 14
-    xs = [cx - 2*s, cx - s, cx, cx + s, cx + 2*s]
+    cx = 120; y = 220; s = 12
+    xs = [cx - ((TOTAL_SCREENS - 1) * s) // 2 + i * s for i in range(TOTAL_SCREENS)]
     for i, x in enumerate(xs):
         if i == active:
             draw_filled_circle(x, y, 4, LIME)
@@ -279,12 +283,17 @@ def draw_gauge(cx, cy, radius, progress, color, label, value):
     tft_center_at(value, cx, cy + 1, color, value_scale)
 
 def tft_center_at(text, cx, y, color, scale=1):
-    x = max(0, cx - (len(str(text)) * 8 * scale) // 2)
-    tft_text(str(text), x, y, color, scale)
+    text = str(text)
+    max_chars = max(1, (min(cx, 120) * 2) // (8 * scale))
+    if len(text) > max_chars:
+        text = text[:max_chars - 1] + "~"
+    x = max(0, cx - (len(text) * 8 * scale) // 2)
+    tft_text(text, x, y, color, scale)
 
 def load_display_preferences():
     """Aplica preferencias do servidor sem reinicializar o display."""
     global energy_saver, display_unlocked, display_enabled, display_theme, display_language
+    global energy_sleeping, energy_sleep_deadline
     prefs = shared_state.get_preferences()
     enabled = prefs.get("energy_saver", False)
     new_display_enabled = prefs.get("display_enabled", True)
@@ -298,14 +307,21 @@ def load_display_preferences():
         display_theme = new_theme
         display_language = new_language
         display_unlocked = False
+        energy_sleeping = False
+        energy_sleep_deadline = time.ticks_add(time.ticks_ms(), ENERGY_SCREEN_TIMEOUT)
         apply_display_theme()
         set_display_brightness(0 if not display_enabled else (18 if enabled else 100))
     return changed
 
-def refresh_energy_screen():
+def refresh_energy_screen(force=False):
     """Tela de baixo consumo: bateria + sensores sempre visiveis."""
+    global _last_energy_signature
     temp, hum, _, _, _ = shared_state.get_sensor_data()
     vbat, pct = shared_state.get_battery_data()
+    signature = (temp, hum, vbat, pct)
+    if not force and signature == _last_energy_signature:
+        return False
+    _last_energy_signature = signature
     tft.fill_rect(18, 72, 204, 137, mono_color(BLACK))
     temp_value = "{:.1f}".format(temp) if temp is not None else "--"
     hum_value = "{:.0f}%".format(hum) if hum is not None else "--"
@@ -314,34 +330,55 @@ def refresh_energy_screen():
     charge = "{}%".format(pct) if pct is not None else "--"
     tft_center("BATERIA {}".format(charge), 178, WHITE, 2)
     tft_center("HOME: DESBLOQUEAR", 201, 0x8410, 1)
+    return True
 
 def draw_screen_energy():
+    global energy_sleeping, energy_sleep_deadline
+    energy_sleeping = False
+    energy_sleep_deadline = time.ticks_add(time.ticks_ms(), ENERGY_SCREEN_TIMEOUT)
+    set_display_brightness(18 if display_enabled else 0)
     tft.fill(BLACK)
     draw_circle_outline(120, 120, 116, WHITE, 1)
     tft.fill_rect(82, 8, 76, 2, WHITE)
     tft_center("ECONOMIA", 18, WHITE, 2)
     tft_center("MODO AMOLED", 47, 0x8410, 1)
-    refresh_energy_screen()
+    refresh_energy_screen(force=True)
 
 
 # ==============================================================================
 # Logo
 # ==============================================================================
-def draw_logo(cx, cy):
-    """Exibe o logo.bin (RGB565 80×80) centrado em (cx, cy)."""
+def draw_logo(cx, cy, zoom=1):
+    """Exibe o logo.bin RGB565 centrado, com ampliacao opcional."""
     LOGO_W = 80
     LOGO_H = 80
-    x0 = cx - LOGO_W // 2
-    y0 = cy - LOGO_H // 2
+    x0 = cx - (LOGO_W * zoom) // 2
+    y0 = cy - (LOGO_H * zoom) // 2
     try:
         with open('logo.bin', 'rb') as f:
-            tft._set_window(x0, y0, x0 + LOGO_W - 1, y0 + LOGO_H - 1)
+            if zoom == 1:
+                tft._set_window(x0, y0, x0 + LOGO_W - 1, y0 + LOGO_H - 1)
+                tft.dc.value(1)
+                tft.cs.value(0)
+                while True:
+                    chunk = f.read(512)
+                    if not chunk: break
+                    tft.spi.write(chunk)
+                tft.cs.value(1)
+                return
+
+            # Amplia cada pixel sem precisar carregar o arquivo inteiro na RAM.
+            tft._set_window(x0, y0, x0 + LOGO_W * zoom - 1, y0 + LOGO_H * zoom - 1)
             tft.dc.value(1)
             tft.cs.value(0)
-            while True:
-                chunk = f.read(512)
-                if not chunk: break
-                tft.spi.write(chunk)
+            for _ in range(LOGO_H):
+                src = f.read(LOGO_W * 2)
+                row = bytearray()
+                for i in range(0, len(src), 2):
+                    for _ in range(zoom):
+                        row.append(src[i]); row.append(src[i + 1])
+                for _ in range(zoom):
+                    tft.spi.write(row)
             tft.cs.value(1)
     except OSError:
         tft_text("ECO", cx - 18, cy - 7, LIME, 2)
@@ -367,6 +404,16 @@ def draw_screen_start():
     tft_center("PRESSIONE HOME", 190, BLUE, 1)
 
 
+def draw_screen_logo():
+    """Tela 0 da navegacao: logo ampliado e centralizado."""
+    tft.fill(mono_color(BG))
+    draw_circle_outline(120, 120, 116, PANEL2, 1)
+    draw_logo(120, 116, zoom=2)
+    tft_center("LOGO", 202, LIME, 1)
+    tft_center("1/{}".format(TOTAL_SCREENS), 212, MUTED, 1)
+    draw_indicators(0)
+
+
 def wait_for_home():
     while home_btn.value():
         time.sleep_ms(10)
@@ -380,7 +427,7 @@ def wait_for_home():
 # ==============================================================================
 def draw_screen_sensors():
     global _last_temp, _last_hum
-    draw_header(tr("temp"), "AHT21", 0)
+    draw_header(tr("temp"), "AHT21", 1)
     # Usa o cache compartilhado para a troca de tela não bloquear no I2C.
     temp, hum, _, _, _ = shared_state.get_sensor_data()
     _last_temp = temp
@@ -389,7 +436,7 @@ def draw_screen_sensors():
 
 def draw_screen_humidity():
     global _last_hum
-    draw_header(tr("hum"), "AHT21", 1)
+    draw_header(tr("hum"), "AHT21", 2)
     _, hum, _, _, _ = shared_state.get_sensor_data()
     _last_hum = hum
     refresh_sensor_gauges(None, hum)
@@ -400,7 +447,7 @@ def draw_screen_humidity():
 # ==============================================================================
 def draw_screen_air_quality():
     global _last_aqi, _last_tvoc, _last_eco2
-    draw_header(tr("air"), "ENS160", 2)
+    draw_header(tr("air"), "ENS160", 3)
 
     # Pega dados do shared_state (já lidos na tela de sensores ou pelo Core 1)
     _, _, aqi, tvoc, eco2 = shared_state.get_sensor_data()
@@ -416,7 +463,7 @@ def draw_screen_air_quality():
 # Tela 2 — Info WiFi
 # ==============================================================================
 def draw_screen_info():
-    draw_header(tr("wifi"), "WI-FI", 3)
+    draw_header(tr("wifi"), "WI-FI", 4)
     _refresh_wifi()
 
 
@@ -424,17 +471,17 @@ def _refresh_wifi():
     status, ssid, ip = shared_state.get_wifi_state()
     tft.fill_rect(18, 82, 204, 116, mono_color(PANEL))
     if status == "CONNECTED":
-        tft_text("OK  " + tr("connected"), 30, 94, LIME, 1)
-        tft_text("REDE", 30, 120, MUTED, 1)
-        tft_text(ssid[:20], 30, 134, TEXT, 1)
-        tft_text("IP  " + ip[:16], 30, 164, BLUE, 1)
+        tft_center_at("OK  " + tr("connected"), 120, 94, LIME, 1)
+        tft_center_at("REDE", 120, 120, MUTED, 1)
+        tft_center_at(ssid[:18], 120, 134, TEXT, 1)
+        tft_center_at("IP  " + ip[:14], 120, 164, BLUE, 1)
     elif status == "CONNECTING":
         tft_center("CONECTANDO...", 126, YELLOW_UI, 1)
     else:
-        tft_text("!  " + tr("ap"), 30, 94, YELLOW_UI, 1)
-        tft_text("REDE  EcoBreath-AP", 30, 126, TEXT, 1)
+        tft_center_at("!  " + tr("ap"), 120, 94, YELLOW_UI, 1)
+        tft_center_at("REDE  EcoBreath-AP", 120, 126, TEXT, 1)
         from lib import wifi_manager as wifi
-        tft_text("IP    " + wifi.get_ap_ip(), 30, 160, BLUE, 1)
+        tft_center_at("IP    " + wifi.get_ap_ip(), 120, 160, BLUE, 1)
 
 
 # ==============================================================================
@@ -442,7 +489,7 @@ def _refresh_wifi():
 # ==============================================================================
 def draw_screen_battery():
     global _last_vbat, _last_pct
-    draw_header(tr("battery"), "", 4)
+    draw_header(tr("battery"), "", 5)
     vbat = read_battery_voltage()
     pct  = voltage_to_percent(vbat)
     _last_vbat = vbat
@@ -458,10 +505,11 @@ def draw_screen_battery():
 def draw_screen():
     if energy_saver and not display_unlocked:
         draw_screen_energy()
-    elif screen_index == 0: draw_screen_sensors()
-    elif screen_index == 1: draw_screen_humidity()
-    elif screen_index == 2: draw_screen_air_quality()
-    elif screen_index == 3: draw_screen_info()
+    elif screen_index == 0: draw_screen_logo()
+    elif screen_index == 1: draw_screen_sensors()
+    elif screen_index == 2: draw_screen_humidity()
+    elif screen_index == 3: draw_screen_air_quality()
+    elif screen_index == 4: draw_screen_info()
     else:                   draw_screen_battery()
 
 
@@ -474,6 +522,7 @@ def run():
     global _last_vbat, _last_pct
 
     global energy_saver, display_unlocked, unlock_deadline, display_enabled
+    global energy_sleeping, energy_sleep_deadline
     load_display_preferences()
     draw_screen()
 
@@ -489,9 +538,11 @@ def run():
             if load_display_preferences():
                 draw_screen()
 
-        if energy_saver and display_unlocked and time.ticks_diff(now, unlock_deadline) >= 0:
+        if energy_saver and not energy_sleeping and time.ticks_diff(now, energy_sleep_deadline) >= 0:
+            energy_sleeping = True
             display_unlocked = False
-            draw_screen_energy()
+            tft.fill(BLACK)
+            set_display_brightness(0)
 
         # HOME tem prioridade: encerra qualquer atualização pendente e volta à tela inicial.
         if btn == 0 and not btn_pressed:
@@ -501,13 +552,14 @@ def run():
             if time.ticks_diff(now, last_button_event) >= 150:
                 last_button_event = now
                 display_enabled = True
-                display_unlocked = True
-                energy_saver = False
-                shared_state.set_preferences(display_enabled=True, energy_saver=False)
-                set_display_brightness(100)
-                # Fora da home, o primeiro toque sempre tem prioridade e volta
-                # para ela; toques seguintes continuam navegando pelas telas.
-                screen_index = (screen_index + 1) % TOTAL_SCREENS if screen_index == 0 else 0
+                if energy_saver:
+                    # HOME e o unico comando que acorda a tela no modo economico.
+                    energy_sleeping = False
+                    set_display_brightness(18)
+                    draw_screen_energy()
+                    continue
+                # Toques seguintes percorrem todas as telas disponíveis.
+                screen_index = (screen_index + 1) % TOTAL_SCREENS
                 draw_screen()
                 continue
 
@@ -516,7 +568,7 @@ def run():
             continue
 
         # No modo de economia, somente bateria e sensores ficam ativos.
-        if energy_saver and not display_unlocked:
+        if energy_saver and not display_unlocked and not energy_sleeping:
             if time.ticks_diff(now, last_sensor_read) >= SENSOR_INTERVAL:
                 last_sensor_read = now
                 refresh_energy_screen()
@@ -530,7 +582,7 @@ def run():
             continue
 
         # Tela 0: atualiza sensores AHT21
-        if screen_index == 0 and time.ticks_diff(now, last_sensor_read) >= SENSOR_INTERVAL:
+        if screen_index == 1 and time.ticks_diff(now, last_sensor_read) >= SENSOR_INTERVAL:
             last_sensor_read = now
             try:
                 temp, hum, aqi, tvoc, eco2 = sensor_hub.read()
@@ -541,37 +593,38 @@ def run():
             except: pass
 
         # Tela 1/2: atualiza sensores somente quando o valor exibido mudou.
-        if screen_index in (0, 1, 2) and time.ticks_diff(now, last_sensor_read) >= SENSOR_INTERVAL:
+        if screen_index in (1, 2, 3) and time.ticks_diff(now, last_sensor_read) >= SENSOR_INTERVAL:
             last_sensor_read = now
             try:
                 temp, hum, aqi, tvoc, eco2 = shared_state.get_sensor_data()
-                if screen_index == 0 and (temp != _last_temp):
+                if screen_index == 1 and (temp != _last_temp):
                     _last_temp = temp
                     refresh_sensor_gauges(temp, None)
-                elif screen_index == 1 and (hum != _last_hum):
+                elif screen_index == 2 and (hum != _last_hum):
                     _last_hum = hum
                     refresh_sensor_gauges(None, hum)
-                elif screen_index == 2 and (aqi, tvoc, eco2) != (_last_aqi, _last_tvoc, _last_eco2):
+                elif screen_index == 3 and (aqi, tvoc, eco2) != (_last_aqi, _last_tvoc, _last_eco2):
                     _last_aqi, _last_tvoc, _last_eco2 = aqi, tvoc, eco2
                     refresh_air_gauge(aqi, tvoc, eco2)
             except: pass
 
         # Tela 2: atualiza WiFi se mudou
-        if screen_index == 3:
+        if screen_index == 4:
             cur = shared_state.get_wifi_state()[0]
             if cur != _last_wifi_status:
                 _last_wifi_status = cur
                 _refresh_wifi()
 
         # Tela 3: atualiza bateria periodicamente
-        if screen_index == 4 and time.ticks_diff(now, last_battery_read) >= BATTERY_INTERVAL:
+        if screen_index == 5 and time.ticks_diff(now, last_battery_read) >= BATTERY_INTERVAL:
             last_battery_read = now
+            previous_vbat, previous_pct = _last_vbat, _last_pct
             vbat = read_battery_voltage()
             pct  = voltage_to_percent(vbat)
             shared_state.set_battery_data(vbat, pct)
             _last_vbat = vbat
             _last_pct = pct
-            if (vbat, pct) != (_last_vbat, _last_pct):
+            if (vbat, pct) != (previous_vbat, previous_pct):
                 refresh_battery_gauge(vbat, pct)
 
         time.sleep_ms(10)

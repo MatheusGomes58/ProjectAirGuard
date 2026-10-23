@@ -1,10 +1,13 @@
 var ss='',chO=false,lgO=false,clCfg={interval:60,enabled:false};
 var prefs={theme:'dark',language:'pt',energy_saver:false,display_enabled:true};
 var lastChartSignature='';
+var lastDataSignature='';
+var pollTimer=null;
+var auxTimer=null;
 var TXT={
-  pt:{brand:'EcoBreath',version:'Monitor v2.0',monitor:'Monitor',wifi:'WiFi',config:'Config',airQuality:'Qualidade do Ar (AQI)',climate:'Clima (AHT21)',temperature:'Temperatura',humidity:'Umidade',pollutants:'Poluentes (ENS160)',battery:'Bateria',voltage:'Voltagem',charge:'Carga',wifiConnection:'Conexao WiFi',status:'Status',disconnect:'Desconectar',networks:'Redes',scanWifi:'Escanear WiFi',scanHint:'Clique para escanear',cloudSync:'Cloud Sync (Firebase)',active:'Ativo',interval:'Intervalo',appearance:'Aparencia',theme:'Tema',themeHint:'Escolha a aparencia do painel',language:'Idioma',languageHint:'Textos do dashboard',darkMode:'Dark',lightMode:'Light',displayEnabled:'Tela local',displayHint:'Liga ou desliga a telinha redonda',energySaver:'Economia de energia',energyHint:'Reduz brilho e atualizacoes'},
-  en:{brand:'EcoBreath',version:'Monitor v2.0',monitor:'Monitor',wifi:'WiFi',config:'Settings',airQuality:'Air Quality (AQI)',climate:'Climate (AHT21)',temperature:'Temperature',humidity:'Humidity',pollutants:'Pollutants (ENS160)',battery:'Battery',voltage:'Voltage',charge:'Charge',wifiConnection:'WiFi connection',status:'Status',disconnect:'Disconnect',networks:'Networks',scanWifi:'Scan WiFi',scanHint:'Tap to scan',cloudSync:'Cloud Sync (Firebase)',active:'Enabled',interval:'Interval',appearance:'Appearance',theme:'Theme',themeHint:'Choose the panel appearance',language:'Language',languageHint:'Dashboard text',darkMode:'Dark',lightMode:'Light',displayEnabled:'Local screen',displayHint:'Turn the round screen on or off',energySaver:'Energy saver',energyHint:'Reduces brightness and updates'},
-  es:{brand:'EcoBreath',version:'Monitor v2.0',monitor:'Monitor',wifi:'WiFi',config:'Config',airQuality:'Calidad del aire (AQI)',climate:'Clima (AHT21)',temperature:'Temperatura',humidity:'Humedad',pollutants:'Contaminantes (ENS160)',battery:'Bateria',voltage:'Voltaje',charge:'Carga',wifiConnection:'Conexion WiFi',status:'Estado',disconnect:'Desconectar',networks:'Redes',scanWifi:'Buscar WiFi',scanHint:'Pulsa para buscar',cloudSync:'Cloud Sync (Firebase)',active:'Activo',interval:'Intervalo',appearance:'Apariencia',theme:'Tema',themeHint:'Elige la apariencia del panel',language:'Idioma',languageHint:'Texto del dashboard',darkMode:'Dark',lightMode:'Light',displayEnabled:'Pantalla local',displayHint:'Enciende o apaga la pantalla redonda',energySaver:'Ahorro de energia',energyHint:'Reduce brillo y actualizaciones'}
+  pt:{brand:'EcoBreath',version:'Monitor v2.0',monitor:'Monitor',wifi:'WiFi',config:'Config',airQuality:'Qualidade do Ar (AQI)',climate:'Clima (AHT21)',temperature:'Temperatura',humidity:'Umidade',pollutants:'Poluentes (ENS160)',battery:'Bateria',voltage:'Voltagem',charge:'Carga',wifiConnection:'Conexao WiFi',status:'Status',disconnect:'Desconectar',networks:'Redes',scanWifi:'Escanear WiFi',scanHint:'Clique para escanear',cloudSync:'Cloud Sync (Firebase)',active:'Ativo',interval:'Intervalo',appearance:'Aparencia',theme:'Tema',themeHint:'Escolha a aparencia do painel',language:'Idioma',languageHint:'Textos do dashboard',darkMode:'Dark',lightMode:'Light',displayEnabled:'Tela local',displayHint:'Desliga a tela redonda para economizar',energySaver:'Economia de energia',energyHint:'Reduz brilho e atualizacoes',energyOptions:'Opcoes de economia',energyOptionsHint:'Desative funcoes extras para poupar bateria',energyOptionsClosed:'Ative a economia para ver estas opcoes'},
+  en:{brand:'EcoBreath',version:'Monitor v2.0',monitor:'Monitor',wifi:'WiFi',config:'Settings',airQuality:'Air Quality (AQI)',climate:'Climate (AHT21)',temperature:'Temperature',humidity:'Humidity',pollutants:'Pollutants (ENS160)',battery:'Battery',voltage:'Voltage',charge:'Charge',wifiConnection:'WiFi connection',status:'Status',disconnect:'Disconnect',networks:'Networks',scanWifi:'Scan WiFi',scanHint:'Tap to scan',cloudSync:'Cloud Sync (Firebase)',active:'Enabled',interval:'Interval',appearance:'Appearance',theme:'Theme',themeHint:'Choose the panel appearance',language:'Language',languageHint:'Dashboard text',darkMode:'Dark',lightMode:'Light',displayEnabled:'Local screen',displayHint:'Turn the round screen on or off',energySaver:'Energy saver',energyHint:'Reduces brightness and updates',energyOptions:'Power-saving options',energyOptionsHint:'Disable extra features to save battery',energyOptionsClosed:'Enable energy saver to see these options'},
+  es:{brand:'EcoBreath',version:'Monitor v2.0',monitor:'Monitor',wifi:'WiFi',config:'Config',airQuality:'Calidad del aire (AQI)',climate:'Clima (AHT21)',temperature:'Temperatura',humidity:'Humedad',pollutants:'Contaminantes (ENS160)',battery:'Bateria',voltage:'Voltaje',charge:'Carga',wifiConnection:'Conexion WiFi',status:'Estado',disconnect:'Desconectar',networks:'Redes',scanWifi:'Buscar WiFi',scanHint:'Pulsa para buscar',cloudSync:'Cloud Sync (Firebase)',active:'Activo',interval:'Intervalo',appearance:'Apariencia',theme:'Tema',themeHint:'Elige la apariencia del panel',language:'Idioma',languageHint:'Texto del dashboard',darkMode:'Dark',lightMode:'Light',displayEnabled:'Pantalla local',displayHint:'Enciende o apaga la pantalla redonda',energySaver:'Ahorro de energia',energyHint:'Reduce brillo y actualizaciones',energyOptions:'Opciones de ahorro',energyOptionsHint:'Desactiva funciones extra para ahorrar bateria',energyOptionsClosed:'Activa el ahorro para ver estas opciones'}
 };
 
 function applyPrefs(){
@@ -18,6 +21,11 @@ function applyPrefs(){
   if(es)es.className='sw'+(prefs.energy_saver?' on':'');
   var ds=document.getElementById('displaySw');
   if(ds)ds.className='sw'+(prefs.display_enabled!==false?' on':'');
+  var panel=document.getElementById('energyPanel');
+  if(panel)panel.style.display=prefs.energy_saver?'block':'none';
+  var hint=document.getElementById('energyOptionsHint');
+  if(hint)hint.textContent=prefs.energy_saver?(dict.energyOptionsHint||''):dict.energyOptionsClosed;
+  restartPolling();
 }
 function loadPrefs(){fetch('/settings').then(r=>r.json()).then(d=>{if(d.preferences){prefs=d.preferences;applyPrefs();}}).catch(()=>{applyPrefs();});}
 function setPref(key,value){
@@ -27,6 +35,11 @@ function setPref(key,value){
 }
 function toggleEnergy(){setPref('energy_saver',!prefs.energy_saver);}
 function toggleDisplay(){setPref('display_enabled',prefs.display_enabled===false);}
+function toggleEnergyPanel(){
+  if(!prefs.energy_saver)return;
+  var panel=document.getElementById('energyPanel');
+  if(panel)panel.classList.toggle('open');
+}
 
 // Tabela AQI UBA (1-5) do ENS160
 var AQI_INFO={
@@ -49,6 +62,9 @@ function P(p){
 // Atualiza todos os campos do dashboard com os dados da API
 function F(){
   fetch('/data').then(r=>r.json()).then(d=>{
+    var signature=JSON.stringify([d.temperature,d.humidity,d.aqi,d.tvoc,d.eco2,d.battery_volt,d.battery_pct,d.sta_connected,d.wifi_ssid,d.wifi_ip,d.ap_ip]);
+    if(signature===lastDataSignature)return;
+    lastDataSignature=signature;
     // Clima (AHT21)
     document.getElementById('tv').textContent=d.temperature!==null?d.temperature.toFixed(1)+'°C':'--';
     document.getElementById('hv').textContent=d.humidity!==null?d.humidity.toFixed(1)+'%':'--';
@@ -286,7 +302,13 @@ function drawChart(data){
   if(eco2s.length>1){ctx.fillStyle='#FFA726';ctx.fillRect(pad.l+115,H-12,10,3);ctx.fillText('eCO2',pad.l+129,H-10);}
 }
 
+function restartPolling(){
+  if(pollTimer)clearInterval(pollTimer);
+  if(auxTimer)clearInterval(auxTimer);
+  pollTimer=setInterval(F,prefs.energy_saver?10000:3000);
+  auxTimer=setInterval(()=>{if(chO)fetchHist();if(lgO)fetchLog();},prefs.energy_saver?15000:5000);
+}
+
 // Init
 loadPrefs();F();fetchCl();drawGauge(0,'#8A9A92');
-setInterval(F,3000);
-setInterval(()=>{if(chO)fetchHist();if(lgO)fetchLog();},5000);
+restartPolling();
